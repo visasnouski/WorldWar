@@ -268,7 +268,6 @@ var createUnitLayout = function (templateLayout, calculateSize) {
                 // Зададим высоту и ширину метки.
                 element.style.width = element.style.height = size + 'px';
 
-
                 const properties = this.getData().properties;
                 const currentZoom = map.getZoom();
 
@@ -445,7 +444,6 @@ export function updateUnit(unit) {
             const positionX = getPositionX(geoObject);
             geoObject.properties.set('spriteX', positionX);
 
-
             const counter = 0;
             const frame = 0;
             runMotionAnimation(geoObject, startCoords[1], startCoords[0], endCoords[1], endCoords[0], counter, frame);
@@ -618,7 +616,6 @@ export function addMob(mob) {
     myMap.geoObjects.add(myGeoObject);
 }
 
-
 export function getCenter() {
     return myMap.getCenter();
 }
@@ -641,7 +638,6 @@ export function playAudio(elementName, src) {
     element.src = src;
     element.play();
 }
-
 
 function degreeBearing(lat1, lon1, lat2, lon2) {
     var dLon = toRad(lon2 - lon1);
