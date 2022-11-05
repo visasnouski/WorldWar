@@ -14,24 +14,21 @@
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.9" />
-	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9" PrivateAssets="all" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.9" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Adapters\" />
-	  <Folder Include="wwwroot\items\" />
-	  <Folder Include="wwwroot\weapons\DesertEagle\" />
-	  <Folder Include="wwwroot\weapons\AK47\" />
+		<Folder Include="Adapters\" />
+		<Folder Include="wwwroot\items\" />
+		<Folder Include="wwwroot\weapons\DesertEagle\" />
+		<Folder Include="wwwroot\weapons\AK47\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
-	  <ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
+		<ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+		<ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
 	</ItemGroup>
 
 </Project>
