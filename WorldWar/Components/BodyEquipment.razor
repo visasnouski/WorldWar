@@ -1,0 +1,207 @@
+﻿@using WorldWar.Internal
+@using WorldWar.Components.States
+@using WorldWar.Abstractions.Models.Items.Base
+@using WorldWar.Abstractions.Models.Items.Base.Protections.Body
+@using WorldWar.Abstractions.Models.Items.Base.Protections.Head
+@using WorldWar.Abstractions.Models.Items.Base.Weapons
+@using WorldWar.Abstractions.Models.Units
+
+@inject DraggableItem DraggableItem
+
+<div class="modal-body-equipment">
+	<table style="width: 42%; height: 42%; float: left">
+		<tr>
+			<td class="modal-equipment-health" width="31%">@Unit?.Health</td>
+			<td rowspan="2" class="modal-equipment-headProtection" style="@_headProtectionStyle"
+				@ondrop="HandleDrop" ondragover="event.preventDefault();"
+				@ondragenter="@(() => HandleDragEnter(EquipmentPosition.Head))">
+				<img src="@Unit?.HeadProtection.IconPath" style="pointer-events: none; height: 40px" title="@Unit?.HeadProtection.Name" />
+			</td>
+		</tr>
+		<tr>
+			<td rowspan="2" class="modal-equipment-weapon" style="@_leftWeaponStyle"
+				@ondrop="HandleDrop" ondragover="event.preventDefault();"
+				@ondragenter="@(() => HandleDragEnter(EquipmentPosition.LeftHand))"
+				title="@Unit?.Weapon.Name">
+				<img src="@Unit?.Weapon.IconPath" style="pointer-events: none; @RotateWeapon" />
+			</td>
+			<td rowspan="2" class="modal-equipment-weapon" style="@_rightWeaponStyle"
+				@ondrop="HandleDrop" ondragover="event.preventDefault();"
+				@ondragenter="@(() => HandleDragEnter(EquipmentPosition.RightHand))"
+				title="@Unit?.Weapon.Name">
+				<img src="@Unit?.Weapon.IconPath" style="pointer-events: none; @RotateWeapon" />
+			</td>
+		</tr>
+		<tr>
+			<td rowspan="2" class="modal-equipment-bodyProtection" style="@_bodyProtectionStyle"
+				@ondrop="HandleDrop" ondragover="event.preventDefault();"
+				@ondragenter="@(() => HandleDragEnter(EquipmentPosition.Body))">
+				<img src="@Unit?.BodyProtection.IconPath" title="@Unit?.BodyProtection.Name" style="pointer-events: none; height: 80px" alt="@Unit?.BodyProtection.Name" />
+			</td>
+		</tr>
+	</table>
+
+	<div class="table" style="width: 56%; float: right;" @ondrop="HandleDrop" ondragover="event.preventDefault();" @ondragenter="@(() => HandleDragEnter(EquipmentPosition.Loot))">
+		<div class="row">
+			<div class="cell modal-equipment-username">@Unit?.Name</div>
+		</div>
+		<div class="row">
+			<div class="cell modal-equipment-empty" height="40" width="40"></div>
+		</div>
+		<div class="row equipment">
+			<p>
+				@foreach (var item in Unit?.Loot.Items ?? new List<Item>())
+				{
+					<div class="cell modal-equipment-item" draggable="true" @ondragstart="@(() => HandleDragStart(@item))">
+						<img src="@item.IconPath" width="@(item.Size * 43)px" title="@item.Name" alt="@item.Name" />
+					</div>
+				}
+			</p>
+		</div>
+	</div>
+</div>
+
+@code {
+	private string _leftWeaponStyle = string.Empty;
+	private string _rightWeaponStyle = string.Empty;
+	private string _bodyProtectionStyle = string.Empty;
+	private string _headProtectionStyle = string.Empty;
+	private EquipmentPosition _equipmentPosition;
+
+	[Parameter]
+	public Unit? Unit { get; set; }
+
+	[Parameter]
+	public EventCallback<Item> RemoveItemCallback { get; set; }
+
+	private string RotateWeapon => Unit?.Weapon.Size > 1 ? "transform: rotate(-90deg); position: relative; right: 30%; width: 180%" : "width: 80%;";
+
+	protected override void OnInitialized()
+	{
+		DraggableItem.OnChange += DraggableItemOnChange();
+	}
+
+	private Action DraggableItemOnChange()
+	{
+		return () =>
+		{
+			SelectZone();
+			StateHasChanged();
+		};
+	}
+
+	private void HandleDragStart(Item item)
+	{
+		DraggableItem.Value = (nameof(BodyEquipment), item);
+	}
+
+	private async Task HandleDrop()
+	{
+		if (_equipmentPosition is EquipmentPosition.Loot)
+		{
+			if (RemoveItemCallback.HasDelegate
+				&& !IsFromUnitLoot)
+			{
+				// Remove item from other component
+				await RemoveItemFromSource();
+				Unit!.Loot.Items.Add(DraggableItem.Value.Item!);
+			}
+
+			await ResetStyles();
+		}
+
+		switch (DraggableItem.Value.Item!)
+		{
+			case Weapon weapon
+				when _equipmentPosition is EquipmentPosition.LeftHand or EquipmentPosition.RightHand:
+				Unit?.SetWeapon(weapon);
+				await RemoveItemFromSource();
+
+				break;
+			case BodyProtection bodyProtection
+				when _equipmentPosition is EquipmentPosition.Body:
+				Unit!.SetBodyProtection(bodyProtection);
+				await RemoveItemFromSource();
+				break;
+			case HeadProtection headProtection
+				when _equipmentPosition is EquipmentPosition.Head:
+				Unit!.SetHeadProtection(headProtection);
+				await RemoveItemFromSource();
+				break;
+		}
+
+		await ResetStyles();
+	}
+
+	private bool IsFromUnitLoot => DraggableItem.Value.Source.Equals(nameof(BodyEquipment), StringComparison.Ordinal);
+
+	private async Task RemoveItemFromSource()
+	{
+		if (IsFromUnitLoot)
+		{
+			Unit?.Loot.Items.Remove(DraggableItem.Value.Item!);
+
+		}
+		else
+		{
+			await ResetStyles();
+			await RemoveItemCallback.InvokeAsync(DraggableItem.Value.Item);
+		}
+	}
+
+	private Task HandleDragEnter(EquipmentPosition equipmentPosition)
+	{
+		_equipmentPosition = equipmentPosition;
+		return Task.CompletedTask;
+	}
+
+	public Task ResetStyles()
+	{
+		_leftWeaponStyle = string.Empty;
+		_rightWeaponStyle = string.Empty;
+		_bodyProtectionStyle = string.Empty;
+		_headProtectionStyle = string.Empty;
+
+		return Task.CompletedTask;
+	}
+
+	private void SelectWeaponZone()
+	{
+		_leftWeaponStyle = "background-color: rgba(0, 128, 0, 0.2);";
+		_rightWeaponStyle = "background-color: rgba(0, 128, 0, 0.2);";
+		_bodyProtectionStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_headProtectionStyle = "background-color: rgba(128, 0, 0, 0.2);";
+	}
+
+	private void SelectBodyZone()
+	{
+		_leftWeaponStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_rightWeaponStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_bodyProtectionStyle = "background-color: rgba(0, 128, 0, 0.2);";
+		_headProtectionStyle = "background-color: rgba(128, 0, 0, 0.2);";
+	}
+
+	private void SelectHeadZone()
+	{
+		_leftWeaponStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_rightWeaponStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_bodyProtectionStyle = "background-color: rgba(128, 0, 0, 0.2);";
+		_headProtectionStyle = "background-color: rgba(0, 128, 0, 0.2);";
+	}
+
+	private void SelectZone()
+	{
+		switch (DraggableItem.Value.Item)
+		{
+			case Weapon:
+				SelectWeaponZone();
+				break;
+			case BodyProtection:
+				SelectBodyZone();
+				break;
+			case HeadProtection:
+				SelectHeadZone();
+				break;
+		}
+	}
+}

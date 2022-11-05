@@ -1,0 +1,107 @@
+﻿@page "/Admin"
+@using WorldWar.Components
+@using WorldWar.Interfaces
+@using WorldWar.Internal
+@using WorldWar.Abstractions
+@using WorldWar.Abstractions.Extensions
+@using WorldWar.Abstractions.Models
+@using WorldWar.Abstractions.Models.Items.Base
+@using WorldWar.Abstractions.Models.Units
+
+@inject IWorldWarMapService WorldWarMapService
+@inject IMapStorage MapStorage
+@inject IYandexJsClientAdapter YandexJsClientAdapter
+@inject IUnitManagementService UnitManagementService;
+@inject DraggableItem DraggableItem;
+
+<PageTitle>WorldWarMap Editor</PageTitle>
+
+<p>WorldWarMap Editor</p>
+<UnitEquipment @ref="_unitEquipment"></UnitEquipment>
+<Interact @ref="_interact"></Interact>
+<ModalDialogBoxContents @ref="_modalDialogBoxContents"></ModalDialogBoxContents>
+
+<body>
+	<div class="mapeditor">
+		<div class="mapeditor-right">
+			<span style="font-size: 40px; cursor: pointer; color: #cfd8dc;" @onclick="OpenNav">&#12298;</span>
+			<div class="sidenav" style="width: @_sideNavWidth">
+				<a class="closebtn" @onclick="CloseNav">&times;</a>
+				<div class="row" style="pointer-events: auto">
+					<div class="col-25">
+						<p style="color: aliceblue"> Add a new unit:</p>
+						<div class="col-75">
+							<button class="w-100 btn btn-lg btn-primary" @onclick="UnitEditorOpen">Edit unit</button>
+							<button class="w-100 btn btn-lg btn-primary" @onclick="AddCar">AddCar</button>
+						</div>
+					</div>
+					<ItemsObserver @ref="_itemsObserver"></ItemsObserver>
+					<div class="col-25">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="mapeditor-left">
+			<div id="map" @ondrop="HandleDrop" ondragover="event.preventDefault();" style="width: 150vh; height: 80vh; position: relative;">
+				<div class="center">X</div>
+			</div>
+		</div>
+	</div>
+</body>
+
+@code {
+	private UnitEquipment? _unitEquipment;
+	private Interact? _interact;
+	private ItemsObserver? _itemsObserver;
+	private ModalDialogBoxContents? _modalDialogBoxContents;
+
+	private string _sideNavWidth = "0px";
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
+			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
+			await YandexJsClientAdapter.SetModalDialogBoxContents(DotNetObjectReference.Create(_modalDialogBoxContents!));
+
+			await WorldWarMapService.RunUnitsAutoRefresh(true);
+			await WorldWarMapService.RunItemsAutoRefresh(true);
+			StateHasChanged();
+		}
+	}
+
+	private void OpenNav()
+	{
+		_sideNavWidth = "250px";
+	}
+
+	private void CloseNav()
+	{
+		_sideNavWidth = "0px";
+	}
+
+	private async Task UnitEditorOpen()
+	{
+		var coords = await YandexJsClientAdapter.GetCenterCoords();
+		var guid = Guid.NewGuid();
+		await _unitEquipment!.Open(new Bot(guid, GenerateName.Generate(7), UnitTypes.Mob, coords[0], coords[1], 100));
+	}
+
+	private async Task AddCar()
+	{
+		var coords = await YandexJsClientAdapter.GetCenterCoords();
+		var guid = Guid.NewGuid();
+		await MapStorage.SetUnit(new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
+	}
+
+	private async Task HandleDrop(DragEventArgs arg)
+	{
+		if (DraggableItem.Value.Item is not null)
+		{
+			var coords = await YandexJsClientAdapter.ConvertPixelCoordsToGlobal(arg.PageX, arg.PageY);
+			var box = new Box(Guid.NewGuid(), coords[0], coords[1], new List<Item>() { DraggableItem.Value.Item });
+			await MapStorage.SetItem(box);
+		}
+	}
+}

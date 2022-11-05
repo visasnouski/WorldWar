@@ -1,0 +1,62 @@
+﻿@using WorldWar.Internal
+@using WorldWar.Abstractions.Models.Items.Base
+
+@inject DraggableItem DraggableItem
+
+<div class="modal-box-equipment">
+	<div class="table" @ondrop="HandleDrop" ondragover="event.preventDefault();">
+		<div class="row">
+			<div class="cell modal-equipment-username">Box</div>
+		</div>
+		<div class="row">
+			<div class="cell modal-equipment-empty"></div>
+		</div>
+		<div class="row equipment" style="width: 400px;">
+			<p>
+				@foreach (var item in Box?.Items ?? new List<Item>())
+				{
+					<div class="cell modal-equipment-item" draggable="true" @ondragstart="@(() => HandleDragStart(@item))">
+						<img src="@item.IconPath" width="@(item.Size * 43)px" title="@item.Name" alt="@item.Name" />
+					</div>
+				}
+			</p>
+		</div>
+	</div>
+</div>
+
+@code {
+	[Parameter]
+	public Box? Box { get; set; }
+
+	[Parameter]
+	public IList<Item>? Source { get; set; }
+
+	[Parameter]
+	public EventCallback StateHasChangedCallback { get; set; }
+
+	private async Task HandleDrop()
+	{
+		if (DraggableItem.Value.Source.Equals(nameof(BoxContents), StringComparison.Ordinal))
+		{
+			return;
+		}
+
+		Box!.Items.Add(DraggableItem.Value.Item!);
+		if (Source is not null)
+		{
+			Source.Remove(DraggableItem.Value.Item!);
+		}
+		await StateHasChangedSource();
+	}
+
+	private Task HandleDragStart(Item item)
+	{
+		DraggableItem.Value = (nameof(BoxContents), item);
+		return Task.CompletedTask;
+	}
+
+	private async Task StateHasChangedSource()
+	{
+		await StateHasChangedCallback.InvokeAsync(DraggableItem.Value.Item);
+	}
+}

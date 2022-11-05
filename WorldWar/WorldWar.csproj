@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<LangVersion>latest</LangVersion>
+		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
+		<AnalysisLevel>latest</AnalysisLevel>
+		<UserSecretsId>aspnet-WorldWar-838EC7B0-0482-44B8-8328-56B047193616</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.9" />
+	<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="6.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.9">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.9" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Adapters\" />
+	  <Folder Include="wwwroot\items\" />
+	  <Folder Include="wwwroot\weapons\DesertEagle\" />
+	  <Folder Include="wwwroot\weapons\AK47\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+	  <ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
+	</ItemGroup>
+
+</Project>

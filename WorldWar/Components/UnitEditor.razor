@@ -1,0 +1,20 @@
+﻿@using WorldWar.Abstractions.Models.Units
+@using WorldWar.Abstractions.Models
+@using WorldWar.Abstractions.Extensions
+
+<div class="wrapper">
+	<div style="float: left; z-index: 100;">
+		<UnitEquipment @ref="UnitEquipment"></UnitEquipment>
+	</div>
+</div>
+@code {
+
+	private UnitEquipment? UnitEquipment { get; set; }
+
+	[JSInvokable("Open")]
+	public async Task Open(float latitude, float longitude)
+	{
+		var guid = Guid.NewGuid();
+		await UnitEquipment!.Open(new Bot(guid, GenerateName.Generate(7), UnitTypes.Mob, latitude, longitude, 100));
+	}
+}

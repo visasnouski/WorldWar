@@ -1,0 +1,54 @@
+﻿@page "/WorldMap"
+@using WorldWar.Interfaces
+@using WorldWar.Components
+@using WorldWar.Abstractions
+
+@inject IWorldWarMapService WorldWarMapService
+@inject IUnitManagementService UnitManagementService
+@inject IYandexJsClientAdapter YandexJsClientAdapter
+@inject IYandexHubConnection YandexHubConnection;
+@inject NavigationManager NavigationManager
+
+@implements IAsyncDisposable
+
+<PageTitle>WorldWar</PageTitle>
+
+<UnitEquipment @ref="_unitEquipment"></UnitEquipment>
+<Interact @ref="_interact"></Interact>
+<body>
+	<div id="map" style="width: 160vh; height: 90vh;"></div>
+</body>
+<audio id="sound" />
+@code {
+	private UnitEquipment? _unitEquipment;
+	private Interact? _interact;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await YandexHubConnection.ConfigureHubConnection(NavigationManager.ToAbsoluteUri("/yandexMapHub"));
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
+			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
+
+			await WorldWarMapService.RunUnitsAutoRefresh();
+			await WorldWarMapService.RunItemsAutoRefresh();
+
+			await WorldWarMapService.RunAutoDbSync();
+			await UnitManagementService.AddUnit();
+			StateHasChanged();
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		if (YandexHubConnection is not null)
+		{
+			await YandexHubConnection.DisposeAsync();
+		}
+	}
+}

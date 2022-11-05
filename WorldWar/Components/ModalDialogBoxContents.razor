@@ -1,0 +1,44 @@
+﻿@using WorldWar.Abstractions
+@using WorldWar.Abstractions.Models.Items.Base
+@inject IMapStorage MapStorage
+
+<div class="modal show" role="dialog" style="position: fixed; display: @_modalDisplay" ondragover="event.preventDefault();">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Box contents</h5>
+				<span class="close" @onclick="@Save">&times;</span>
+			</div>
+			<div class="wrapper">
+				<div>
+					<BoxContents Box="@_box" @ref="_boxContents"></BoxContents>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private Box? _box;
+	private BoxContents? _boxContents;
+	private string _modalDisplay = "none;";
+	
+	private async Task Save()
+	{
+		if (!_box!.Items.Any())
+		{
+			await MapStorage.RemoveItem(_box);
+		}
+		_modalDisplay = "none;";
+		StateHasChanged();
+	}
+
+	[JSInvokable("Open")]
+	public async Task Open(Guid boxId)
+	{
+		_box = await MapStorage.GetItem(boxId);
+		_modalDisplay = "block;";
+		StateHasChanged();
+	}
+
+}

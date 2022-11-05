@@ -1,0 +1,108 @@
+﻿@using WorldWar.Interfaces
+@using WorldWar.Internal
+@using WorldWar.Components.States
+@using WorldWar.Abstractions
+@using WorldWar.Abstractions.Models.Items.Base
+@using WorldWar.Abstractions.Models.Units
+
+@inject IAuthUser AuthUser
+@inject IMapStorage MapStorage
+@inject InteractStates InteractStates
+@inject DraggableItem DraggableItem
+
+@implements IAsyncDisposable
+
+<div class="modal show" role="dialog" style="position: fixed; display: @_modalDisplay" ondragover="event.preventDefault();">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content" style="width: 200%">
+			<div class="modal-header">
+				<h5 class="modal-title">BoxContents</h5>
+				<span class="close" @onclick="@Save">&times;</span>
+			</div>
+			<div class="wrapper">
+				<div style="width: 60%; float: left">
+					<BodyEquipment Unit="@_unit" RemoveItemCallback="item => RemoveItem(_box!.Items,item)" @ref="_bodyEquipment"></BodyEquipment>
+				</div>
+				<div style="width: 40%; float: right">
+					<BoxContents Box="@_box" Source="_unit?.Loot.Items" StateHasChangedCallback="BodyStateHasChanged" @ref="_boxContents"></BoxContents>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@code {
+	private BodyEquipment? _bodyEquipment;
+	private BoxContents? _boxContents;
+	private string _modalDisplay = string.Empty;
+	private Box? _box;
+	private Unit? _unit;
+
+	protected override void OnInitialized()
+	{
+		DraggableItem.OnChange += StateHasChanged;
+		InteractStates.OnChange += InteractStatesOnChange();
+	}
+
+	private AsyncEventHandler InteractStatesOnChange()
+	{
+		return async () =>
+		{
+			await Open(InteractStates.Id);
+			await InvokeAsync(StateHasChanged);
+		};
+	}
+
+	public async Task Open(Guid id)
+	{
+		_box = await MapStorage.GetItem(id);
+		var user = await AuthUser.GetIdentity();
+		_unit = await MapStorage.GetUnit(user.GuidId);
+		_modalDisplay = "block;";
+	}
+
+	private Task Test(DragEventArgs arg)
+	{
+		StateHasChanged();
+		return Task.CompletedTask;
+	}
+
+	public async Task Save()
+	{
+		_modalDisplay = "none";
+		await MapStorage.SetUnit(_unit!);
+		if (!_box!.Items.Any())
+		{
+			await MapStorage.RemoveItem(_box);
+		}
+		StateHasChanged();
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		DraggableItem.OnChange -= StateHasChanged;
+		InteractStates.OnChange -= InteractStatesOnChange();
+
+		await Task.CompletedTask;
+	}
+
+	private Task RemoveItem(ICollection<Item> items, Item itemToRemove)
+	{
+		items.Remove(itemToRemove);
+		return Task.CompletedTask;
+	}
+
+	private Task HandleDrop()
+	{
+		_box!.Items.Add(DraggableItem.Value.Item!);
+		_unit!.Loot.Items.Remove(DraggableItem.Value.Item!);
+		StateHasChanged();
+		return Task.CompletedTask;
+	}
+
+	private async Task BodyStateHasChanged()
+	{
+		await _bodyEquipment!.ResetStyles();
+		StateHasChanged();
+	}
+}

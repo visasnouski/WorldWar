@@ -1,0 +1,99 @@
+﻿@page "/Register"
+@using WorldWar.Interfaces
+@using WorldWar.Abstractions.DTOs
+@using WorldWar.Abstractions
+
+@inject IYandexJsClientAdapter YandexJsClientAdapter
+@inject IRegisterModelServices RegisterModelServices
+@inject NavigationManager NavigationManager
+
+<div>
+	@if (string.IsNullOrWhiteSpace(_errorMessage) == false)
+	{
+		<div class="alert alert-danger" role="alert">
+			@_errorMessage
+		</div>
+	}
+</div>
+<div>
+	<section id="container" class="container">
+		<div id="left" class="left-half">
+			<h2 style="color: #42b397; text-shadow: 1px 1px 2px #246d5b, 0 0 1em blue, 0 0 0.2em blue;">Create a new account:</h2>
+			<hr />
+			<EditForm Model="@_inputModel" OnValidSubmit="@OnValidSubmit">
+				<DataAnnotationsValidator />
+				<div class="col-md-10">
+					<div class="form-floating">
+						<InputText id="UserName" @bind-Value="_inputModel.UserName" class="form-control" autocomplete="username" aria-required="true" />
+						<label for="UserName">UserName</label>
+						<ValidationMessage For="@(() => _inputModel.UserName)" />
+					</div>
+				</div>
+				<div class="col-md-10">
+					<div class="form-floating">
+						<InputText id="Email" @bind-Value="_inputModel.Email" class="form-control" autocomplete="email" aria-required="true" />
+						<label for="Email">Email</label>
+						<ValidationMessage For="@(() => _inputModel.Email)" />
+					</div>
+				</div>
+				<div class="col-md-10">
+					<div class="form-floating">
+						<InputText id="Password" type="password" @bind-Value="_inputModel.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+						<label for="Password">Password</label>
+						<ValidationMessage For="@(() => _inputModel.Password)" />
+					</div>
+				</div>
+				<div class="col-md-10">
+					<div class="form-floating">
+						<InputText id="ConfirmPassword" type="password" @bind-Value="_inputModel.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+						<label for="ConfirmPassword">ConfirmPassword</label>
+						<ValidationMessage For="@(() => _inputModel.ConfirmPassword)" />
+					</div>
+				</div>
+				<button type="submit" class="w-50 btn btn-lg btn-primary">Register</button>
+			</EditForm>
+		</div>
+		<div id="right" class="right-half">
+			<h3 style="color: #42b397; text-shadow: 1px 1px 2px #246d5b, 0 0 1em blue, 0 0 0.2em blue; text-align: right">Specify the Spawn Point</h3>
+			<div id="map" style="width: 80vh; height: 80vh; position: relative; box-shadow: 1px 1px 2px #246d5b, 0 0 1em blue, 0 0 0.2em blue;">
+				<div class="center" style="pointer-events: none;">X</div>
+			</div>
+		</div>
+	</section>
+</div>
+
+@code {
+	private readonly InputModel _inputModel = new();
+	private string? _errorMessage;
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await UpdateCoords();
+		}
+
+		StateHasChanged();
+	}
+
+	private async Task UpdateCoords()
+	{
+		var coords = await YandexJsClientAdapter.GetCenterCoords();
+		_inputModel.Latitude = coords[0];
+		_inputModel.Longitude = coords[1];
+	}
+
+	private async Task OnValidSubmit()
+	{
+		try
+		{
+			await UpdateCoords();
+			await RegisterModelServices.RegisterAsync(_inputModel, NavigationManager.BaseUri);
+			NavigationManager.NavigateTo("/Identity/Account/Login?returnUrl=/WorldMap", true);
+		}
+		catch (Exception ex)
+		{
+			_errorMessage = ex.ToString();
+		}
+	}
+}
