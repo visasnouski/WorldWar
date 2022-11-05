@@ -1,0 +1,85 @@
+﻿@using WorldWar.Interfaces
+@using NuGet.Protocol
+@using System.Collections.Immutable
+@using Microsoft.Extensions.Logging.Abstractions
+@using WorldWar.Abstractions
+@using WorldWar.Abstractions.Models.Units
+@using WorldWar.Components.States
+@using WorldWar.Internal
+@inject IMapStorage MapStorage
+@inject IAuthUser AuthUser
+@inject DraggableItem DraggableItem
+@inject UnitEquipmentDialogState UnitEquipmentDialogState;
+
+@implements IAsyncDisposable
+
+<div class="modal show" role="dialog" style="pointer-events: none; display:@_modalDisplay" @ondrop="()=> _bodyEquipment?.ResetStyles()!" ondragover="event.preventDefault();">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content" style="width: 120%">
+			<div class="modal-header">
+				<h5 class="modal-title">Equipment</h5>
+				<span class="close" @onclick="@Save">&times;</span>
+			</div>
+			<BodyEquipment Unit="@_unit" @ref="_bodyEquipment"></BodyEquipment>
+		</div>
+	</div>
+</div>
+
+@code {
+	private BodyEquipment? _bodyEquipment;
+	private string _modalDisplay = "none;";
+	private Unit? _unit;
+
+	protected override void OnInitialized()
+	{
+		UnitEquipmentDialogState.OnChange += UnitEquipmentDialogStateOnChange();
+	}
+
+	private AsyncEventHandler UnitEquipmentDialogStateOnChange()
+	{
+		return async () => await Open();
+	}
+	
+	[JSInvokable("Open")]
+	public async Task Open(Guid guid)
+	{
+		_unit = await MapStorage.GetUnit(guid).ConfigureAwait(true);
+		_modalDisplay = "block;";
+		StateHasChanged();
+	}
+
+	public async Task Open()
+	{
+		var user = await AuthUser.GetIdentity();
+		_unit = await MapStorage.GetUnit(user.GuidId).ConfigureAwait(true);
+		_modalDisplay = "block;";
+		StateHasChanged();
+	}
+
+	public Task Open(Unit unit)
+	{
+		_unit = unit ?? throw new ArgumentNullException(nameof(unit), "The Unit is not defined");
+		_modalDisplay = "block;";
+		StateHasChanged();
+
+		return Task.CompletedTask;
+	}
+
+	public async Task Save()
+	{
+		_modalDisplay = "none";
+		await MapStorage.SetUnit(_bodyEquipment!.Unit!);
+		StateHasChanged();
+	}
+	
+	private bool IsShow()
+	{
+		return _modalDisplay.Equals("block;", StringComparison.Ordinal);
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		UnitEquipmentDialogState.OnChange -= UnitEquipmentDialogStateOnChange();
+		await Task.CompletedTask;
+	}
+}

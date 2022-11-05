@@ -1,0 +1,43 @@
+﻿@using WorldWar.Interfaces
+@using WorldWar.Internal
+@using WorldWar.Abstractions.Models.Items.Base
+@inject IDbRepository DbRepository
+@inject DraggableItem DraggableItem;
+
+<table style="border: 4px solid red">
+	@foreach (var item in GetItems())
+	{
+		<tr class="modal-equipment-item" draggable="true" @ondragstart="@(() => HandleDragStart(@item))">
+			<img src="@item.IconPath" style="width:40%" title="@item.Name" />
+		</tr>
+	}
+</table>
+
+@code {
+	private string _modalDisplay = "none;";
+
+	private IEnumerable<Item> GetItems()
+	{
+		IEnumerable<IEnumerable<Item>> Items()
+		{
+			yield return DbRepository.Weapons;
+			yield return DbRepository.HeadProtections;
+			yield return DbRepository.BodyProtections;
+		}
+
+		return Items().SelectMany(x => x);
+	}
+
+	private void HandleDragStart(Item item)
+	{
+		DraggableItem.Value = (nameof(ItemsObserver), item);
+		StateHasChanged();
+	}
+
+	public Task Open()
+	{
+		_modalDisplay = "block;";
+		StateHasChanged();
+		return Task.CompletedTask;
+	}
+}

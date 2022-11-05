@@ -1,0 +1,64 @@
+﻿.mapeditor {
+    width: 100%;
+}
+
+.mapeditor-left {
+    float: left;
+    border: 1px solid blue;
+}
+
+.mapeditor-right {
+    float: right;
+    line-height: 10px;
+    /*padding-left: 10px;*/
+    margin-top: 20%;
+}
+
+.sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    right: 0;
+    background-color: #111;
+    overflow-x: hidden;
+    transition: 0.5s;
+    padding-top: 60px;
+}
+    .sidenav:hover {
+        width: 250px;
+    }
+
+    .sidenav a {
+        padding: 8px 8px 8px 32px;
+        text-decoration: none;
+        font-size: 25px;
+        color: #828282;
+        display: block;
+        transition: 0.3s;
+    }
+
+        .sidenav a:hover {
+            color: white;
+        }
+
+    .sidenav .closebtn {
+        position: absolute;
+        top: 0;
+        right: 25px;
+        font-size: 36px;
+        margin-left: 50px;
+    }
+
+.col-25 {
+    float: right;
+    width: 95%;
+    margin-top: 6px;
+}
+
+.col-75 {
+    float: right;
+    width: auto;
+    margin-top: 6px;
+}

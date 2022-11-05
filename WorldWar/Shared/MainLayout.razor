@@ -1,0 +1,36 @@
+﻿@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<PageTitle>WorldWar</PageTitle>
+
+<div class="page">
+	<div class="sidebar sidebar_grid">
+		<NavMenu />
+	</div>
+
+	<main>
+		<div class="top-row px-4 auth">
+			<LoginDisplay />
+			<a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
+		</div>
+
+		<article class="content px-4">
+			@Body
+		</article>
+	</main>
+</div>
+
+@code
+{
+	[CascadingParameter] protected Task<AuthenticationState> AuthStat { get; set; }
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+		var user = (await AuthStat).User;
+		if (!user.Identity?.IsAuthenticated ?? false)
+		{
+			NavigationManager.NavigateTo($"Identity/Account/Login?returnUrl=/WorldMap", true);
+		}
+	}
+}
