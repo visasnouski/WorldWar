@@ -46,7 +46,6 @@ public class WorldWarMapService : IWorldWarMapService
 			try
 			{
 
-
 				while (true)
 				{
 					var visibleGuids = new HashSet<(Guid, UnitTypes)>();

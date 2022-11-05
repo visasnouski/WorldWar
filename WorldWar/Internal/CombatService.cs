@@ -73,7 +73,6 @@ public class CombatService : ICombatService
 
 			await _mapStorage.SetUnit(enemy).ConfigureAwait(true);
 
-
 			if (user.Health <= 0)
 			{
 				await KillUnit(user).ConfigureAwait(true);

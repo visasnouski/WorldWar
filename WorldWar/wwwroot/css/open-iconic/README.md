@@ -4,7 +4,6 @@
 ### Open Iconic is the open source sibling of [Iconic](http://useiconic.com). It is a hyper-legible collection of 223 icons with a tiny footprint&mdash;ready to use with Bootstrap and Foundation. [View the collection](http://useiconic.com/open#icons)
 
 
-
 ## What's in Open Iconic?
 
 * 223 icons designed to be legible down to 8 pixels
@@ -13,7 +12,6 @@
 * Webfont (EOT, OTF, SVG, TTF, WOFF), PNG and WebP formats
 * Webfont stylesheets (including versions for Bootstrap and Foundation) in CSS, LESS, SCSS and Stylus formats
 * PNG and WebP raster images in 8px, 16px, 24px, 32px, 48px and 64px.
-
 
 ## Getting Started
 
@@ -62,16 +60,13 @@ To learn more about SVG Sprites, read [Chris Coyier's guide](http://css-tricks.c
 
 #### Using Open Iconic's Icon Font...
 
-
 ##### …with Bootstrap
 
 You can find our Bootstrap stylesheets in `font/css/open-iconic-bootstrap.{css, less, scss, styl}`
 
-
 ```
 <link href="/open-iconic/font/css/open-iconic-bootstrap.css" rel="stylesheet">
 ```
-
 
 ```
 <span class="oi oi-icon-name" title="icon name" aria-hidden="true"></span>
@@ -84,7 +79,6 @@ You can find our Foundation stylesheets in `font/css/open-iconic-foundation.{css
 ```
 <link href="/open-iconic/font/css/open-iconic-foundation.css" rel="stylesheet">
 ```
-
 
 ```
 <span class="fi-icon-name" title="icon name" aria-hidden="true"></span>
@@ -101,7 +95,6 @@ You can find our default stylesheets in `font/css/open-iconic.{css, less, scss, 
 ```
 <span class="oi" data-glyph="icon-name" title="icon name" aria-hidden="true"></span>
 ```
-
 
 ## License
 

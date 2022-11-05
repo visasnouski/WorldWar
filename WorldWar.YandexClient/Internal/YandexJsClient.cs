@@ -13,7 +13,6 @@ namespace WorldWar.YandexClient.Internal
 		private readonly IAuthUser _authUser;
 		private readonly YandexSettings _yandexSettings;
 
-
 		public YandexJsClient(IJSRuntime jsRuntime, ITaskDelay taskDelay, IAuthUser authUser, IOptions<YandexSettings> yandexSettings)
 		{
 			_jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
