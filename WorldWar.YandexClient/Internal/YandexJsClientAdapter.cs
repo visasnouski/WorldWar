@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.JSInterop;
 using WorldWar.Abstractions;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
@@ -11,11 +12,11 @@ namespace WorldWar.YandexClient.Internal
 		private readonly Lazy<Task<IJSObjectReference>> _yandexJsModule;
 		private bool _isDisposed;
 
-		public YandexJsClientAdapter(IJSRuntime jsRuntime, ITaskDelay taskDelay, IAuthUser authUser)
+		public YandexJsClientAdapter(IJSRuntime jsRuntime, ITaskDelay taskDelay, IAuthUser authUser, IOptions<YandexSettings> yandexSettings)
 		{
 			_yandexJsModule = new Lazy<Task<IJSObjectReference>>(async () =>
 				{
-					var client = new YandexJsClient(jsRuntime, taskDelay, authUser);
+					var client = new YandexJsClient(jsRuntime, taskDelay, authUser, yandexSettings);
 					var module = await client.GetYandexJsModule("./js/WorldWarMap.js").ConfigureAwait(true);
 					return module;
 				}

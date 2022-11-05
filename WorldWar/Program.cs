@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Configuration;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Models;
 using WorldWar.Areas.Identity;
 using WorldWar.Components.States;
 using WorldWar.Data;
@@ -43,6 +45,7 @@ builder.Services.AddScoped<InteractStates>();
 builder.Services.AddScoped<IInteractionObjectsService, InteractionObjectsService>();
 
 builder.Services.AddSingleton<IDbRepository, DbRepository>();
+builder.Services.Configure<YandexSettings>(options => builder.Configuration.GetSection("YandexMap").Bind(options));
 
 builder.Services.AddYandexClient();
 
