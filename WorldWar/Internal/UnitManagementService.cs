@@ -103,7 +103,6 @@ public class UnitManagementService : IUnitManagementService
 			});
 	}
 
-
 	[JSInvokable("GetInCar")]
 	public async Task GetInCar(Guid itemGuid)
 	{
