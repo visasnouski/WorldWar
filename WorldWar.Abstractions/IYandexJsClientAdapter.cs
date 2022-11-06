@@ -28,7 +28,6 @@ namespace WorldWar.Abstractions
 
 		public Task SetUserGuid(Guid id);
 
-
 		public Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)
 			where TValue : class;
 

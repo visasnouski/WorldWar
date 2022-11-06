@@ -1,0 +1,7 @@
+﻿declare @id int 
+select @id = 1
+while @id >= 1 and @id <= 1000
+begin
+insert into Units values(NEWID(), 'John Doe' + convert(varchar(5), @id), 0, RAND() * (0.001 - 0.0001) + 27.56, RAND() * (0.001 - 0.0001) + 53.90, 1000, 3000, 2000, some-loot-id)
+select @id = @id + 1
+end
