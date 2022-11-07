@@ -153,7 +153,6 @@ public class DbRepository : IDbRepository
 
 		await LockAsync(async () =>
 		{
-
 			await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true);
 			return await applicationDbContext.SaveChangesAsync().ConfigureAwait(true);
 		}).ConfigureAwait(true);

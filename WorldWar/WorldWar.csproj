@@ -11,6 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ConcurrentHashSet" Version="1.3.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.9" />
@@ -20,7 +21,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Adapters\" />
 		<Folder Include="wwwroot\items\" />
 		<Folder Include="wwwroot\weapons\DesertEagle\" />
 		<Folder Include="wwwroot\weapons\AK47\" />
@@ -28,6 +28,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+		<ProjectReference Include="..\WorldWar.AI\WorldWar.AI.csproj" />
 		<ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
 	</ItemGroup>
 

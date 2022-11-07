@@ -2,7 +2,6 @@
 using System.Security.Cryptography;
 using WorldWar.Abstractions;
 using WorldWar.Abstractions.Extensions;
-using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
 using WorldWar.Abstractions.Models.Units;
@@ -35,8 +34,7 @@ public class CombatService : ICombatService
 
 		if (user.Weapon.WeaponType == WeaponTypes.Handguns && !user.IsWithinReach(enemy.CurrentLongitude, enemy.CurrentLatitude, user.Weapon.Distance))
 		{
-			await _movableService.StartMove(enemy.Id, cancellationToken,
-				user.Weapon.Distance).ConfigureAwait(true);
+			await _movableService.StartMove(user.Id, enemy.Id, cancellationToken, user.Weapon.Distance).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;

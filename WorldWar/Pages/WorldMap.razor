@@ -35,7 +35,7 @@
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
 			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
 
-			await WorldWarMapService.RunUnitsAutoRefresh();
+			await WorldWarMapService.RunUnitsAutoRefreshAsync();
 			await WorldWarMapService.RunItemsAutoRefresh();
 
 			await WorldWarMapService.RunAutoDbSync();

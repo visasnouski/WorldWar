@@ -65,11 +65,11 @@ public class UnitManagementService : IUnitManagementService
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
 		await StopUnit().ConfigureAwait(true);
 
-		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _movableService.StartMove(latitude, longitude, cs.Token)),
+		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _movableService.StartMoveAlongRoute(identity.GuidId, latitude, longitude, cs.Token)),
 			(_, task) =>
 			{
 				task.Item1.Cancel(false);
-				return GetTask(cs => _movableService.StartMove(latitude, longitude, cs.Token));
+				return GetTask(cs => _movableService.StartMoveAlongRoute(identity.GuidId, latitude, longitude, cs.Token));
 			});
 	}
 
@@ -79,7 +79,7 @@ public class UnitManagementService : IUnitManagementService
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
 
 		await StopUnit().ConfigureAwait(true);
-		
+
 		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _combatService.AttackUnit(enemyGuid, cs.Token)),
 			(_, task) =>
 			{

@@ -30,7 +30,7 @@ public class InteractionObjectsService : IInteractionObjectsService
 
 		if (!user.IsWithinReach(box.Longitude, box.Latitude))
 		{
-			await _movableService.StartMove(box.Latitude, box.Longitude, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMoveAlongRoute(user.Id, box.Latitude, box.Longitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
@@ -50,10 +50,10 @@ public class InteractionObjectsService : IInteractionObjectsService
 			return;
 		}
 		var unit = await _mapStorage.GetUnit(guidId).ConfigureAwait(true);
-		
+
 		if (!user.IsWithinReach(unit.CurrentLongitude, unit.CurrentLatitude))
 		{
-			await _movableService.StartMove(unit.CurrentLatitude, unit.CurrentLongitude, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMoveAlongRoute(user.Id, unit.CurrentLatitude, unit.CurrentLongitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;

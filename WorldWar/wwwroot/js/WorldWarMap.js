@@ -51,7 +51,6 @@ function init() {
 }
 
 export async function getRoute(startCoords, endCoords, routingMode) {
-    console.log(startCoords, endCoords);
     let coords;
 
     if (yandexRoute) {
@@ -131,9 +130,7 @@ export function addUnit(unit) {
             function (zoom) {
                 // Минимальный размер метки будет 8px, а максимальный 200px.
                 // Размер метки будет расти с квадратичной зависимостью от уровня зума.
-                const size = scale(60, zoom);
-                console.log('zoom', zoom, size);
-                return size;
+                return scale(60, zoom);
             }),
         iconImageHref: 'img/unit.png',
         iconImageSize: [28, 28],
