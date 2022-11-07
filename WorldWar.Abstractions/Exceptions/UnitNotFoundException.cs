@@ -1,4 +1,4 @@
-﻿namespace WorldWar.Exceptions
+﻿namespace WorldWar.Abstractions.Exceptions
 {
 	public class UnitNotFoundException : Exception
 	{

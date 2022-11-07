@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.ComponentModel.DataAnnotations;
 using WorldWar.Internal;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Areas.Identity.Pages.Account
 {

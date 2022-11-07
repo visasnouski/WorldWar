@@ -1,12 +1,11 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-using WorldWar.Abstractions;
+using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
-using WorldWar.Exceptions;
 
-namespace WorldWar.Data;
+namespace WorldWar.Core;
 
 public class MapStorage : IMapStorage
 {

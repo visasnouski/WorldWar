@@ -1,8 +1,9 @@
 ﻿using Microsoft.JSInterop;
+using WorldWar.Abstractions;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 
-namespace WorldWar.Abstractions
+namespace WorldWar.YandexClient.Interfaces
 {
 	public interface IYandexJsClientAdapter
 	{

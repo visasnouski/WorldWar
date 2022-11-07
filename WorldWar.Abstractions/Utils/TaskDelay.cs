@@ -1,6 +1,6 @@
-﻿using WorldWar.Abstractions;
+﻿using WorldWar.Abstractions.Interfaces;
 
-namespace WorldWar.Internal;
+namespace WorldWar.Abstractions.Utils;
 
 public class TaskDelay : ITaskDelay
 {

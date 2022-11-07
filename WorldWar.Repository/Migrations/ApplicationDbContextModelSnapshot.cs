@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using WorldWar.Data.Repository;
+using WorldWar.Repository.Internal;
 
 #nullable disable
 
-namespace WorldWar.Migrations
+namespace WorldWar.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -239,7 +239,7 @@ namespace WorldWar.Migrations
                     b.ToTable("Units");
                 });
 
-            modelBuilder.Entity("WorldWar.Internal.MyIdentityUser", b =>
+            modelBuilder.Entity("WorldWar.Repository.Models.MyIdentityUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
@@ -489,7 +489,7 @@ namespace WorldWar.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("WorldWar.Internal.MyIdentityUser", null)
+                    b.HasOne("WorldWar.Repository.Models.MyIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -498,7 +498,7 @@ namespace WorldWar.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("WorldWar.Internal.MyIdentityUser", null)
+                    b.HasOne("WorldWar.Repository.Models.MyIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -513,7 +513,7 @@ namespace WorldWar.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("WorldWar.Internal.MyIdentityUser", null)
+                    b.HasOne("WorldWar.Repository.Models.MyIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -522,7 +522,7 @@ namespace WorldWar.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("WorldWar.Internal.MyIdentityUser", null)
+                    b.HasOne("WorldWar.Repository.Models.MyIdentityUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)

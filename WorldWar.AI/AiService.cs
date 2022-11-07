@@ -3,7 +3,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Core;
 
 namespace WorldWar.AI
 {
@@ -29,7 +31,6 @@ namespace WorldWar.AI
 			{
 				try
 				{
-
 					var units = await _mapStorage.GetUnits().ConfigureAwait(true);
 					var mobs = units.Where(unit => unit.UnitType == UnitTypes.Mob
 												   && unit.Location.StartPos == unit.Location.CurrentPos);

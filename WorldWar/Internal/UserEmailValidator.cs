@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal
 {

@@ -3,7 +3,7 @@ using WorldWar.Abstractions.Models.Items.Base.Protections.Head;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
 using WorldWar.Abstractions.Models.Units;
 
-namespace WorldWar.Interfaces;
+namespace WorldWar.Repository.interfaces;
 
 public interface IDbRepository
 {

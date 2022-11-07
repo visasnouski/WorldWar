@@ -1,36 +1,30 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using WorldWar.Abstractions;
-using WorldWar.Abstractions.Models;
+using WorldWar.Abstractions.Interfaces;
+using WorldWar.Abstractions.Utils;
 using WorldWar.AI;
 using WorldWar.Areas.Identity;
 using WorldWar.Components.States;
-using WorldWar.Data;
-using WorldWar.Data.Repository;
+using WorldWar.Core.Extensions;
 using WorldWar.Interfaces;
 using WorldWar.Internal;
+using WorldWar.Repository;
+using WorldWar.Repository.Models;
 using WorldWar.YandexClient;
 using WorldWar.YandexClient.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-	options.UseSqlServer(connectionString));
-builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+var identityBuilder =
+	builder.Services.AddDefaultIdentity<MyIdentityUser>(options => options.SignIn.RequireConfirmedAccount = true);
+builder.Services.AddDbRepository(builder.Configuration.GetConnectionString("DefaultConnection"), identityBuilder);
+identityBuilder.AddUserValidator<UserEmailValidator<MyIdentityUser>>();
 
-// TODO Adjust RequireConfirmedAccount
-builder.Services.AddDefaultIdentity<MyIdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-	.AddEntityFrameworkStores<ApplicationDbContext>()
-	.AddUserValidator<UserEmailValidator<MyIdentityUser>>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<MyIdentityUser>>();
-builder.Services.AddSingleton<IMapStorage, MapStorage>();
-
-builder.Services.AddScoped<ITaskDelay, TaskDelay>();
+builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
 builder.Services.AddScoped<ICombatService, CombatService>();
@@ -44,11 +38,10 @@ builder.Services.AddScoped<InteractStates>();
 
 builder.Services.AddScoped<IInteractionObjectsService, InteractionObjectsService>();
 
-builder.Services.AddSingleton<IDbRepository, DbRepository>();
-builder.Services.Configure<YandexSettings>(options => builder.Configuration.GetSection("YandexMap").Bind(options));
-
-builder.Services.AddYandexClient();
+builder.Services.AddYandexClient(options => builder.Configuration.GetSection("YandexMap").Bind(options));
 builder.Services.AddAiService();
+
+builder.Services.AddStorage();
 
 var app = builder.Build();
 

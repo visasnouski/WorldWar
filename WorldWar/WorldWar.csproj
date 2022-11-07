@@ -29,6 +29,8 @@
 	<ItemGroup>
 		<ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
 		<ProjectReference Include="..\WorldWar.AI\WorldWar.AI.csproj" />
+		<ProjectReference Include="..\WorldWar.Core\WorldWar.Core.csproj" />
+		<ProjectReference Include="..\WorldWar.Repository\WorldWar.Repository.csproj" />
 		<ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
 	</ItemGroup>
 

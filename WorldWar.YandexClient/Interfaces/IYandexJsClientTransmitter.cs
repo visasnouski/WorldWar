@@ -1,4 +1,4 @@
-﻿namespace WorldWar.Abstractions;
+﻿namespace WorldWar.YandexClient.Interfaces;
 
 public interface IYandexJsClientTransmitter
 {

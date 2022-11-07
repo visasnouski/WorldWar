@@ -1,7 +1,7 @@
 ﻿using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 
-namespace WorldWar.Abstractions;
+namespace WorldWar.Core;
 
 public interface IMapStorage
 {

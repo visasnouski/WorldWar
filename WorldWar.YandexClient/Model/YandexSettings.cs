@@ -1,4 +1,4 @@
-﻿namespace WorldWar.Abstractions.Models
+﻿namespace WorldWar.YandexClient.Model
 {
 	public class YandexSettings
 	{

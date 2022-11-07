@@ -1,7 +1,11 @@
 ﻿using ConcurrentCollections;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Core;
 using WorldWar.Interfaces;
+using WorldWar.Repository.interfaces;
+using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Internal;
 
@@ -22,20 +26,21 @@ public class WorldWarMapService : IWorldWarMapService
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 	}
 
-	public async Task RunAutoDbSync()
+	public Task RunAutoDbSync()
 	{
-		var dbUnits = _dbRepository.Units;
-		await _mapStorage.SetUnits(dbUnits).ConfigureAwait(true);
-
 		_ = Task.Run(async () =>
 		{
 			while (true)
 			{
+				var dbUnits = _dbRepository.Units;
+				await _mapStorage.SetUnits(dbUnits).ConfigureAwait(true);
 				var mapUnits = await _mapStorage.GetUnits().ConfigureAwait(true);
-				await _dbRepository.SetUnits(mapUnits).ConfigureAwait(true);
 				await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(true);
+				await _dbRepository.SetUnits(mapUnits).ConfigureAwait(true);
 			}
 		}, CancellationToken.None);
+
+		return Task.CompletedTask;
 	}
 
 	public Task RunUnitsAutoRefresh(bool viewAllUnits = false)

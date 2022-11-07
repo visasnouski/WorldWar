@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace WorldWar.Migrations
+namespace WorldWar.Repository.Migrations
 {
     public partial class WorldWar : Migration
     {

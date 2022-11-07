@@ -1,4 +1,5 @@
 ﻿ymaps.ready(init);
+
 var myMap;
 var yandexRoute;
 
@@ -28,7 +29,7 @@ function init() {
         ignoreRightClick = false;
     }
 
-    myMap = new ymaps.Map('map',
+    myMap = new window.ymaps.Map('map',
         {
             center: [53.902284, 27.561831],
             zoom: 19
@@ -74,7 +75,7 @@ export async function getRoute(startCoords, endCoords, routingMode) {
 }
 
 function getYmapsRoute(startCoords, endCoords, routingMode) {
-    return ymaps.route([
+    return window.ymaps.route([
         { type: 'wayPoint', point: startCoords },
         { type: 'wayPoint', point: endCoords }
     ],
@@ -239,7 +240,7 @@ export function addCar(car) {
 
 var createUnitLayout = function (templateLayout, calculateSize) {
     // Создадим макет метки.
-    var layout = ymaps.templateLayoutFactory.createClass(
+    var layout = window.ymaps.templateLayoutFactory.createClass(
         templateLayout,
         {
             build: function () {
@@ -305,7 +306,7 @@ function scale(size, zoom) {
 
 var createCarLayout = function (templateLayout, calculateSize) {
     // Создадим макет метки.
-    var layout = ymaps.templateLayoutFactory.createClass(
+    var layout = window.ymaps.templateLayoutFactory.createClass(
         templateLayout,
         {
             build: function () {
@@ -485,11 +486,11 @@ export function showMessage(id, message) {
         if (geoObject.properties.get('id') === id) {
             const startCoords = geoObject.geometry.getCoordinates();
 
-            const ballonLayout = ymaps.templateLayoutFactory.createClass(
+            const ballonLayout = window.ymaps.templateLayoutFactory.createClass(
                 '<div class="slideUp">{{content}}</div>'
             );
 
-            var balloon = new ymaps.Balloon(myMap, { closeButton: false, layout: ballonLayout });
+            var balloon = new window.ymaps.Balloon(myMap, { closeButton: false, layout: ballonLayout });
             balloon.options.setParent(geoObject.options);
             balloon.open(startCoords, message);
             setTimeout(function () {

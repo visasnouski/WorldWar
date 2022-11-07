@@ -1,5 +1,5 @@
 ﻿export function addScript(src) {
-    var s = document.createElement('script');
-    s.setAttribute('src', src);
-    document.body.appendChild(s);
+    var yandexScript = document.createElement('script');
+    yandexScript.setAttribute('src', src);
+    document.body.appendChild(yandexScript);
 }

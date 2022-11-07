@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Core;
+using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Internal
 {

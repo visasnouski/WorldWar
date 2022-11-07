@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using WorldWar.Abstractions;
+using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Hubs
 {

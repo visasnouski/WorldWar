@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using System.Security.Authentication;
 using WorldWar.Abstractions;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;
 

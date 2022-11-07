@@ -16,5 +16,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+	  <ProjectReference Include="..\WorldWar.Core\WorldWar.Core.csproj" />
 	</ItemGroup>
 </Project>

@@ -7,6 +7,7 @@ using System.Web;
 using WorldWar.Abstractions.DTOs;
 using WorldWar.Exceptions;
 using WorldWar.Interfaces;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;
 
