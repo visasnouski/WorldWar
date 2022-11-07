@@ -17,20 +17,20 @@ using WorldWar.YandexClient.Hubs;
 var builder = WebApplication.CreateBuilder(args);
 
 var identityBuilder =
-	builder.Services.AddDefaultIdentity<MyIdentityUser>(options => options.SignIn.RequireConfirmedAccount = true);
+	builder.Services.AddDefaultIdentity<WorldWarIdentity>(options => options.SignIn.RequireConfirmedAccount = true);
 builder.Services.AddDbRepository(builder.Configuration.GetConnectionString("DefaultConnection"), identityBuilder);
-identityBuilder.AddUserValidator<UserEmailValidator<MyIdentityUser>>();
+identityBuilder.AddUserValidator<UserEmailValidator<WorldWarIdentity>>();
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<MyIdentityUser>>();
+builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<WorldWarIdentity>>();
 builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
 builder.Services.AddScoped<ICombatService, CombatService>();
 builder.Services.AddScoped<IMovableService, MovableService>();
 builder.Services.AddScoped<IAuthUser, AuthUser>();
-builder.Services.AddScoped<UserManager<MyIdentityUser>>();
+builder.Services.AddScoped<UserManager<WorldWarIdentity>>();
 builder.Services.AddScoped<IRegisterModelServices, RegisterModelServices>();
 builder.Services.AddScoped<DraggableItem>();
 builder.Services.AddScoped<UnitEquipmentDialogState>();

@@ -5,7 +5,7 @@ using WorldWar.Abstractions;
 
 namespace WorldWar.Repository.Models;
 
-public class MyIdentityUser : IdentityUser, IWorldWarIdentityUser
+public class WorldWarIdentity : IdentityUser, IWorldWarIdentityUser
 {
 	public Guid GuidId => Guid.Parse(Id);
 

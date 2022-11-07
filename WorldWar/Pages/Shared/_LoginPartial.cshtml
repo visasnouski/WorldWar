@@ -1,7 +1,7 @@
 ﻿@using WorldWar.Internal
 @using WorldWar.Repository.Models
-@inject SignInManager<MyIdentityUser> SignInManager
-@inject UserManager<MyIdentityUser> UserManager
+@inject SignInManager<WorldWarIdentity> SignInManager
+@inject UserManager<WorldWarIdentity> UserManager
 
 <ul class="navbar-nav">
 @if (SignInManager.IsSignedIn(User))

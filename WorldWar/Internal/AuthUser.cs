@@ -9,11 +9,11 @@ namespace WorldWar.Internal;
 public class AuthUser : IAuthUser
 {
     private readonly AuthenticationStateProvider _authenticationStateProvider;
-    private readonly UserManager<MyIdentityUser> _userManager;
+    private readonly UserManager<WorldWarIdentity> _userManager;
 
-    private MyIdentityUser? _user;
+    private WorldWarIdentity? _user;
 
-    public AuthUser(AuthenticationStateProvider authenticationStateProvider, UserManager<MyIdentityUser> userManager)
+    public AuthUser(AuthenticationStateProvider authenticationStateProvider, UserManager<WorldWarIdentity> userManager)
     {
         _authenticationStateProvider = authenticationStateProvider;
         _userManager = userManager;
@@ -24,7 +24,7 @@ public class AuthUser : IAuthUser
         return _user ??= await GetUser().ConfigureAwait(true);
     }
 
-    private async Task<MyIdentityUser> GetUser()
+    private async Task<WorldWarIdentity> GetUser()
     {
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(true);
         var user = await _userManager.GetUserAsync(authState.User).ConfigureAwait(true);

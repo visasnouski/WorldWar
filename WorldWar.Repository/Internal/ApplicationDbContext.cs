@@ -9,7 +9,7 @@ using WorldWar.Repository.Models;
 
 namespace WorldWar.Repository.Internal;
 
-public class ApplicationDbContext : IdentityDbContext<MyIdentityUser>
+public class ApplicationDbContext : IdentityDbContext<WorldWarIdentity>
 {
 	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
