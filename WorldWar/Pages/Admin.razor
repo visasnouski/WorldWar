@@ -7,11 +7,12 @@
 @using WorldWar.Abstractions.Models
 @using WorldWar.Abstractions.Models.Items.Base
 @using WorldWar.Abstractions.Models.Units
+@using WorldWar.YandexClient.Interfaces
 
 @inject IWorldWarMapService WorldWarMapService
 @inject IMapStorage MapStorage
 @inject IYandexJsClientAdapter YandexJsClientAdapter
-@inject IUnitManagementService UnitManagementService;
+@inject IUserManagement UserManagement;
 @inject DraggableItem DraggableItem;
 
 <PageTitle>WorldWarMap Editor</PageTitle>
@@ -61,11 +62,11 @@
 	{
 		if (firstRender)
 		{
-			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
+			await YandexJsClientAdapter.SetUnitManagementService(UserManagement);
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
 			await YandexJsClientAdapter.SetModalDialogBoxContents(DotNetObjectReference.Create(_modalDialogBoxContents!));
 
-			await WorldWarMapService.RunUnitsAutoRefresh(true);
+			await WorldWarMapService.RunUnitsAutoRefreshAsync(true);
 			await WorldWarMapService.RunItemsAutoRefresh(true);
 			StateHasChanged();
 		}

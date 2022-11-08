@@ -7,22 +7,23 @@ using System.Web;
 using WorldWar.Abstractions.DTOs;
 using WorldWar.Exceptions;
 using WorldWar.Interfaces;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;
 
 public class RegisterModelServices : IRegisterModelServices
 {
-    private readonly SignInManager<MyIdentityUser> _signInManager;
-    private readonly UserManager<MyIdentityUser> _userManager;
-    private readonly IUserStore<MyIdentityUser> _userStore;
-    private readonly IUserEmailStore<MyIdentityUser> _emailStore;
+    private readonly SignInManager<WorldWarIdentity> _signInManager;
+    private readonly UserManager<WorldWarIdentity> _userManager;
+    private readonly IUserStore<WorldWarIdentity> _userStore;
+    private readonly IUserEmailStore<WorldWarIdentity> _emailStore;
     private readonly ILogger<RegisterModelServices> _logger;
     private readonly IEmailSender _emailSender;
 
     public RegisterModelServices(
-        UserManager<MyIdentityUser> userManager,
-        IUserStore<MyIdentityUser> userStore,
-        SignInManager<MyIdentityUser> signInManager,
+        UserManager<WorldWarIdentity> userManager,
+        IUserStore<WorldWarIdentity> userStore,
+        SignInManager<WorldWarIdentity> signInManager,
         ILogger<RegisterModelServices> logger,
         IEmailSender emailSender)
     {
@@ -91,26 +92,26 @@ public class RegisterModelServices : IRegisterModelServices
         }
     }
 
-    private static MyIdentityUser CreateUser()
+    private static WorldWarIdentity CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<MyIdentityUser>();
+            return Activator.CreateInstance<WorldWarIdentity>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(MyIdentityUser)}'. " +
-                                                $"Ensure that '{nameof(MyIdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(WorldWarIdentity)}'. " +
+                                                $"Ensure that '{nameof(WorldWarIdentity)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                                                 $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
         }
     }
 
-    private IUserEmailStore<MyIdentityUser> GetEmailStore()
+    private IUserEmailStore<WorldWarIdentity> GetEmailStore()
     {
         if (!_userManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<MyIdentityUser>)_userStore;
+        return (IUserEmailStore<WorldWarIdentity>)_userStore;
     }
 }

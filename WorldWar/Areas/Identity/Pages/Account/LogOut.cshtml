@@ -1,7 +1,7 @@
 ﻿@page
-@using WorldWar.Internal
+@using WorldWar.Repository.Models
 @attribute [IgnoreAntiforgeryToken]
-@inject SignInManager<MyIdentityUser> SignInManager
+@inject SignInManager<WorldWarIdentity> SignInManager
 @functions {
     public async Task<IActionResult> OnPost()
     {

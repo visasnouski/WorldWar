@@ -1,4 +1,5 @@
 ﻿ymaps.ready(init);
+
 var myMap;
 var yandexRoute;
 
@@ -28,7 +29,7 @@ function init() {
         ignoreRightClick = false;
     }
 
-    myMap = new ymaps.Map('map',
+    myMap = new window.ymaps.Map('map',
         {
             center: [53.902284, 27.561831],
             zoom: 19
@@ -51,7 +52,6 @@ function init() {
 }
 
 export async function getRoute(startCoords, endCoords, routingMode) {
-    console.log(startCoords, endCoords);
     let coords;
 
     if (yandexRoute) {
@@ -75,7 +75,7 @@ export async function getRoute(startCoords, endCoords, routingMode) {
 }
 
 function getYmapsRoute(startCoords, endCoords, routingMode) {
-    return ymaps.route([
+    return window.ymaps.route([
         { type: 'wayPoint', point: startCoords },
         { type: 'wayPoint', point: endCoords }
     ],
@@ -131,9 +131,7 @@ export function addUnit(unit) {
             function (zoom) {
                 // Минимальный размер метки будет 8px, а максимальный 200px.
                 // Размер метки будет расти с квадратичной зависимостью от уровня зума.
-                const size = scale(60, zoom);
-                console.log('zoom', zoom, size);
-                return size;
+                return scale(60, zoom);
             }),
         iconImageHref: 'img/unit.png',
         iconImageSize: [28, 28],
@@ -151,7 +149,11 @@ export function addUnit(unit) {
         if (window.unitManagementService) {
             const properties = e.get('target').properties;
             ignoreRightClick = true;
-            window.unitManagementService.invokeMethodAsync('Attack', properties.get('id'));
+            if (properties.get('health') > 0) {
+                window.unitManagementService.invokeMethodAsync('Attack', properties.get('id'));
+            } else {
+                window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), true);
+            }
         }
     });
 
@@ -164,7 +166,10 @@ export function addUnit(unit) {
     myGeoObject.events.add('mousemove',
         function (e) {
             const properties = e.get('target').properties;
-            properties.set('aimStyle', '<div class="aim-container"><div class="aim1"></div><div class="aim2"></div></div>');
+            if (properties.get('health') > 0) {
+                properties.set('aimStyle',
+                    '<div class="aim-container"><div class="aim1"></div><div class="aim2"></div></div>');
+            }
         });
 
     myGeoObject.events.add('mouseleave',
@@ -242,7 +247,7 @@ export function addCar(car) {
 
 var createUnitLayout = function (templateLayout, calculateSize) {
     // Создадим макет метки.
-    var layout = ymaps.templateLayoutFactory.createClass(
+    var layout = window.ymaps.templateLayoutFactory.createClass(
         templateLayout,
         {
             build: function () {
@@ -308,7 +313,7 @@ function scale(size, zoom) {
 
 var createCarLayout = function (templateLayout, calculateSize) {
     // Создадим макет метки.
-    var layout = ymaps.templateLayoutFactory.createClass(
+    var layout = window.ymaps.templateLayoutFactory.createClass(
         templateLayout,
         {
             build: function () {
@@ -369,7 +374,7 @@ export function addBox(box) {
         if (window.unitManagementService) {
             window.stopMotionAnimation = false;
             ignoreRightClick = true;
-            window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'));
+            window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), false);
         }
     });
 
@@ -436,6 +441,12 @@ export function updateUnit(unit) {
             const startCoords = geoObject.geometry.getCoordinates();
             const endCoords = [unit.currentLatitude, unit.currentLongitude];
 
+            if (unit.health <= 0) {
+                geoObject.properties.set('spriteX', 360);
+                geoObject.properties.set('spriteY', 360);
+                return false;
+            }
+
             if (startCoords[1].toFixed(6) === endCoords[1].toFixed(6) &&
                 startCoords[0].toFixed(6) === endCoords[0].toFixed(6)) {
                 return false;
@@ -488,11 +499,11 @@ export function showMessage(id, message) {
         if (geoObject.properties.get('id') === id) {
             const startCoords = geoObject.geometry.getCoordinates();
 
-            const ballonLayout = ymaps.templateLayoutFactory.createClass(
+            const ballonLayout = window.ymaps.templateLayoutFactory.createClass(
                 '<div class="slideUp">{{content}}</div>'
             );
 
-            var balloon = new ymaps.Balloon(myMap, { closeButton: false, layout: ballonLayout });
+            var balloon = new window.ymaps.Balloon(myMap, { closeButton: false, layout: ballonLayout });
             balloon.options.setParent(geoObject.options);
             balloon.open(startCoords, message);
             setTimeout(function () {
@@ -531,6 +542,11 @@ function runAnimation(geoObject, positionY, positionX) {
 
 function runMotionAnimation(geoObject, x1, y1, x2, y2, percentage, frame) {
     const currentCoords = getPositionAlongTheLine(x1, y1, x2, y2, percentage);
+
+    if (geoObject.properties.get('health') <= 0) {
+        return;
+    }
+
     if (frame % 60 === 0) {
 
         geoObject.properties.set('spriteX', getPositionX(geoObject));
@@ -541,7 +557,6 @@ function runMotionAnimation(geoObject, x1, y1, x2, y2, percentage, frame) {
         geoObject.properties.set('spriteY', spriteY);
     }
     geoObject.geometry.setCoordinates([currentCoords.y, currentCoords.x]);
-
     percentage = percentage + 0.01;
     frame = frame + 4;
     if (percentage <= 1) {

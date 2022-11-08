@@ -2,9 +2,10 @@
 @using WorldWar.Interfaces
 @using WorldWar.Components
 @using WorldWar.Abstractions
+@using WorldWar.YandexClient.Interfaces
 
 @inject IWorldWarMapService WorldWarMapService
-@inject IUnitManagementService UnitManagementService
+@inject IUserManagement UserManagement
 @inject IYandexJsClientAdapter YandexJsClientAdapter
 @inject IYandexHubConnection YandexHubConnection;
 @inject NavigationManager NavigationManager
@@ -33,13 +34,12 @@
 		if (firstRender)
 		{
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
-			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
+			await YandexJsClientAdapter.SetUnitManagementService(UserManagement);
 
-			await WorldWarMapService.RunUnitsAutoRefresh();
+			await WorldWarMapService.RunUnitsAutoRefreshAsync();
 			await WorldWarMapService.RunItemsAutoRefresh();
 
-			await WorldWarMapService.RunAutoDbSync();
-			await UnitManagementService.AddUnit();
+			await UserManagement.AddUnit();
 			StateHasChanged();
 		}
 	}

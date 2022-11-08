@@ -6,5 +6,5 @@ public interface IWorldWarMapService
 
     Task RunItemsAutoRefresh(bool viewAllItems = false);
 
-    Task RunAutoDbSync();
+    Task RunUnitsAutoRefreshAsync(bool viewAllUnits = false);
 }

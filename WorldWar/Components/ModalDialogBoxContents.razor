@@ -1,5 +1,6 @@
 ﻿@using WorldWar.Abstractions
 @using WorldWar.Abstractions.Models.Items.Base
+@using WorldWar.Core
 @inject IMapStorage MapStorage
 
 <div class="modal show" role="dialog" style="position: fixed; display: @_modalDisplay" ondragover="event.preventDefault();">
@@ -25,7 +26,7 @@
 	
 	private async Task Save()
 	{
-		if (!_box!.Items.Any())
+		if (!_box!.Loot.Items.Any())
 		{
 			await MapStorage.RemoveItem(_box);
 		}

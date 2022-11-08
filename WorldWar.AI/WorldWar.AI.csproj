@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -11,6 +11,11 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.2" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+	  <ProjectReference Include="..\WorldWar.Core\WorldWar.Core.csproj" />
+	</ItemGroup>
 </Project>

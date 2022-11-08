@@ -8,7 +8,7 @@ using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Units;
 
-public abstract class Unit : IFightable, ICarriable, IMovable
+public abstract class Unit : IFightable, ICarryable, IMovable
 {
 	public string Name { get; init; }
 
@@ -60,16 +60,16 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 		BodyProtection? bodyProtection = null,
 		Loot? loot = null)
 	{
-		this.Id = id;
-		this.Name = name;
-		this.UnitType = unitType;
-		this.Location = new Location(longitude, latitude);
-		this.Health = health;
+		Id = id;
+		Name = name;
+		UnitType = unitType;
+		Location = new Location(longitude, latitude);
+		Health = health;
 		//TODO implement values by default
-		this.Weapon = weapon ?? WeaponModels.Fist;
-		this.HeadProtection = headProtection ?? HeadProtectionModels.Bandana;
-		this.BodyProtection = bodyProtection ?? BodyProtectionModels.WifeBeater;
-		this.Loot = loot ?? new Loot() { Id = id.GetHashCode(), Items = new List<Item>() };
+		Weapon = weapon ?? WeaponModels.Fist;
+		HeadProtection = headProtection ?? HeadProtectionModels.Bandana;
+		BodyProtection = bodyProtection ?? BodyProtectionModels.WifeBeater;
+		Loot = loot ?? new Loot() { Id = id.GetHashCode(), Items = new List<Item>() };
 	}
 
 	public string MobTypesString => UnitType.ToString();
@@ -83,23 +83,23 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 
 	public void SetWeapon(Weapon weapon)
 	{
-		this.Loot.Items.Add(Weapon);
+		Loot.Items.Add(Weapon);
 		Weapon = weapon;
 	}
 
 	public void SetBodyProtection(BodyProtection bodyProtection)
 	{
-		this.Loot.Items.Add(BodyProtection);
+		Loot.Items.Add(BodyProtection);
 		BodyProtection = bodyProtection;
 	}
 
 	public void SetHeadProtection(HeadProtection headProtection)
 	{
-		this.Loot.Items.Add(HeadProtection);
+		Loot.Items.Add(HeadProtection);
 		HeadProtection = headProtection;
 	}
 
-	public void Move(TimeSpan deltaTime, float endLongitude, float endLatitude, int acceleration = 1)
+	public void Move(TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)
 	{
 		var endPos = new Vector2(endLongitude, endLatitude);
 		var movVec = Vector2.Subtract(endPos, Location.StartPos);
@@ -110,7 +110,7 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 			return;
 		}
 
-		var deltaVec = normMovVec * Convert.ToInt64(deltaTime.TotalSeconds) * Speed * acceleration;
+		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * Speed * acceleration;
 		Location.ChangeLocation(Vector2.Add(Location.StartPos, deltaVec));
 	}
 
@@ -126,11 +126,11 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 		Location.SaveCurrentLocation();
 	}
 
-	public bool IsWithinReach(float endLongitude, float endLatitude, float? distance = null)
+	public bool IsWithinReach(float endLongitude, float endLatitude, float? weaponDistance = null)
 	{
-		distance ??= Speed * 10;
+		weaponDistance ??= Speed * 10;
 		var currentDistance = Vector2.Distance(Location.CurrentPos, new Vector2(endLongitude, endLatitude));
-		return currentDistance < distance;
+		return currentDistance < weaponDistance;
 	}
 
 	public void ChangeUnitType(UnitTypes unitType)

@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal
 {
     public class UserEmailValidator<TUser> : IUserValidator<TUser>
-        where TUser : MyIdentityUser
+        where TUser : WorldWarIdentity
     {
         public async Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user)
         {

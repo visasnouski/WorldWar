@@ -1,9 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
+using WorldWar.YandexClient.Interfaces;
+using WorldWar.YandexClient.Model;
 
 namespace WorldWar.YandexClient.Internal
 {
@@ -12,11 +15,11 @@ namespace WorldWar.YandexClient.Internal
 		private readonly Lazy<Task<IJSObjectReference>> _yandexJsModule;
 		private bool _isDisposed;
 
-		public YandexJsClientAdapter(IJSRuntime jsRuntime, ITaskDelay taskDelay, IAuthUser authUser, IOptions<YandexSettings> yandexSettings)
+		public YandexJsClientAdapter(IJSRuntime jsRuntime, IAuthUser authUser, ITaskDelay taskDelay, IOptions<YandexSettings> yandexSettings)
 		{
 			_yandexJsModule = new Lazy<Task<IJSObjectReference>>(async () =>
 				{
-					var client = new YandexJsClient(jsRuntime, taskDelay, authUser, yandexSettings);
+					var client = new YandexJsClient(jsRuntime, authUser, taskDelay, yandexSettings);
 					var module = await client.GetYandexJsModule("./js/WorldWarMap.js").ConfigureAwait(true);
 					return module;
 				}
@@ -92,10 +95,10 @@ namespace WorldWar.YandexClient.Internal
 			await module.InvokeVoidAsync("setUserGuid", id).ConfigureAwait(true);
 		}
 
-		public async Task SetUnitManagementService(IUnitManagementService unitManagementService)
+		public async Task SetUnitManagementService(IUserManagement userManagement)
 		{
 			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(unitManagementService)).ConfigureAwait(true);
+			await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(userManagement)).ConfigureAwait(true);
 		}
 
 		public async Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)

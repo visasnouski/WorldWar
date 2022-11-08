@@ -1,8 +1,8 @@
-﻿ymaps.ready(init);
+﻿window.ymaps.ready(init);
 var registerMap;
 
 export function init() {
-    registerMap = new ymaps.Map("registerMap", {
+    registerMap = new window.ymaps.Map("registerMap", {
         center: [53.902284, 27.561831],
         zoom: 15
     }, {
