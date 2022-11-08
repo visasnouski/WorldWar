@@ -12,7 +12,7 @@
 @inject IWorldWarMapService WorldWarMapService
 @inject IMapStorage MapStorage
 @inject IYandexJsClientAdapter YandexJsClientAdapter
-@inject IUnitManagementService UnitManagementService;
+@inject IUserManagement UserManagement;
 @inject DraggableItem DraggableItem;
 
 <PageTitle>WorldWarMap Editor</PageTitle>
@@ -62,7 +62,7 @@
 	{
 		if (firstRender)
 		{
-			await YandexJsClientAdapter.SetUnitManagementService(UnitManagementService);
+			await YandexJsClientAdapter.SetUnitManagementService(UserManagement);
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
 			await YandexJsClientAdapter.SetModalDialogBoxContents(DotNetObjectReference.Create(_modalDialogBoxContents!));
 

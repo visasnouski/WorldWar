@@ -8,7 +8,7 @@ using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Units;
 
-public abstract class Unit : IFightable, ICarriable, IMovable
+public abstract class Unit : IFightable, ICarryable, IMovable
 {
 	public string Name { get; init; }
 
@@ -99,7 +99,7 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 		HeadProtection = headProtection;
 	}
 
-	public void Move(TimeSpan deltaTime, float endLongitude, float endLatitude, int acceleration = 1)
+	public void Move(TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)
 	{
 		var endPos = new Vector2(endLongitude, endLatitude);
 		var movVec = Vector2.Subtract(endPos, Location.StartPos);
@@ -110,7 +110,7 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 			return;
 		}
 
-		var deltaVec = normMovVec * Convert.ToInt64(deltaTime.TotalSeconds) * Speed * acceleration;
+		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * Speed * acceleration;
 		Location.ChangeLocation(Vector2.Add(Location.StartPos, deltaVec));
 	}
 
@@ -126,11 +126,11 @@ public abstract class Unit : IFightable, ICarriable, IMovable
 		Location.SaveCurrentLocation();
 	}
 
-	public bool IsWithinReach(float endLongitude, float endLatitude, float? distance = null)
+	public bool IsWithinReach(float endLongitude, float endLatitude, float? weaponDistance = null)
 	{
-		distance ??= Speed * 10;
+		weaponDistance ??= Speed * 10;
 		var currentDistance = Vector2.Distance(Location.CurrentPos, new Vector2(endLongitude, endLatitude));
-		return currentDistance < distance;
+		return currentDistance < weaponDistance;
 	}
 
 	public void ChangeUnitType(UnitTypes unitType)

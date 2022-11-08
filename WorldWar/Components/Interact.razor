@@ -22,7 +22,7 @@
 			</div>
 			<div class="wrapper">
 				<div style="width: 60%; float: left">
-					<BodyEquipment Unit="@_unit" RemoveItemCallback="item => RemoveItem(_box!.Items,item)" @ref="_bodyEquipment"></BodyEquipment>
+					<BodyEquipment Unit="@_unit" RemoveItemCallback="item => RemoveItem(_box!.Loot.Items,item)" @ref="_bodyEquipment"></BodyEquipment>
 				</div>
 				<div style="width: 40%; float: right">
 					<BoxContents Box="@_box" Source="_unit?.Loot.Items" StateHasChangedCallback="BodyStateHasChanged" @ref="_boxContents"></BoxContents>
@@ -49,14 +49,33 @@
 	{
 		return async () =>
 		{
-			await Open(InteractStates.Id);
+			await Open(InteractStates.Id, InteractStates.IsUnit);
 			await InvokeAsync(StateHasChanged);
 		};
 	}
 
-	public async Task Open(Guid id)
+	public async Task Open(Guid id, bool isUnit = false)
 	{
-		_box = await MapStorage.GetItem(id);
+		if (isUnit)
+		{
+			var unit = await MapStorage.GetUnit(id);
+
+			var trophies = new List<Item>(unit.Loot.Items)
+			{
+				unit.Weapon,
+				unit.BodyProtection,
+				unit.HeadProtection,
+			};
+
+			_box = new Box(Guid.NewGuid(), unit.CurrentLatitude, unit.CurrentLongitude, trophies, unit.Rotate);
+			await MapStorage.SetItem(_box);
+			await MapStorage.RemoveUnit(unit);
+		}
+		else
+		{
+			_box = await MapStorage.GetItem(id);
+		}
+
 		var user = await AuthUser.GetIdentity();
 		_unit = await MapStorage.GetUnit(user.GuidId);
 		_modalDisplay = "block;";
@@ -72,7 +91,7 @@
 	{
 		_modalDisplay = "none";
 		await MapStorage.SetUnit(_unit!);
-		if (!_box!.Items.Any())
+		if (!_box!.Loot.Items.Any())
 		{
 			await MapStorage.RemoveItem(_box);
 		}
@@ -95,7 +114,7 @@
 
 	private Task HandleDrop()
 	{
-		_box!.Items.Add(DraggableItem.Value.Item!);
+		_box!.Loot.Items.Add(DraggableItem.Value.Item!);
 		_unit!.Loot.Items.Remove(DraggableItem.Value.Item!);
 		StateHasChanged();
 		return Task.CompletedTask;

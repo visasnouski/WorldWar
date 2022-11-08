@@ -1,151 +1,76 @@
-﻿using Microsoft.JSInterop;
-using System.Collections.Concurrent;
-using WorldWar.Abstractions;
-using WorldWar.Abstractions.Exceptions;
-using WorldWar.Abstractions.Models.Items.Base;
-using WorldWar.Abstractions.Models.Units;
-using WorldWar.Abstractions.Models.Units.Base;
+﻿using WorldWar.Abstractions;
 using WorldWar.Core;
 using WorldWar.Interfaces;
-using WorldWar.Repository.interfaces;
 
-namespace WorldWar.Internal;
-
-public class UnitManagementService : IUnitManagementService
+namespace WorldWar.Internal
 {
-	// Added due to the need to manage a unit on multiple open tabs
-	// The CancellationToken is used to stop all tasks of the current user.
-	private static readonly ConcurrentDictionary<Guid, (CancellationTokenSource, Task)> TasksStorage = new();
-
-	private readonly IMapStorage _mapStorage;
-	private readonly IDbRepository _dbRepository;
-	private readonly ICombatService _combatService;
-	private readonly IMovableService _movableService;
-	private readonly IInteractionObjectsService _interactionObjectsService;
-	private readonly IAuthUser _authUser;
-
-	public UnitManagementService(IMapStorage mapStorage, IDbRepository dbRepository, ICombatService combatService, IMovableService movableService, IInteractionObjectsService interactionObjectsService, IAuthUser authUser)
+	public class UnitManagementService : IUnitManagementService
 	{
-		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
-		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
-		_combatService = combatService ?? throw new ArgumentNullException(nameof(combatService));
-		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
-		_interactionObjectsService = interactionObjectsService ?? throw new ArgumentNullException(nameof(interactionObjectsService));
-		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
-	}
+		private readonly ITasksStorage _tasksStorage;
+		private readonly ICombatService _combatService;
+		private readonly IMovableService _movableService;
+		private readonly IInteractionObjectsService _interactionObjectsService;
 
-	public async Task AddUnit()
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		try
+		public UnitManagementService(ITasksStorage tasksStorage, ICombatService combatService, IMovableService movableService, IInteractionObjectsService interactionObjectsService)
 		{
-			var unit = await _dbRepository.GetUnit(identity.GuidId).ConfigureAwait(true);
-			await _mapStorage.SetUnit(unit).ConfigureAwait(true);
+			_tasksStorage = tasksStorage ?? throw new ArgumentNullException(nameof(tasksStorage));
+			_combatService = combatService ?? throw new ArgumentNullException(nameof(combatService));
+			_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
+			_interactionObjectsService = interactionObjectsService ?? throw new ArgumentNullException(nameof(interactionObjectsService));
 		}
-		catch (UnitNotFoundException)
+
+		public async Task MoveUnit(Guid unitId, float latitude, float longitude, bool useRoute = false)
 		{
-			var unit = new Player(
-				identity.GuidId,
-				identity.UserName,
-				(float)identity.Latitude,
-				(float)identity.Longitude,
-				100,
-				loot: new Loot()
+			await StopUnit(unitId).ConfigureAwait(true);
+
+			Task Func(CancellationTokenSource cs) =>
+				useRoute
+					? _movableService.StartMoveAlongRoute(unitId, latitude, longitude, cs.Token)
+					: _movableService.StartMoveToCoordinates(unitId, latitude, longitude, cs.Token);
+
+			_tasksStorage.AddOrUpdate(unitId, GetTask(Func));
+		}
+
+		public async Task StopUnit(Guid unitId)
+		{
+			if (_tasksStorage.TryGetValue(unitId, out var task))
+			{
+				task!.Value.Item1.Cancel(false);
+
+				try
 				{
-					Id = identity.GuidId.GetHashCode(),
-					Items = new List<Item>() { WeaponModels.TT, WeaponModels.Ak47, WeaponModels.DesertEagle, BodyProtectionModels.Waistcoat, HeadProtectionModels.Cap, WeaponModels.TT, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, },
-				});
-
-			await _dbRepository.SetUnit(unit).ConfigureAwait(true);
-			await _mapStorage.SetUnit(unit).ConfigureAwait(true);
-		}
-	}
-
-	[JSInvokable("MoveUnit")]
-	public async Task MoveUnit(float latitude, float longitude)
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await StopUnit().ConfigureAwait(true);
-
-		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _movableService.StartMoveAlongRoute(identity.GuidId, latitude, longitude, cs.Token)),
-			(_, task) =>
-			{
-				task.Item1.Cancel(false);
-				return GetTask(cs => _movableService.StartMoveAlongRoute(identity.GuidId, latitude, longitude, cs.Token));
-			});
-	}
-
-	[JSInvokable("Attack")]
-	public async Task Attack(Guid enemyGuid)
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-
-		await StopUnit().ConfigureAwait(true);
-
-		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _combatService.AttackUnit(enemyGuid, cs.Token)),
-			(_, task) =>
-			{
-				task.Item1.Cancel(false);
-				return GetTask(cs => _combatService.AttackUnit(enemyGuid, cs.Token));
-			});
-	}
-
-	[JSInvokable("PickUp")]
-	public async Task PickUp(Guid itemGuid)
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-
-		await StopUnit().ConfigureAwait(true);
-
-		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _interactionObjectsService.PickUp(itemGuid, cs.Token)),
-			(_, task) =>
-			{
-				task.Item1.Cancel(false);
-				return GetTask(cs => _interactionObjectsService.PickUp(itemGuid, cs.Token));
-			});
-	}
-
-	[JSInvokable("GetInCar")]
-	public async Task GetInCar(Guid itemGuid)
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-
-		await StopUnit().ConfigureAwait(true);
-
-		TasksStorage.AddOrUpdate(identity.GuidId, (_) => GetTask(cs => _interactionObjectsService.GetIn(itemGuid, cs.Token)),
-			(_, task) =>
-			{
-				task.Item1.Cancel(false);
-				return GetTask(cs => _interactionObjectsService.GetIn(itemGuid, cs.Token));
-			});
-	}
-
-	private static (CancellationTokenSource cs, Task task) GetTask(Func<CancellationTokenSource, Task> func)
-	{
-		var cs = new CancellationTokenSource();
-		var attackTask = Task.Run(() => func(cs), cs.Token);
-		return (cs, attackTask);
-	}
-
-	[JSInvokable("StopUnit")]
-	public async Task StopUnit()
-	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		TasksStorage.TryGetValue(identity.GuidId, out var task);
-		if (task.Item1 is null)
-		{
-			return;
+					await task.Value.Item2.ConfigureAwait(true);
+					_tasksStorage.TryRemove(unitId);
+				}
+				catch (TaskCanceledException)
+				{
+				}
+			}
 		}
 
-		task.Item1.Cancel(false);
-
-		try
+		public async Task Attack(Guid unitId, Guid enemyGuid)
 		{
-			await task.Item2.ConfigureAwait(true);
-			TasksStorage.TryRemove(identity.GuidId, out _);
+			await StopUnit(unitId).ConfigureAwait(true);
+			_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _combatService.AttackUnit(enemyGuid, cs.Token)));
 		}
-		catch (TaskCanceledException)
+
+		public async Task GetInCar(Guid unitId, Guid itemGuid)
 		{
+			await StopUnit(unitId).ConfigureAwait(true);
+			_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _interactionObjectsService.GetIn(itemGuid, cs.Token)));
+		}
+
+		public async Task PickUp(Guid unitId, Guid itemGuid, bool isUnit)
+		{
+			await StopUnit(unitId).ConfigureAwait(true);
+			_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _interactionObjectsService.PickUp(itemGuid, isUnit, cs.Token)));
+		}
+
+		private static (CancellationTokenSource cs, Task task) GetTask(Func<CancellationTokenSource, Task> func)
+		{
+			var cs = new CancellationTokenSource();
+			var attackTask = Task.Run(() => func(cs), cs.Token);
+			return (cs, attackTask);
 		}
 	}
 }

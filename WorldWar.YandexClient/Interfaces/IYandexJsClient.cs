@@ -1,6 +1,6 @@
 ﻿using Microsoft.JSInterop;
 
-namespace WorldWar.YandexClient.Internal
+namespace WorldWar.YandexClient.Interfaces
 {
     internal interface IYandexJsClient
     {

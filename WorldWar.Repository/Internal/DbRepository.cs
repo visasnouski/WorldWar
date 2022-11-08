@@ -10,217 +10,220 @@ using WorldWar.Repository.interfaces;
 
 namespace WorldWar.Repository.Internal;
 
-public class DbRepository : IDbRepository
+internal class DbRepository : IDbRepository
 {
-    private readonly SemaphoreSlim _semaphore = new(1, 1);
-    private readonly IServiceScopeFactory _scopeFactory;
+	private readonly SemaphoreSlim _semaphore = new(1, 1);
+	private readonly IServiceScopeFactory _scopeFactory;
 
-    public DbRepository(IServiceScopeFactory scopeFactory)
-    {
-        _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
-    }
+	public DbRepository(IServiceScopeFactory scopeFactory)
+	{
+		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+	}
 
-    public IReadOnlyCollection<Weapon> Weapons
-    {
-        get
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            return Lock(() => applicationDbContext.Weapons.Select(x => x.ToWeapon()).ToList());
-        }
-    }
+	public IReadOnlyCollection<Weapon> Weapons
+	{
+		get
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+			return Lock(() => applicationDbContext.Weapons.Select(x => x.ToWeapon()).ToList());
+		}
+	}
 
-    public IReadOnlyCollection<Unit> Units
-    {
-        get
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+	public IReadOnlyCollection<Unit> Units
+	{
+		get
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-            return Lock(() =>
-            {
-                var unitDtos = applicationDbContext.Units
-                    .Include(x => x.Weapon)
-                    .Include(x => x.BodyProtection)
-                    .Include(x => x.HeadProtection);
+			return Lock(() =>
+			{
+				var unitDtos = applicationDbContext.Units
+					.Include(x => x.Weapon)
+					.Include(x => x.BodyProtection)
+					.Include(x => x.HeadProtection)
+					.Include(x => x.Loot).ToArray();
 
-                return unitDtos.Select(x => x.ToUnit(itemIds =>
-                        itemIds.Select(itemId => applicationDbContext.Items.First(item => itemId == item.Id))
-                            .ToArray()))
-                    .ToArray();
-            });
-        }
-    }
+				var items = applicationDbContext.Items.ToArray();
 
-    public IReadOnlyCollection<BodyProtection> BodyProtections
-    {
-        get
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            return Lock(() => applicationDbContext.BodyProtections.Select(x => x.ToBodyProtection()).ToList());
-        }
-    }
-    public IReadOnlyCollection<HeadProtection> HeadProtections
-    {
-        get
-        {
-            using var scope = _scopeFactory.CreateScope();
-            var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            return Lock(() => applicationDbContext.HeadProtections.Select(x => x.ToHeadProtection()).ToList());
-        }
-    }
+				return unitDtos.Select(x => x.ToUnit(itemIds =>
+						itemIds.Select(itemId => items.First(item => itemId == item.Id))
+							.ToArray()))
+					.ToArray();
+			});
+		}
+	}
 
-    public async Task<Weapon> GetWeapon(int id)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var weaponDto = await LockAsync(() => applicationDbContext.Weapons.FirstOrDefaultAsync(x => x.Id == id))
-            .ConfigureAwait(true);
+	public IReadOnlyCollection<BodyProtection> BodyProtections
+	{
+		get
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+			return Lock(() => applicationDbContext.BodyProtections.Select(x => x.ToBodyProtection()).ToList());
+		}
+	}
+	public IReadOnlyCollection<HeadProtection> HeadProtections
+	{
+		get
+		{
+			using var scope = _scopeFactory.CreateScope();
+			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+			return Lock(() => applicationDbContext.HeadProtections.Select(x => x.ToHeadProtection()).ToList());
+		}
+	}
 
-        if (weaponDto == null)
-        {
-            throw new ItemNotFoundException($"Weapon with id {id} not found");
-        }
+	public async Task<Weapon> GetWeapon(int id)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		var weaponDto = await LockAsync(() => applicationDbContext.Weapons.FirstOrDefaultAsync(x => x.Id == id))
+			.ConfigureAwait(true);
 
-        return weaponDto.ToWeapon();
-    }
+		if (weaponDto == null)
+		{
+			throw new ItemNotFoundException($"Weapon with id {id} not found");
+		}
 
-    public async Task<BodyProtection> GetBodyProtection(int id)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var bodyProtectionDto = await LockAsync(() => applicationDbContext.BodyProtections.FirstOrDefaultAsync(x => x.Id == id))
-            .ConfigureAwait(true);
+		return weaponDto.ToWeapon();
+	}
 
-        if (bodyProtectionDto == null)
-        {
-            throw new ItemNotFoundException($"BodyProtection with id {id} not found");
-        }
+	public async Task<BodyProtection> GetBodyProtection(int id)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		var bodyProtectionDto = await LockAsync(() => applicationDbContext.BodyProtections.FirstOrDefaultAsync(x => x.Id == id))
+			.ConfigureAwait(true);
 
-        return bodyProtectionDto.ToBodyProtection();
-    }
+		if (bodyProtectionDto == null)
+		{
+			throw new ItemNotFoundException($"BodyProtection with id {id} not found");
+		}
 
-    public async Task<HeadProtection> GetHeadProtection(int id)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        var headProtectionDto = await LockAsync(() => applicationDbContext.HeadProtections.FirstOrDefaultAsync(x => x.Id == id))
-            .ConfigureAwait(true);
+		return bodyProtectionDto.ToBodyProtection();
+	}
 
-        if (headProtectionDto == null)
-        {
-            throw new ItemNotFoundException($"BodyProtection with id {id} not found");
-        }
+	public async Task<HeadProtection> GetHeadProtection(int id)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		var headProtectionDto = await LockAsync(() => applicationDbContext.HeadProtections.FirstOrDefaultAsync(x => x.Id == id))
+			.ConfigureAwait(true);
 
-        return headProtectionDto.ToHeadProtection();
-    }
+		if (headProtectionDto == null)
+		{
+			throw new ItemNotFoundException($"BodyProtection with id {id} not found");
+		}
 
-    public async Task<Unit> GetUnit(Guid id)
-    {
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		return headProtectionDto.ToHeadProtection();
+	}
 
-        var unitDto = await LockAsync(() => applicationDbContext.Units
-                .Include(x => x.Weapon)
-                .Include(x => x.BodyProtection)
-                .Include(x => x.HeadProtection)
-                .Include(x => x.Loot)
-                .FirstOrDefaultAsync(x => x.Id == id))
-            .ConfigureAwait(true);
+	public async Task<Unit> GetUnit(Guid id)
+	{
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        if (unitDto == null)
-        {
-            throw new UnitNotFoundException($"Unit with id {id} not found");
-        }
+		var unitDto = await LockAsync(() => applicationDbContext.Units
+				.Include(x => x.Weapon)
+				.Include(x => x.BodyProtection)
+				.Include(x => x.HeadProtection)
+				.Include(x => x.Loot)
+				.FirstOrDefaultAsync(x => x.Id == id))
+			.ConfigureAwait(true);
 
-        return unitDto.ToUnit(itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
-    }
+		if (unitDto == null)
+		{
+			throw new UnitNotFoundException($"Unit with id {id} not found");
+		}
 
-    public async Task SetUnit(Unit unit)
-    {
-        var unitDto = unit.ToUnitDto();
+		return unitDto.ToUnit(itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
+	}
 
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+	public async Task SetUnit(Unit unit)
+	{
+		var unitDto = unit.ToUnitDto();
 
-        Lock(() =>
-        {
-            applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
-            applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
-            return applicationDbContext.Weapons.Attach(unitDto.Weapon);
-        });
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        await LockAsync(async () =>
-        {
-            await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true);
-            return await applicationDbContext.SaveChangesAsync().ConfigureAwait(true);
-        }).ConfigureAwait(true);
-    }
+		Lock(() =>
+		{
+			applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
+			applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
+			return applicationDbContext.Weapons.Attach(unitDto.Weapon);
+		});
 
-    public async Task UpdateUnit(Unit unit)
-    {
-        var unitDto = unit.ToUnitDto();
+		await LockAsync(async () =>
+		{
+			await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true);
+			return await applicationDbContext.SaveChangesAsync().ConfigureAwait(true);
+		}).ConfigureAwait(true);
+	}
 
-        using var scope = _scopeFactory.CreateScope();
-        var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+	public async Task UpdateUnit(Unit unit)
+	{
+		var unitDto = unit.ToUnitDto();
 
-        Lock(() =>
-        {
-            applicationDbContext.Weapons.Attach(unitDto.Weapon);
-            applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
-            return applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
-        });
+		using var scope = _scopeFactory.CreateScope();
+		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
-        if (Lock(() => applicationDbContext.Units.AsNoTracking().Any(x => x.Id == unitDto.Id)))
-        {
-            Lock(() => applicationDbContext.Units.Update(unitDto));
-        }
-        else
-        {
-            await LockAsync(async () => await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true)).ConfigureAwait(true);
-        }
+		Lock(() =>
+		{
+			applicationDbContext.Weapons.Attach(unitDto.Weapon);
+			applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
+			return applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
+		});
 
-        await LockAsync(async () => await applicationDbContext.SaveChangesAsync().ConfigureAwait(true)).ConfigureAwait(true);
-    }
+		if (Lock(() => applicationDbContext.Units.AsNoTracking().Any(x => x.Id == unitDto.Id)))
+		{
+			Lock(() => applicationDbContext.Units.Update(unitDto));
+		}
+		else
+		{
+			await LockAsync(async () => await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true)).ConfigureAwait(true);
+		}
 
-    public async Task SetUnits(IEnumerable<Unit> units)
-    {
-        // TODO Add CancellationToken
-        if (units == null)
-        {
-            throw new ArgumentNullException(nameof(units));
-        }
+		await LockAsync(async () => await applicationDbContext.SaveChangesAsync().ConfigureAwait(true)).ConfigureAwait(true);
+	}
 
-        foreach (var unit in units)
-        {
-            await UpdateUnit(unit).ConfigureAwait(true);
-        }
-    }
+	public async Task SetUnits(IEnumerable<Unit> units)
+	{
+		// TODO Add CancellationToken
+		if (units == null)
+		{
+			throw new ArgumentNullException(nameof(units));
+		}
 
-    private async Task<T> LockAsync<T>(Func<Task<T>> worker)
-    {
-        await _semaphore.WaitAsync().ConfigureAwait(true);
-        try
-        {
-            return await worker().ConfigureAwait(true);
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
+		foreach (var unit in units)
+		{
+			await UpdateUnit(unit).ConfigureAwait(true);
+		}
+	}
 
-    private T Lock<T>(Func<T> worker)
-    {
-        _semaphore.Wait();
-        try
-        {
-            return worker();
-        }
-        finally
-        {
-            _semaphore.Release();
-        }
-    }
+	private async Task<T> LockAsync<T>(Func<Task<T>> worker)
+	{
+		await _semaphore.WaitAsync().ConfigureAwait(true);
+		try
+		{
+			return await worker().ConfigureAwait(true);
+		}
+		finally
+		{
+			_semaphore.Release();
+		}
+	}
+
+	private T Lock<T>(Func<T> worker)
+	{
+		_semaphore.Wait();
+		try
+		{
+			return worker();
+		}
+		finally
+		{
+			_semaphore.Release();
+		}
+	}
 }

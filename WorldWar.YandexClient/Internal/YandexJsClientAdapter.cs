@@ -95,10 +95,10 @@ namespace WorldWar.YandexClient.Internal
 			await module.InvokeVoidAsync("setUserGuid", id).ConfigureAwait(true);
 		}
 
-		public async Task SetUnitManagementService(IUnitManagementService unitManagementService)
+		public async Task SetUnitManagementService(IUserManagement userManagement)
 		{
 			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(unitManagementService)).ConfigureAwait(true);
+			await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(userManagement)).ConfigureAwait(true);
 		}
 
 		public async Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)

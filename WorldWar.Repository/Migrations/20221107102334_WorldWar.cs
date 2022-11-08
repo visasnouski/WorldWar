@@ -1,11 +1,10 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace WorldWar.Repository.Migrations
 {
-    public partial class WorldWar : Migration
+    internal partial class WorldWar : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

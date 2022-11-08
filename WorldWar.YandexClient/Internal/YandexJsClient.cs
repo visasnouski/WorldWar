@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.YandexClient.Model;
-using WorldWar.Abstractions.Utils;
+using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Internal
 {

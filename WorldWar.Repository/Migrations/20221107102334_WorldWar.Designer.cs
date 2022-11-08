@@ -12,7 +12,7 @@ using WorldWar.Repository.Internal;
 namespace WorldWar.Repository.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221107100848_WorldWar")]
+    [Migration("20221107102334_WorldWar")]
     partial class WorldWar
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

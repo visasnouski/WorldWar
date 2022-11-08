@@ -1,6 +1,6 @@
 ﻿namespace WorldWar.Abstractions.Models.Units.Base;
 
-public interface ICarriable
+public interface ICarryable
 {
 	public Loot Loot { get; init; }
 }

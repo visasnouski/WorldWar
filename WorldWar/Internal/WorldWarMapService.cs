@@ -4,7 +4,6 @@ using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Core;
 using WorldWar.Interfaces;
-using WorldWar.Repository.interfaces;
 using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Internal;
@@ -14,33 +13,14 @@ public class WorldWarMapService : IWorldWarMapService
 	private readonly IMapStorage _mapStorage;
 	private readonly IAuthUser _authUser;
 	private readonly ITaskDelay _taskDelay;
-	private readonly IDbRepository _dbRepository;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 
-	public WorldWarMapService(IMapStorage mapStorage, IAuthUser authUser, IDbRepository dbRepository, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter)
+	public WorldWarMapService(IMapStorage mapStorage, IAuthUser authUser, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter)
 	{
 		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
-		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
-	}
-
-	public Task RunAutoDbSync()
-	{
-		_ = Task.Run(async () =>
-		{
-			while (true)
-			{
-				var dbUnits = _dbRepository.Units;
-				await _mapStorage.SetUnits(dbUnits).ConfigureAwait(true);
-				var mapUnits = await _mapStorage.GetUnits().ConfigureAwait(true);
-				await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(true);
-				await _dbRepository.SetUnits(mapUnits).ConfigureAwait(true);
-			}
-		}, CancellationToken.None);
-
-		return Task.CompletedTask;
 	}
 
 	public Task RunUnitsAutoRefresh(bool viewAllUnits = false)
@@ -51,7 +31,6 @@ public class WorldWarMapService : IWorldWarMapService
 			var mapGuids = new HashSet<(Guid, UnitTypes)>();
 			try
 			{
-
 				while (true)
 				{
 					var visibleGuids = new HashSet<(Guid, UnitTypes)>();
@@ -71,7 +50,6 @@ public class WorldWarMapService : IWorldWarMapService
 						}
 
 						visibleGuids.Add((unit.Id, unit.UnitType));
-
 						await _yandexJsClientAdapter.UpdateUnit(unit).ConfigureAwait(true);
 					}
 

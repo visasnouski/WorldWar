@@ -6,22 +6,25 @@ public delegate Task AsyncEventHandler();
 
 public class InteractStates
 {
-    public bool IsShow { get; set; }
+	public bool IsShow { get; set; }
 
-    public Guid Id { get; set; }
+	public bool IsUnit { get; set; }
 
-    public event AsyncEventHandler? OnChange;
+	public Guid Id { get; set; }
 
-    public void Show(Guid id)
-    {
-        Id = id;
-        IsShow = true;
-        NotifyStateChanged();
-    }
+	public event AsyncEventHandler? OnChange;
 
-    private void NotifyStateChanged()
-    {
-        OnChange?.Invoke();
-    }
+	public void Show(Guid id, bool isUnit = false)
+	{
+		Id = id;
+		IsShow = true;
+		IsUnit = isUnit;
+		NotifyStateChanged();
+	}
+
+	private void NotifyStateChanged()
+	{
+		OnChange?.Invoke();
+	}
 }
 

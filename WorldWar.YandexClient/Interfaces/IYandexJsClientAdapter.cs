@@ -25,7 +25,7 @@ namespace WorldWar.YandexClient.Interfaces
 
 		public Task AddBox(Box box);
 
-		public Task SetUnitManagementService(IUnitManagementService unitManagementService);
+		public Task SetUnitManagementService(IUserManagement userManagement);
 
 		public Task SetUserGuid(Guid id);
 

@@ -1,6 +1,7 @@
 ﻿using WorldWar.Abstractions;
 using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Models;
+using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Components.States;
 using WorldWar.Core;
@@ -23,22 +24,40 @@ public class InteractionObjectsService : IInteractionObjectsService
 		_interactStates = interactStates ?? throw new ArgumentNullException(nameof(interactStates));
 	}
 
-	public async Task PickUp(Guid guidId, CancellationToken cancellationToken)
+	public async Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
 		var user = await _mapStorage.GetUnit(identity.GuidId).ConfigureAwait(true);
-		var box = await _mapStorage.GetItem(guidId).ConfigureAwait(true);
+		var coords = await GetCoordinates(isUnit, guidId, _mapStorage).ConfigureAwait(true);
 
-		if (!user.IsWithinReach(box.Longitude, box.Latitude))
+		if (!user.IsWithinReach(coords.longitude, coords.latitude))
 		{
-			await _movableService.StartMoveAlongRoute(user.Id, box.Latitude, box.Longitude, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMoveAlongRoute(user.Id, coords.latitude, coords.longitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
 			}
 		}
 
+		if (isUnit)
+		{
+			_interactStates.Show(guidId, true);
+		}
+
+
 		_interactStates.Show(guidId);
+	}
+
+	private static async Task<(float latitude, float longitude)> GetCoordinates(bool isUnit, Guid id, IMapStorage mapStorage)
+	{
+		if (isUnit)
+		{
+			var unit = await mapStorage.GetUnit(id).ConfigureAwait(true);
+			return (unit.CurrentLatitude, unit.CurrentLongitude);
+		}
+
+		var box = await mapStorage.GetItem(id).ConfigureAwait(true);
+		return (box.Latitude, box.Longitude);
 	}
 
 	public async Task GetIn(Guid guidId, CancellationToken cancellationToken)

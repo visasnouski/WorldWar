@@ -2,10 +2,10 @@
 
 namespace WorldWar.Abstractions.Models.Units.Base
 {
-    public class Loot
+    public sealed class Loot
     {
         public int Id { get; init; }
 
-        public virtual IList<Item> Items { get; init; } = default!;
+        public ICollection<Item> Items { get; init; } = default!;
     }
 }

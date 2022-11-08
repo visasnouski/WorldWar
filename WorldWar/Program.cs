@@ -26,7 +26,10 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<WorldWarIdentity>>();
 builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
+
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
+builder.Services.AddScoped<IUserManagement, UserManagement>();
+
 builder.Services.AddScoped<ICombatService, CombatService>();
 builder.Services.AddScoped<IMovableService, MovableService>();
 builder.Services.AddScoped<IAuthUser, AuthUser>();

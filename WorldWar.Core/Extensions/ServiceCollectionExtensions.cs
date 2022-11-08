@@ -11,7 +11,9 @@ namespace WorldWar.Core.Extensions
 				throw new ArgumentNullException(nameof(serviceCollection));
 			}
 
+			serviceCollection.AddHostedService<DbSyncService>();
 			serviceCollection.AddSingleton<IMapStorage, MapStorage>();
+			serviceCollection.AddSingleton<ITasksStorage, TasksStorage>();
 			return serviceCollection;
 		}
 	}

@@ -149,7 +149,11 @@ export function addUnit(unit) {
         if (window.unitManagementService) {
             const properties = e.get('target').properties;
             ignoreRightClick = true;
-            window.unitManagementService.invokeMethodAsync('Attack', properties.get('id'));
+            if (properties.get('health') > 0) {
+                window.unitManagementService.invokeMethodAsync('Attack', properties.get('id'));
+            } else {
+                window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), true);
+            }
         }
     });
 
@@ -162,7 +166,10 @@ export function addUnit(unit) {
     myGeoObject.events.add('mousemove',
         function (e) {
             const properties = e.get('target').properties;
-            properties.set('aimStyle', '<div class="aim-container"><div class="aim1"></div><div class="aim2"></div></div>');
+            if (properties.get('health') > 0) {
+                properties.set('aimStyle',
+                    '<div class="aim-container"><div class="aim1"></div><div class="aim2"></div></div>');
+            }
         });
 
     myGeoObject.events.add('mouseleave',
@@ -367,7 +374,7 @@ export function addBox(box) {
         if (window.unitManagementService) {
             window.stopMotionAnimation = false;
             ignoreRightClick = true;
-            window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'));
+            window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), false);
         }
     });
 
@@ -433,6 +440,12 @@ export function updateUnit(unit) {
             geoObject.properties.set('rotate', unit.rotate);
             const startCoords = geoObject.geometry.getCoordinates();
             const endCoords = [unit.currentLatitude, unit.currentLongitude];
+
+            if (unit.health <= 0) {
+                geoObject.properties.set('spriteX', 360);
+                geoObject.properties.set('spriteY', 360);
+                return false;
+            }
 
             if (startCoords[1].toFixed(6) === endCoords[1].toFixed(6) &&
                 startCoords[0].toFixed(6) === endCoords[0].toFixed(6)) {
@@ -529,6 +542,11 @@ function runAnimation(geoObject, positionY, positionX) {
 
 function runMotionAnimation(geoObject, x1, y1, x2, y2, percentage, frame) {
     const currentCoords = getPositionAlongTheLine(x1, y1, x2, y2, percentage);
+
+    if (geoObject.properties.get('health') <= 0) {
+        return;
+    }
+
     if (frame % 60 === 0) {
 
         geoObject.properties.set('spriteX', getPositionX(geoObject));
@@ -539,7 +557,6 @@ function runMotionAnimation(geoObject, x1, y1, x2, y2, percentage, frame) {
         geoObject.properties.set('spriteY', spriteY);
     }
     geoObject.geometry.setCoordinates([currentCoords.y, currentCoords.x]);
-
     percentage = percentage + 0.01;
     frame = frame + 4;
     if (percentage <= 1) {
