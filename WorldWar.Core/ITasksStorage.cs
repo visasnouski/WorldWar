@@ -1,11 +1,10 @@
-﻿namespace WorldWar.Core
+﻿namespace WorldWar.Core;
+
+public interface ITasksStorage
 {
-	public interface ITasksStorage
-	{
-		public void AddOrUpdate(Guid unitId, (CancellationTokenSource, Task) task);
+	public void AddOrUpdate(Guid unitId, (CancellationTokenSource, Task) task);
 
-		public bool TryGetValue(Guid unitId, out (CancellationTokenSource, Task)? task);
+	public bool TryGetValue(Guid unitId, out (CancellationTokenSource, Task)? task);
 
-		public void TryRemove(Guid unitId);
-	}
+	public void TryRemove(Guid unitId);
 }

@@ -1,10 +1,9 @@
-﻿namespace WorldWar.Abstractions.Models.Items.Base
+﻿namespace WorldWar.Abstractions.Models.Items.Base;
+
+public enum ItemTypes
 {
-	public enum ItemTypes
-	{
-		Food,
-		Weapon,
-		BodyProtection,
-		HeadProtection
-	}
+	Food,
+	Weapon,
+	BodyProtection,
+	HeadProtection
 }

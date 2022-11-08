@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Web;
 using WorldWar.Abstractions.Models.Items.Base;
 
-namespace WorldWar.Internal
+namespace WorldWar.Internal;
+
+public class DraggableEventObject : DragEventArgs
 {
-    public class DraggableEventObject : DragEventArgs
-    {
-        public Item? Item { get; set; }
-    }
+	public Item? Item { get; set; }
 }

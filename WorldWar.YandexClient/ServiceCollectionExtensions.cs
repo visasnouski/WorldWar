@@ -3,23 +3,22 @@ using WorldWar.YandexClient.Interfaces;
 using WorldWar.YandexClient.Internal;
 using WorldWar.YandexClient.Model;
 
-namespace WorldWar.YandexClient
+namespace WorldWar.YandexClient;
+
+public static class ServiceCollectionExtensions
 {
-	public static class ServiceCollectionExtensions
+	public static IServiceCollection AddYandexClient(this IServiceCollection serviceCollection, Action<YandexSettings> configureOptions)
 	{
-		public static IServiceCollection AddYandexClient(this IServiceCollection serviceCollection, Action<YandexSettings> configureOptions)
+		if (serviceCollection == null)
 		{
-			if (serviceCollection == null)
-			{
-				throw new ArgumentNullException(nameof(serviceCollection));
-			}
-
-			serviceCollection.Configure(configureOptions);
-			serviceCollection.AddScoped<IYandexJsClientAdapter, YandexJsClientAdapter>();
-			serviceCollection.AddScoped<IYandexJsClientTransmitter, YandexJsClientTransmitter>();
-			serviceCollection.AddScoped<IYandexHubConnection, YandexHubConnection>();
-
-			return serviceCollection;
+			throw new ArgumentNullException(nameof(serviceCollection));
 		}
+
+		serviceCollection.Configure(configureOptions);
+		serviceCollection.AddScoped<IYandexJsClientAdapter, YandexJsClientAdapter>();
+		serviceCollection.AddScoped<IYandexJsClientTransmitter, YandexJsClientTransmitter>();
+		serviceCollection.AddScoped<IYandexHubConnection, YandexHubConnection>();
+
+		return serviceCollection;
 	}
 }

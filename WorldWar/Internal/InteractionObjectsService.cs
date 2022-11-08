@@ -1,7 +1,6 @@
 ﻿using WorldWar.Abstractions;
 using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Models;
-using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Components.States;
 using WorldWar.Core;

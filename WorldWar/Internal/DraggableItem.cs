@@ -1,22 +1,21 @@
 ﻿using WorldWar.Abstractions.Models.Items.Base;
 
-namespace WorldWar.Internal
+namespace WorldWar.Internal;
+
+public class DraggableItem
 {
-    public class DraggableItem
-    {
-        private (string Source, Item? Item) _value;
-        public (string Source, Item? Item) Value
-        {
-            get => _value;
-            set
-            {
-                _value = value;
-                NotifyDataChanged();
-            }
-        }
+	private (string Source, Item? Item) _value;
+	public (string Source, Item? Item) Value
+	{
+		get => _value;
+		set
+		{
+			_value = value;
+			NotifyDataChanged();
+		}
+	}
 
-        public event Action? OnChange;
+	public event Action? OnChange;
 
-        private void NotifyDataChanged() => OnChange?.Invoke();
-    }
+	private void NotifyDataChanged() => OnChange?.Invoke();
 }

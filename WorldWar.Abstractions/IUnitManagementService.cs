@@ -1,15 +1,14 @@
-﻿namespace WorldWar.Abstractions
+﻿namespace WorldWar.Abstractions;
+
+public interface IUnitManagementService
 {
-	public interface IUnitManagementService
-	{
-		Task MoveUnit(Guid unitId, float latitude, float longitude, bool useRoute = false);
+	Task MoveUnit(Guid unitId, float latitude, float longitude, bool useRoute = false);
 
-		Task StopUnit(Guid unitId);
+	Task StopUnit(Guid unitId);
 
-		Task Attack(Guid unitId, Guid enemyGuid);
+	Task Attack(Guid unitId, Guid enemyGuid);
 
-		Task GetInCar(Guid unitId, Guid itemGuid);
+	Task GetInCar(Guid unitId, Guid itemGuid);
 
-		Task PickUp(Guid unitId, Guid itemGuid, bool isUnit);
-	}
+	Task PickUp(Guid unitId, Guid itemGuid, bool isUnit);
 }
