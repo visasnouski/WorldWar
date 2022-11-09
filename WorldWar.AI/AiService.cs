@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Core;
@@ -39,13 +40,15 @@ internal class AiService : BackgroundService
 				var index = 0;
 				await Parallel.ForEachAsync(mobs, cancellationToken, (unit, token) =>
 				{
+					token.ThrowIfCancellationRequested();
+
 					var latitudeRnd = (float)RandomNumberGenerator.GetInt32(-99, 99) / 100;
 					var longitudeRnd = (float)RandomNumberGenerator.GetInt32(-99, 99) / 100;
 					var newLatitude = unit.CurrentLatitude + latitudeRnd;
 					var newLongitude = unit.CurrentLongitude + longitudeRnd;
 					_logger.LogInformation("{index} Unit {unitId} move to {latitude} {longitud}", index, unit.Id, newLatitude, newLongitude);
 					unit.RotateUnit(newLongitude, newLatitude);
-					managementService.MoveUnit(unit.Id, newLatitude, newLongitude, false).ConfigureAwait(true);
+					managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
 					index++;
 					return ValueTask.CompletedTask;
 				}).ConfigureAwait(true);

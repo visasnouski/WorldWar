@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
 using WorldWar.Abstractions;
+using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Abstractions.Models.Units;
 using WorldWar.Core;
 using WorldWar.YandexClient.Interfaces;
 
@@ -60,13 +62,13 @@ public class MovableService : IMovableService
 					//ToDo Acceleration
 				}
 
-				user.Move(lastTime + remainingTime, points[index][1], points[index][0]);
+				Move(user, lastTime + remainingTime, points[index][1], points[index][0]);
 				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(true);
 			}
 			else
 			{
-				user.Move(lastTime, points[index][1], points[index][0]);
-				user.SaveCurrentLocation();
+				Move(user, lastTime, points[index][1], points[index][0]);
+				SaveCurrentLocation(user);
 				index++;
 				if (points.Length <= index)
 				{
@@ -78,7 +80,7 @@ public class MovableService : IMovableService
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
-		user.SaveCurrentLocation();
+		SaveCurrentLocation(user);
 		await _mapStorage.SetUnit(user).ConfigureAwait(true);
 	}
 
@@ -106,20 +108,20 @@ public class MovableService : IMovableService
 					//ToDo Acceleration
 				}
 
-				user.Move(lastTime + remainingTime, longitude, latitude);
+				Move(user, lastTime + remainingTime, longitude, latitude);
 				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(true);
 			}
 			else
 			{
-				user.Move(lastTime, longitude, latitude);
-				user.SaveCurrentLocation();
-				
+				Move(user, lastTime, longitude, latitude);
+				SaveCurrentLocation(user);
+
 				stopWatch.Restart();
 				user.RotateUnit(longitude, latitude, user.CurrentLongitude, user.CurrentLatitude);
 				await _mapStorage.SetUnit(user).ConfigureAwait(true);
 			}
 		}
-		user.SaveCurrentLocation();
+		SaveCurrentLocation(user);
 		await _mapStorage.SetUnit(user).ConfigureAwait(true);
 	}
 
@@ -134,7 +136,7 @@ public class MovableService : IMovableService
 
 			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
 
-			myUnit.Move(DateTime.Now - startDateTime, targetUnit.CurrentLongitude, targetUnit.CurrentLatitude);
+			Move(myUnit, DateTime.Now - startDateTime, targetUnit.CurrentLongitude, targetUnit.CurrentLatitude);
 			await _mapStorage.SetUnit(myUnit).ConfigureAwait(true);
 
 			if (myUnit.IsWithinReach(targetUnit.CurrentLongitude, targetUnit.CurrentLatitude, distance))
@@ -143,11 +145,31 @@ public class MovableService : IMovableService
 			}
 		}
 
-		myUnit.SaveCurrentLocation();
+		SaveCurrentLocation(myUnit);
 	}
 
 	public async Task Rotate(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken)
 	{
 		await _yandexJsClientTransmitter.RotateUnit(unitId, latitude, longitude).ConfigureAwait(true);
+	}
+
+	private static void Move(Unit unit, TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)
+	{
+		var endPos = new Vector2(endLongitude, endLatitude);
+		var movVec = Vector2.Subtract(endPos, unit.Location.StartPos);
+		var normMovVec = Vector2.Normalize(movVec);
+
+		if (normMovVec.X is Single.NaN || normMovVec.Y is Single.NaN)
+		{
+			return;
+		}
+
+		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * unit.Speed * acceleration;
+		unit.Location.ChangeLocation(Vector2.Add(unit.Location.StartPos, deltaVec));
+	}
+
+	private static void SaveCurrentLocation(Unit unit)
+	{
+		unit.Location.SaveCurrentLocation();
 	}
 }

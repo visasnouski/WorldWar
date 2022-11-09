@@ -2,7 +2,7 @@
 
 namespace WorldWar.Abstractions.Models.Items.Base;
 
-public class Box : ICarryable
+public class Box
 {
 	public float Latitude { get; init; }
 

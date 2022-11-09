@@ -7,7 +7,9 @@ namespace WorldWar.Abstractions.Models.Units;
 
 public class Player : Unit
 {
-    public Player(Guid id, string userName, float latitude, float longitude, int health, Weapon? weapon = null, HeadProtection? headProtection = null, BodyProtection? bodyProtection = null,
+	public override float Speed => 00.00001F;
+
+	public Player(Guid id, string userName, float latitude, float longitude, int health, Weapon? weapon = null, HeadProtection? headProtection = null, BodyProtection? bodyProtection = null,
         Loot? loot = null)
         : base(id, userName, UnitTypes.Player, latitude, longitude, health, weapon, headProtection, bodyProtection, loot)
     {

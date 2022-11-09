@@ -9,6 +9,8 @@ public class Car : Unit
 {
 	private readonly IList<Guid> _passengers;
 
+	public override float Speed => 00.00009F;
+
 	public Car(Guid id, string name, float latitude, float longitude, int health, Weapon? weapon = null, HeadProtection? headProtection = null, BodyProtection? bodyProtection = null, Loot? loot = null)
 		: base(id, name, UnitTypes.Car, latitude, longitude, health,  weapon, headProtection, bodyProtection, loot)
 	{

@@ -27,6 +27,11 @@ public class MapStorage : IMapStorage
 
 	public Task SetItem(Box item)
 	{
+		if (item == null)
+		{
+			throw new ArgumentNullException(nameof(item));
+		}
+
 		ItemsStorage.AddOrUpdate(item.Id, item, (_, _) => item);
 		return Task.CompletedTask;
 	}
@@ -83,18 +88,33 @@ public class MapStorage : IMapStorage
 
 	public Task SetUnit(Unit unit)
 	{
+		if (unit == null)
+		{
+			throw new ArgumentNullException(nameof(unit));
+		}
+
 		UnitsStorage.AddOrUpdate(unit.Id, unit, (_, _) => unit);
 		return Task.CompletedTask;
 	}
 
 	public Task RemoveUnit(Unit unit)
 	{
+		if (unit == null)
+		{
+			throw new ArgumentNullException(nameof(unit));
+		}
+
 		UnitsStorage.TryRemove(unit.Id, out _);
 		return Task.CompletedTask;
 	}
 
 	public Task RemoveItem(Box box)
 	{
+		if (box == null)
+		{
+			throw new ArgumentNullException(nameof(box));
+		}
+
 		ItemsStorage.TryRemove(box.Id, out _);
 		return Task.CompletedTask;
 	}

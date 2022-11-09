@@ -94,6 +94,8 @@ public class WorldWarMapService : IWorldWarMapService
 
 					await Parallel.ForEachAsync(units, async (unit, token) =>
 					{
+						token.ThrowIfCancellationRequested();
+
 						if (!mapGuids.Contains((unit.Id, unit.UnitType)))
 						{
 							await _yandexJsClientAdapter.AddUnit(unit).ConfigureAwait(true);
