@@ -16,7 +16,7 @@ internal class ApplicationDbContext : IdentityDbContext<WorldWarIdentity>
 	{
 	}
 
-	public DbSet<UnitDto> Units { get; set; }
+	public DbSet<UnitDto> Units { get; set; } = null!;
 
 	public DbSet<WeaponDto> Weapons { get; set; } = null!;
 

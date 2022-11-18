@@ -15,6 +15,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\WorldWar.Repository\WorldWar.Repository.csproj" />
+	  <ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
 	</ItemGroup>
 
 </Project>

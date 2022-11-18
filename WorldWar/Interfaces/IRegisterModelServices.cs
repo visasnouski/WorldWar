@@ -3,10 +3,9 @@
 
 using WorldWar.Abstractions.DTOs;
 
-namespace WorldWar.Interfaces
+namespace WorldWar.Interfaces;
+
+public interface IRegisterModelServices
 {
-    public interface IRegisterModelServices
-    {
-        Task RegisterAsync(InputModel input, string baseUri);
-    }
+	Task RegisterAsync(InputModel input, string baseUri);
 }

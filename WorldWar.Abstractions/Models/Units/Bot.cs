@@ -10,4 +10,6 @@ public class Bot : Unit
 		: base(id, botName, unitTypes, latitude, longitude, health, weapon, headProtection, bodyProtection, loot)
 	{
 	}
+
+	public override float Speed => 00.00001F;
 }

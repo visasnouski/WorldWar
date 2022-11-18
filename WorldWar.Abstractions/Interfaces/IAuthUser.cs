@@ -1,4 +1,4 @@
-﻿namespace WorldWar.Abstractions;
+﻿namespace WorldWar.Abstractions.Interfaces;
 
 public interface IAuthUser
 {

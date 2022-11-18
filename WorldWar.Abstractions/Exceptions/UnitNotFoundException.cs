@@ -1,10 +1,9 @@
-﻿namespace WorldWar.Abstractions.Exceptions
+﻿namespace WorldWar.Abstractions.Exceptions;
+
+public class UnitNotFoundException : Exception
 {
-	public class UnitNotFoundException : Exception
+	public UnitNotFoundException(string? message)
+		: base(message)
 	{
-		public UnitNotFoundException(string? message)
-			: base(message)
-		{
-		}
 	}
 }

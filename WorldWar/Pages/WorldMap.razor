@@ -1,8 +1,8 @@
 ﻿@page "/WorldMap"
 @using WorldWar.Interfaces
-@using WorldWar.Components
-@using WorldWar.Abstractions
 @using WorldWar.YandexClient.Interfaces
+@using WorldWar.Abstractions.Interfaces
+@using WorldWar.Components
 
 @inject IWorldWarMapService WorldWarMapService
 @inject IUserManagement UserManagement
@@ -19,7 +19,8 @@
 <body>
 	<div id="map" style="width: 160vh; height: 90vh;"></div>
 </body>
-<audio id="sound" />
+<audio id="sound"></audio>
+
 @code {
 	private UnitEquipment? _unitEquipment;
 	private Interact? _interact;

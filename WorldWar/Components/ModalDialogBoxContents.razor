@@ -1,6 +1,7 @@
 ﻿@using WorldWar.Abstractions
 @using WorldWar.Abstractions.Models.Items.Base
-@using WorldWar.Core
+@using WorldWar.Core;
+@using WorldWar.Core.Interfaces
 @inject IMapStorage MapStorage
 
 <div class="modal show" role="dialog" style="position: fixed; display: @_modalDisplay" ondragover="event.preventDefault();">

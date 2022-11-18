@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Authentication;
-using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;

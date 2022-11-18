@@ -1,32 +1,30 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
 using WorldWar.Abstractions.Models.Units;
-using WorldWar.Core;
-using WorldWar.Interfaces;
+using WorldWar.Core.Interfaces;
 using WorldWar.YandexClient.Interfaces;
 
-namespace WorldWar.Internal;
+namespace WorldWar.Core;
 
-public class CombatService : ICombatService
+internal class CombatService : ICombatService
 {
 	private readonly IMapStorage _mapStorage;
 	private readonly IMovableService _movableService;
 	private readonly ITasksStorage _tasksStorage;
 	private readonly ITaskDelay _taskDelay;
 	private readonly IAuthUser _authUser;
-	private readonly IYandexJsClientTransmitter _yandexJsClientTransmitter;
+	private readonly IYandexJsClientNotifier _yandexJsClientNotifier;
 
-	public CombatService(IMapStorage mapStorage, IMovableService movableService, ITasksStorage tasksStorage, ITaskDelay taskDelay, IYandexJsClientTransmitter yandexJsClientTransmitter, IAuthUser authUser)
+	public CombatService(IMapStorage mapStorage, IMovableService movableService, ITasksStorage tasksStorage, ITaskDelay taskDelay, IYandexJsClientNotifier yandexJsClientNotifier, IAuthUser authUser)
 	{
 		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_tasksStorage = tasksStorage ?? throw new ArgumentNullException(nameof(tasksStorage));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
-		_yandexJsClientTransmitter = yandexJsClientTransmitter ?? throw new ArgumentNullException(nameof(yandexJsClientTransmitter));
+		_yandexJsClientNotifier = yandexJsClientNotifier ?? throw new ArgumentNullException(nameof(yandexJsClientNotifier));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 	}
 
@@ -54,18 +52,18 @@ public class CombatService : ICombatService
 
 			if (user.Weapon.Ammo <= 0)
 			{
-				await _yandexJsClientTransmitter.PlaySound("sound", user.Weapon.ReloadSoundLocation).ConfigureAwait(true);
+				await _yandexJsClientNotifier.PlaySound("sound", user.Weapon.ReloadSoundLocation).ConfigureAwait(true);
 				await ReloadWithDelay(user.Weapon, _taskDelay, cancellationToken).ConfigureAwait(true);
 			}
 			else
 			{
 				var damage = user.GetDamage(enemy);
-				await _yandexJsClientTransmitter.ShootUnit(user.Id, enemy.CurrentLatitude, enemy.CurrentLongitude).ConfigureAwait(true);
-				await _yandexJsClientTransmitter.PlaySound("sound", user.Weapon.ShotSoundLocation).ConfigureAwait(true);
+				await _yandexJsClientNotifier.ShootUnit(user.Id, enemy.CurrentLatitude, enemy.CurrentLongitude).ConfigureAwait(true);
+				await _yandexJsClientNotifier.PlaySound("sound", user.Weapon.ShotSoundLocation).ConfigureAwait(true);
 
 				var message = damage > 0 ? damage.ToString(NumberFormatInfo.CurrentInfo) : "missed!";
 
-				await _yandexJsClientTransmitter.SendMessage(enemy.Id, message).ConfigureAwait(true);
+				await _yandexJsClientNotifier.SendMessage(enemy.Id, message).ConfigureAwait(true);
 				await ShootWithDelay(user.Weapon, _taskDelay, cancellationToken).ConfigureAwait(true);
 			}
 
@@ -97,7 +95,7 @@ public class CombatService : ICombatService
 			}
 			_tasksStorage.TryRemove(unit.Id);
 
-			await _yandexJsClientTransmitter.KillUnit(unit.Id).ConfigureAwait(true);
+			await _yandexJsClientNotifier.KillUnit(unit.Id).ConfigureAwait(true);
 		}
 		catch (Exception e)
 		{

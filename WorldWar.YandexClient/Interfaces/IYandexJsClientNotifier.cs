@@ -1,6 +1,6 @@
 ﻿namespace WorldWar.YandexClient.Interfaces;
 
-public interface IYandexJsClientTransmitter
+public interface IYandexJsClientNotifier
 {
 	public Task KillUnit(Guid id);
 

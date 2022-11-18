@@ -1,7 +1,6 @@
-﻿namespace WorldWar.YandexClient.Interfaces
+﻿namespace WorldWar.YandexClient.Interfaces;
+
+public interface IYandexHubConnection : IAsyncDisposable
 {
-	public interface IYandexHubConnection : IAsyncDisposable
-	{
-		public Task ConfigureHubConnection(Uri uri);
-	}
+	public Task ConfigureHubConnection(Uri uri);
 }

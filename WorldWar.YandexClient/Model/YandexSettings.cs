@@ -1,7 +1,6 @@
-﻿namespace WorldWar.YandexClient.Model
+﻿namespace WorldWar.YandexClient.Model;
+
+public class YandexSettings
 {
-	public class YandexSettings
-	{
-		public string ApiKey { get; set; }
-	}
+	public string? ApiKey { get; set; }
 }

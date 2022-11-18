@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
@@ -8,153 +7,158 @@ using WorldWar.Abstractions.Models.Units;
 using WorldWar.YandexClient.Interfaces;
 using WorldWar.YandexClient.Model;
 
-namespace WorldWar.YandexClient.Internal
+namespace WorldWar.YandexClient.Internal;
+
+internal class YandexJsClientAdapter : IYandexJsClientAdapter, IDisposable
 {
-	internal class YandexJsClientAdapter : IYandexJsClientAdapter, IDisposable
+	private readonly Lazy<Task<IJSObjectReference>> _yandexJsModule;
+	private bool _isDisposed;
+
+	public YandexJsClientAdapter(IJSRuntime jsRuntime, IAuthUser authUser, ITaskDelay taskDelay, IOptions<YandexSettings> yandexSettings)
 	{
-		private readonly Lazy<Task<IJSObjectReference>> _yandexJsModule;
-		private bool _isDisposed;
-
-		public YandexJsClientAdapter(IJSRuntime jsRuntime, IAuthUser authUser, ITaskDelay taskDelay, IOptions<YandexSettings> yandexSettings)
-		{
-			_yandexJsModule = new Lazy<Task<IJSObjectReference>>(async () =>
-				{
-					var client = new YandexJsClient(jsRuntime, authUser, taskDelay, yandexSettings);
-					var module = await client.GetYandexJsModule("./js/WorldWarMap.js").ConfigureAwait(true);
-					return module;
-				}
-			);
-		}
-
-		public async Task AddUnit(Unit unit)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-
-			switch (unit.UnitType)
+		_yandexJsModule = new Lazy<Task<IJSObjectReference>>(async () =>
 			{
-				case UnitTypes.Car:
-					await module.InvokeVoidAsync("addCar", unit).ConfigureAwait(true);
-					break;
-				case UnitTypes.Player or UnitTypes.Mob:
-					await module.InvokeVoidAsync("addUnit", unit).ConfigureAwait(true);
-					break;
+				var client = new YandexJsClient(jsRuntime, authUser, taskDelay, yandexSettings);
+				var module = await client.GetYandexJsModule("./js/WorldWarMap.js").ConfigureAwait(true);
+				return module;
 			}
-		}
+		);
+	}
 
-		public async Task UpdateUnit(Unit unit)
+	public async Task AddUnit(Unit unit)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+
+		switch (unit.UnitType)
 		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("updateUnit", unit).ConfigureAwait(true);
+			case UnitTypes.Car:
+				await module.InvokeVoidAsync("addCar", unit).ConfigureAwait(true);
+				break;
+			case UnitTypes.Player or UnitTypes.Mob:
+				await module.InvokeVoidAsync("addUnit", unit).ConfigureAwait(true);
+				break;
 		}
+	}
 
-		public async Task RemoveGeoObjects(Guid[] ids)
+	public async Task UpdateUnit(Unit unit)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("updateUnit", unit).ConfigureAwait(true);
+	}
+
+	public async Task RemoveGeoObjects(Guid[] ids)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("removeGeoObjects", ids).ConfigureAwait(true);
+	}
+
+	public async Task KillUnit(Guid id)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("killUnit", id).ConfigureAwait(false);
+	}
+
+	public async Task ShowMessage(Guid id, string message)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("showMessage", id, message).ConfigureAwait(false);
+	}
+
+	public async Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("shoot", id, enemyLatitude, enemyLongitude).ConfigureAwait(true);
+	}
+
+	public async Task PlaySound(string elementId, string src)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("playAudio", elementId, src).ConfigureAwait(true);
+	}
+
+	public async Task RotateUnit(Guid id, float latitude, float longitude)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("rotateUnit", id, latitude, longitude).ConfigureAwait(false);
+	}
+
+	public async Task AddBox(Box box)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("addBox", box).ConfigureAwait(true);
+	}
+
+	public async Task SetUserGuid(Guid id)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("setUserGuid", id).ConfigureAwait(true);
+	}
+
+	public async Task SetUnitManagementService(IUserManagement userManagement)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(userManagement)).ConfigureAwait(true);
+	}
+
+	public async Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)
+		where TValue : class
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("setUnitEquipmentComponent", unitEquipment).ConfigureAwait(true);
+	}
+
+	public async Task SetModalDialogBoxContents<TValue>(DotNetObjectReference<TValue> modalDialogBoxContents)
+		where TValue : class
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("setModalDialogBoxContents", modalDialogBoxContents).ConfigureAwait(true);
+	}
+
+	public async Task UpdateUnits(Unit[] toUpdateList)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("updateUnits", new object?[] { toUpdateList }).ConfigureAwait(true);
+	}
+
+	public async Task<float[]> ConvertPixelCoordsToGlobal(double pixelX, double pixelY)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		return await module.InvokeAsync<float[]>("convertPixelCoordsToGlobal", pixelX, pixelY).ConfigureAwait(true);
+	}
+
+	public async Task<float[]> GetCenterCoords()
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		return await module.InvokeAsync<float[]>("getCenter").ConfigureAwait(true);
+	}
+
+	public async Task<float[][]> GetRoute(float[] startCoords, float[] endCoords, string routingMode)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		return await module.InvokeAsync<float[][]>("getRoute", startCoords, endCoords, routingMode)
+			.ConfigureAwait(true);
+	}
+
+	public void Dispose()
+	{
+		Dispose(true);
+		GC.SuppressFinalize(this);
+	}
+
+	protected virtual void Dispose(bool disposing)
+	{
+		if (_isDisposed)
 		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("removeGeoObjects", ids).ConfigureAwait(true);
+			return;
 		}
 
-		public async Task KillUnit(Guid id)
+		if (disposing
+			&& _yandexJsModule.IsValueCreated
+			&& _yandexJsModule.Value.IsCompleted)
 		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("killUnit", id).ConfigureAwait(false);
+			_yandexJsModule.Value.Dispose();
 		}
 
-		public async Task ShowMessage(Guid id, string message)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("showMessage", id, message).ConfigureAwait(false);
-		}
-
-		public async Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("shoot", id, enemyLatitude, enemyLongitude).ConfigureAwait(true);
-		}
-
-		public async Task PlaySound(string elementId, string src)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("playAudio", elementId, src).ConfigureAwait(true);
-		}
-
-		public async Task RotateUnit(Guid id, float latitude, float longitude)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("rotateUnit", id, latitude, longitude).ConfigureAwait(false);
-		}
-
-		public async Task AddBox(Box box)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("addBox", box).ConfigureAwait(true);
-		}
-
-		public async Task SetUserGuid(Guid id)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setUserGuid", id).ConfigureAwait(true);
-		}
-
-		public async Task SetUnitManagementService(IUserManagement userManagement)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setUnitManagementService", DotNetObjectReference.Create(userManagement)).ConfigureAwait(true);
-		}
-
-		public async Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)
-			where TValue : class
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setUnitEquipmentComponent", unitEquipment).ConfigureAwait(true);
-		}
-
-		public async Task SetModalDialogBoxContents<TValue>(DotNetObjectReference<TValue> modalDialogBoxContents)
-			where TValue : class
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			await module.InvokeVoidAsync("setModalDialogBoxContents", modalDialogBoxContents).ConfigureAwait(true);
-		}
-
-		public async Task<float[]> ConvertPixelCoordsToGlobal(double pixelX, double pixelY)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			return await module.InvokeAsync<float[]>("convertPixelCoordsToGlobal", pixelX, pixelY).ConfigureAwait(true);
-		}
-
-		public async Task<float[]> GetCenterCoords()
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			return await module.InvokeAsync<float[]>("getCenter").ConfigureAwait(true);
-		}
-
-		public async Task<float[][]> GetRoute(float[] startCoords, float[] endCoords, string routingMode)
-		{
-			var module = await _yandexJsModule.Value.ConfigureAwait(true);
-			return await module.InvokeAsync<float[][]>("getRoute", startCoords, endCoords, routingMode)
-				.ConfigureAwait(true);
-		}
-
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool disposing)
-		{
-			if (_isDisposed)
-			{
-				return;
-			}
-
-			if (disposing
-				&& _yandexJsModule.IsValueCreated
-				&& _yandexJsModule.Value.IsCompleted)
-			{
-				_yandexJsModule.Value.Dispose();
-			}
-
-			_isDisposed = true;
-		}
+		_isDisposed = true;
 	}
 }

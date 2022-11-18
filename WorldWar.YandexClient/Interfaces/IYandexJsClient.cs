@@ -1,9 +1,8 @@
 ﻿using Microsoft.JSInterop;
 
-namespace WorldWar.YandexClient.Interfaces
+namespace WorldWar.YandexClient.Interfaces;
+
+internal interface IYandexJsClient
 {
-    internal interface IYandexJsClient
-    {
-        Task<IJSObjectReference> GetYandexJsModule(string jsSrc);
-    }
+	Task<IJSObjectReference> GetYandexJsModule(string jsSrc);
 }

@@ -4,10 +4,11 @@ using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
+using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core;
 
-public class MapStorage : IMapStorage
+internal class MapStorage : IMapStorage
 {
 	private static readonly ConcurrentDictionary<Guid, Unit> UnitsStorage = new();
 	private static readonly ConcurrentDictionary<Guid, Box> ItemsStorage = new();
@@ -27,6 +28,11 @@ public class MapStorage : IMapStorage
 
 	public Task SetItem(Box item)
 	{
+		if (item == null)
+		{
+			throw new ArgumentNullException(nameof(item));
+		}
+
 		ItemsStorage.AddOrUpdate(item.Id, item, (_, _) => item);
 		return Task.CompletedTask;
 	}
@@ -83,18 +89,33 @@ public class MapStorage : IMapStorage
 
 	public Task SetUnit(Unit unit)
 	{
+		if (unit == null)
+		{
+			throw new ArgumentNullException(nameof(unit));
+		}
+
 		UnitsStorage.AddOrUpdate(unit.Id, unit, (_, _) => unit);
 		return Task.CompletedTask;
 	}
 
 	public Task RemoveUnit(Unit unit)
 	{
+		if (unit == null)
+		{
+			throw new ArgumentNullException(nameof(unit));
+		}
+
 		UnitsStorage.TryRemove(unit.Id, out _);
 		return Task.CompletedTask;
 	}
 
 	public Task RemoveItem(Box box)
 	{
+		if (box == null)
+		{
+			throw new ArgumentNullException(nameof(box));
+		}
+
 		ItemsStorage.TryRemove(box.Id, out _);
 		return Task.CompletedTask;
 	}

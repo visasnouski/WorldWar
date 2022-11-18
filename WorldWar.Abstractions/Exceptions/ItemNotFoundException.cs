@@ -1,10 +1,9 @@
-﻿namespace WorldWar.Abstractions.Exceptions
+﻿namespace WorldWar.Abstractions.Exceptions;
+
+public class ItemNotFoundException : Exception
 {
-	public class ItemNotFoundException : Exception
+	public ItemNotFoundException(string? message)
+		: base(message)
 	{
-		public ItemNotFoundException(string? message)
-			: base(message)
-		{
-		}
 	}
 }

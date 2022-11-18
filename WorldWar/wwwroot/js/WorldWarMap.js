@@ -424,8 +424,16 @@ function getHint() {
     );
 }
 
+export function updateUnits(units) {
+    units.forEach(updateUnit);
+}
+
 export function updateUnit(unit) {
     myMap.geoObjects.each(function (geoObject) {
+        if (!geoObject || !unit) {
+            return false;
+        }
+
         if (geoObject.properties.get('id') === unit.id) {
             geoObject.properties.set('health', unit.health);
             geoObject.properties.set('ammo', unit.weapon.ammo);
