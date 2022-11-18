@@ -1,12 +1,14 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
+using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Utils;
 using WorldWar.AI;
 using WorldWar.Areas.Identity;
 using WorldWar.Components.States;
+using WorldWar.Core;
 using WorldWar.Core.Extensions;
+using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 using WorldWar.Internal;
 using WorldWar.Repository;
@@ -30,8 +32,6 @@ builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
 builder.Services.AddScoped<IUserManagement, UserManagement>();
 
-builder.Services.AddScoped<ICombatService, CombatService>();
-builder.Services.AddScoped<IMovableService, MovableService>();
 builder.Services.AddScoped<IAuthUser, AuthUser>();
 builder.Services.AddScoped<UserManager<WorldWarIdentity>>();
 builder.Services.AddScoped<IRegisterModelServices, RegisterModelServices>();
@@ -45,6 +45,7 @@ builder.Services.AddYandexClient(options => builder.Configuration.GetSection("Ya
 builder.Services.AddAiService();
 
 builder.Services.AddStorage();
+builder.Services.AddUnitServices();
 
 var app = builder.Build();
 

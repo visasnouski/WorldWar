@@ -1,9 +1,9 @@
-﻿using WorldWar.Abstractions;
-using WorldWar.Abstractions.Extensions;
+﻿using WorldWar.Abstractions.Extensions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Components.States;
-using WorldWar.Core;
+using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 
 namespace WorldWar.Internal;
@@ -47,18 +47,6 @@ public class InteractionObjectsService : IInteractionObjectsService
 		_interactStates.Show(guidId);
 	}
 
-	private static async Task<(float latitude, float longitude)> GetCoordinates(bool isUnit, Guid id, IMapStorage mapStorage)
-	{
-		if (isUnit)
-		{
-			var unit = await mapStorage.GetUnit(id).ConfigureAwait(true);
-			return (unit.CurrentLatitude, unit.CurrentLongitude);
-		}
-
-		var box = await mapStorage.GetItem(id).ConfigureAwait(true);
-		return (box.Latitude, box.Longitude);
-	}
-
 	public async Task GetIn(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
@@ -95,6 +83,18 @@ public class InteractionObjectsService : IInteractionObjectsService
 
 		await _mapStorage.SetUnit(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.CurrentLatitude, user.CurrentLongitude, 100)).ConfigureAwait(true);
 		await _mapStorage.SetUnit(user).ConfigureAwait(true);
+	}
+
+	private static async Task<(float latitude, float longitude)> GetCoordinates(bool isUnit, Guid id, IMapStorage mapStorage)
+	{
+		if (isUnit)
+		{
+			var unit = await mapStorage.GetUnit(id).ConfigureAwait(true);
+			return (unit.CurrentLatitude, unit.CurrentLongitude);
+		}
+
+		var box = await mapStorage.GetItem(id).ConfigureAwait(true);
+		return (box.Latitude, box.Longitude);
 	}
 }
 

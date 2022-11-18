@@ -22,6 +22,7 @@ public static class WeaponModels
 		ReloadSoundLocation = "/weapons/Fist/Kick2.wav"
 	};
 
+	// ReSharper disable once InconsistentNaming
 	public static readonly Weapon TT = new()
 	{
 		Id = 1001,

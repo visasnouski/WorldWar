@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using WorldWar.Abstractions.Interfaces;
+using WorldWar.Core.Interfaces;
 using WorldWar.Repository.interfaces;
 
 namespace WorldWar.Core;

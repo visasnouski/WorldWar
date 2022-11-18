@@ -1,6 +1,6 @@
 ﻿using WorldWar.Abstractions.Models.Items.Base;
 
-namespace WorldWar.Internal;
+namespace WorldWar.Abstractions.Models;
 
 public class DraggableItem
 {

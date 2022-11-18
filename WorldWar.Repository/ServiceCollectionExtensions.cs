@@ -25,9 +25,4 @@ public static class ServiceCollectionExtensions
 
 		return serviceCollection;
 	}
-
-	private static string GetCurrentNamespace()
-	{
-		return System.Reflection.Assembly.GetExecutingAssembly().EntryPoint?.DeclaringType?.Namespace!;
-	}
 }

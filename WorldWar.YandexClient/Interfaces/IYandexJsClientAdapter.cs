@@ -1,5 +1,5 @@
 ﻿using Microsoft.JSInterop;
-using WorldWar.Abstractions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 
@@ -40,4 +40,6 @@ public interface IYandexJsClientAdapter
 	public Task<float[]> GetCenterCoords();
 
 	public Task<float[][]> GetRoute(float[] startCoords, float[] endCoords, string routingMode);
+
+	public Task UpdateUnits(Unit[] toUpdateList);
 }

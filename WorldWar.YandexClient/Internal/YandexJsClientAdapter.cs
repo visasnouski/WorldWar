@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
 using Microsoft.JSInterop;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
@@ -113,6 +112,12 @@ internal class YandexJsClientAdapter : IYandexJsClientAdapter, IDisposable
 	{
 		var module = await _yandexJsModule.Value.ConfigureAwait(true);
 		await module.InvokeVoidAsync("setModalDialogBoxContents", modalDialogBoxContents).ConfigureAwait(true);
+	}
+
+	public async Task UpdateUnits(Unit[] toUpdateList)
+	{
+		var module = await _yandexJsModule.Value.ConfigureAwait(true);
+		await module.InvokeVoidAsync("updateUnits", new object?[] { toUpdateList }).ConfigureAwait(true);
 	}
 
 	public async Task<float[]> ConvertPixelCoordsToGlobal(double pixelX, double pixelY)

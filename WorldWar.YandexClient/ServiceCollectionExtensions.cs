@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 
 		serviceCollection.Configure(configureOptions);
 		serviceCollection.AddScoped<IYandexJsClientAdapter, YandexJsClientAdapter>();
-		serviceCollection.AddScoped<IYandexJsClientTransmitter, YandexJsClientTransmitter>();
+		serviceCollection.AddScoped<IYandexJsClientNotifier, YandexJsClientNotifier>();
 		serviceCollection.AddScoped<IYandexHubConnection, YandexHubConnection>();
 
 		return serviceCollection;

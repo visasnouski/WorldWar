@@ -2,11 +2,10 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
-using WorldWar.Core;
+using WorldWar.Core.Interfaces;
 
 namespace WorldWar.AI;
 
@@ -46,6 +45,7 @@ internal class AiService : BackgroundService
 					var longitudeRnd = (float)RandomNumberGenerator.GetInt32(-99, 99) / 100;
 					var newLatitude = unit.CurrentLatitude + latitudeRnd;
 					var newLongitude = unit.CurrentLongitude + longitudeRnd;
+
 					_logger.LogInformation("{index} Unit {unitId} move to {latitude} {longitud}", index, unit.Id, newLatitude, newLongitude);
 					unit.RotateUnit(newLongitude, newLatitude);
 					managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
@@ -53,7 +53,7 @@ internal class AiService : BackgroundService
 					return ValueTask.CompletedTask;
 				}).ConfigureAwait(true);
 
-				await _taskDelay.Delay(TimeSpan.FromSeconds(10), cancellationToken).ConfigureAwait(true);
+				await _taskDelay.Delay(TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(true);
 			}
 			catch (Exception e)
 			{

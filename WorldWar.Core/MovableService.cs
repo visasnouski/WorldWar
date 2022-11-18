@@ -1,27 +1,27 @@
 ﻿using System.Diagnostics;
 using System.Numerics;
-using WorldWar.Abstractions;
+using Microsoft.Extensions.Logging;
 using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Units;
-using WorldWar.Core;
+using WorldWar.Core.Interfaces;
 using WorldWar.YandexClient.Interfaces;
 
-namespace WorldWar.Internal;
+namespace WorldWar.Core;
 
-public class MovableService : IMovableService
+internal class MovableService : IMovableService
 {
 	private readonly IMapStorage _mapStorage;
-	private readonly IYandexJsClientTransmitter _yandexJsClientTransmitter;
+	private readonly IYandexJsClientNotifier _yandexJsClientNotifier;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly ITaskDelay _taskDelay;
 	private readonly ILogger<MovableService> _logger;
 
-	public MovableService(IMapStorage mapStorage, IYandexJsClientTransmitter yandexJsClientTransmitter, IYandexJsClientAdapter yandexJsClientAdapter, ITaskDelay taskDelay, ILogger<MovableService> logger)
+	public MovableService(IMapStorage mapStorage, IYandexJsClientNotifier yandexJsClientNotifier, IYandexJsClientAdapter yandexJsClientAdapter, ITaskDelay taskDelay, ILogger<MovableService> logger)
 	{
 		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
-		_yandexJsClientTransmitter = yandexJsClientTransmitter ?? throw new ArgumentNullException(nameof(yandexJsClientTransmitter));
+		_yandexJsClientNotifier = yandexJsClientNotifier ?? throw new ArgumentNullException(nameof(yandexJsClientNotifier));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -68,7 +68,7 @@ public class MovableService : IMovableService
 			else
 			{
 				Move(user, lastTime, points[index][1], points[index][0]);
-				SaveCurrentLocation(user);
+				user.SaveCurrentLocation();
 				index++;
 				if (points.Length <= index)
 				{
@@ -80,7 +80,7 @@ public class MovableService : IMovableService
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
-		SaveCurrentLocation(user);
+		user.SaveCurrentLocation();
 		await _mapStorage.SetUnit(user).ConfigureAwait(true);
 	}
 
@@ -114,14 +114,14 @@ public class MovableService : IMovableService
 			else
 			{
 				Move(user, lastTime, longitude, latitude);
-				SaveCurrentLocation(user);
+				user.SaveCurrentLocation();
 
 				stopWatch.Restart();
 				user.RotateUnit(longitude, latitude, user.CurrentLongitude, user.CurrentLatitude);
 				await _mapStorage.SetUnit(user).ConfigureAwait(true);
 			}
 		}
-		SaveCurrentLocation(user);
+		user.SaveCurrentLocation();
 		await _mapStorage.SetUnit(user).ConfigureAwait(true);
 	}
 
@@ -145,12 +145,12 @@ public class MovableService : IMovableService
 			}
 		}
 
-		SaveCurrentLocation(myUnit);
+		myUnit.SaveCurrentLocation();
 	}
 
 	public async Task Rotate(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken)
 	{
-		await _yandexJsClientTransmitter.RotateUnit(unitId, latitude, longitude).ConfigureAwait(true);
+		await _yandexJsClientNotifier.RotateUnit(unitId, latitude, longitude).ConfigureAwait(true);
 	}
 
 	private static void Move(Unit unit, TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)
@@ -166,10 +166,5 @@ public class MovableService : IMovableService
 
 		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * unit.Speed * acceleration;
 		unit.Location.ChangeLocation(Vector2.Add(unit.Location.StartPos, deltaVec));
-	}
-
-	private static void SaveCurrentLocation(Unit unit)
-	{
-		unit.Location.SaveCurrentLocation();
 	}
 }

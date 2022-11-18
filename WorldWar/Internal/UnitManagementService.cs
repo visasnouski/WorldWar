@@ -1,5 +1,5 @@
-﻿using WorldWar.Abstractions;
-using WorldWar.Core;
+﻿using WorldWar.Abstractions.Interfaces;
+using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 
 namespace WorldWar.Internal;

@@ -3,7 +3,7 @@ using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Hubs;
 
-public class YandexMapHub : Hub<IYandexJsClientTransmitter>
+public class YandexMapHub : Hub<IYandexJsClientNotifier>
 {
 	public async Task SendShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
 	{

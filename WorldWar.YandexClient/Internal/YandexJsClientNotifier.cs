@@ -4,12 +4,12 @@ using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Internal;
 
-internal class YandexJsClientTransmitter : IYandexJsClientTransmitter, IDisposable
+internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 {
 	private readonly Lazy<Task<HubConnection>> _hubConnection;
 	private bool _isDisposed;
 
-	public YandexJsClientTransmitter(NavigationManager navigationManager)
+	public YandexJsClientNotifier(NavigationManager navigationManager)
 	{
 		_hubConnection = new Lazy<Task<HubConnection>>(async () =>
 		{

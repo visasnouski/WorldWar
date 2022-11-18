@@ -87,5 +87,11 @@ namespace WorldWar.Abstractions.Extensions
 
 			unit.UnitType = unitType;
 		}
+
+
+		public static void SaveCurrentLocation(this Unit unit)
+		{
+			unit.Location.SaveCurrentLocation();
+		}
 	}
 }

@@ -1,7 +1,6 @@
 ﻿using Microsoft.JSInterop;
 using System.Security.Authentication;
 using Microsoft.Extensions.Options;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.YandexClient.Model;
 using WorldWar.YandexClient.Interfaces;

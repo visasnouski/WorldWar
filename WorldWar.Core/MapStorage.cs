@@ -4,10 +4,11 @@ using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
+using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core;
 
-public class MapStorage : IMapStorage
+internal class MapStorage : IMapStorage
 {
 	private static readonly ConcurrentDictionary<Guid, Unit> UnitsStorage = new();
 	private static readonly ConcurrentDictionary<Guid, Box> ItemsStorage = new();
