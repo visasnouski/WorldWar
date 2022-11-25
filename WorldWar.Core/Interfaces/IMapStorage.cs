@@ -3,6 +3,7 @@ using WorldWar.Abstractions.Models.Units;
 
 namespace WorldWar.Core.Interfaces;
 
+//TODO Split this interface
 public interface IMapStorage
 {
     public Task<Unit> GetUnit(Guid id);
