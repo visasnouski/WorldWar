@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using WorldWar.Abstractions.Interfaces;
 using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core.Extensions;

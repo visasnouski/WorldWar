@@ -11,8 +11,7 @@ public static class ServiceCollectionExtensions
 			throw new ArgumentNullException(nameof(serviceCollection));
 		}
 
-		serviceCollection.AddSingleton<AiService>();
-		serviceCollection.AddHostedService(provider => provider.GetService<AiService>());
+		serviceCollection.AddHostedService<AiService>();
 
 		return serviceCollection;
 	}

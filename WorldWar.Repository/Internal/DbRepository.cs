@@ -187,9 +187,8 @@ internal class DbRepository : IDbRepository
 		await LockAsync(async () => await applicationDbContext.SaveChangesAsync().ConfigureAwait(true)).ConfigureAwait(true);
 	}
 
-	public async Task SetUnits(IEnumerable<Unit> units)
+	public async Task SetUnits(IEnumerable<Unit> units, CancellationToken cancellationToken)
 	{
-		// TODO Add CancellationToken
 		if (units == null)
 		{
 			throw new ArgumentNullException(nameof(units));
@@ -197,6 +196,8 @@ internal class DbRepository : IDbRepository
 
 		foreach (var unit in units)
 		{
+			cancellationToken.ThrowIfCancellationRequested();
+
 			await UpdateUnit(unit).ConfigureAwait(true);
 		}
 	}

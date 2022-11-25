@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.SignalR.Client;
+using WorldWar.YandexClient.Hubs;
 using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Internal;
@@ -25,31 +26,31 @@ internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 	public async Task KillUnit(Guid id)
 	{
 		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync("SendKillUnit", id).ConfigureAwait(true);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendKillUnit), id).ConfigureAwait(true);
 	}
 
 	public async Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
 	{
 		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync("SendShootUnit", id, enemyLatitude, enemyLongitude).ConfigureAwait(true);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendShootUnit), id, enemyLatitude, enemyLongitude).ConfigureAwait(true);
 	}
 
 	public async Task SendMessage(Guid id, string message)
 	{
 		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync("SendMessage", id, message).ConfigureAwait(true);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendMessage), id, message).ConfigureAwait(true);
 	}
 
 	public async Task PlaySound(string id, string src)
 	{
 		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync("SendPlaySound", id, src).ConfigureAwait(true);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendPlaySound), id, src).ConfigureAwait(true);
 	}
 
 	public async Task RotateUnit(Guid id, float latitude, float longitude)
 	{
 		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync("SendRotateUnit", id, latitude, longitude).ConfigureAwait(true);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendRotateUnit), id, latitude, longitude).ConfigureAwait(true);
 	}
 
 	public void Dispose()
@@ -66,8 +67,8 @@ internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 		}
 
 		if (disposing
-		    && _hubConnection.IsValueCreated
-		    && _hubConnection.Value.IsCompleted)
+			&& _hubConnection.IsValueCreated
+			&& _hubConnection.Value.IsCompleted)
 		{
 			_hubConnection.Value.Dispose();
 		}
