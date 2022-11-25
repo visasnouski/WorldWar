@@ -28,5 +28,5 @@ public interface IDbRepository
 
     Task UpdateUnit(Unit unit);
 
-    Task SetUnits(IEnumerable<Unit> units);
+    Task SetUnits(IEnumerable<Unit> units, CancellationToken cancellationToken);
 }

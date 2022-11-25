@@ -26,7 +26,7 @@ public class DbSyncService : BackgroundService
 		{
 			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(true);
 			var mapUnits = await _mapStorage.GetUnits().ConfigureAwait(true);
-			await _dbRepository.SetUnits(mapUnits).ConfigureAwait(true);
+			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(true);
 		}
 	}
 }

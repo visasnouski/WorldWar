@@ -34,9 +34,8 @@ internal class AiService : BackgroundService
 			{
 				var units = await _mapStorage.GetUnits().ConfigureAwait(true);
 				var mobs = units.Where(unit => unit.UnitType == UnitTypes.Mob
-				                               && unit.Location.StartPos == unit.Location.CurrentPos
-				                               && unit.Health > 0);
-				var index = 0;
+											   && unit.Location.StartPos == unit.Location.CurrentPos
+											   && unit.Health > 0);
 				await Parallel.ForEachAsync(mobs, cancellationToken, (unit, token) =>
 				{
 					token.ThrowIfCancellationRequested();
@@ -46,10 +45,8 @@ internal class AiService : BackgroundService
 					var newLatitude = unit.CurrentLatitude + latitudeRnd;
 					var newLongitude = unit.CurrentLongitude + longitudeRnd;
 
-					_logger.LogInformation("{index} Unit {unitId} move to {latitude} {longitud}", index, unit.Id, newLatitude, newLongitude);
 					unit.RotateUnit(newLongitude, newLatitude);
 					managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
-					index++;
 					return ValueTask.CompletedTask;
 				}).ConfigureAwait(true);
 
