@@ -5,6 +5,7 @@ using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Units;
+using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
 using WorldWar.YandexClient.Interfaces;
 
@@ -12,15 +13,15 @@ namespace WorldWar.Core;
 
 internal class MovableService : IMovableService
 {
-	private readonly IMapStorage _mapStorage;
+	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IYandexJsClientNotifier _yandexJsClientNotifier;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly ITaskDelay _taskDelay;
 	private readonly ILogger<MovableService> _logger;
 
-	public MovableService(IMapStorage mapStorage, IYandexJsClientNotifier yandexJsClientNotifier, IYandexJsClientAdapter yandexJsClientAdapter, ITaskDelay taskDelay, ILogger<MovableService> logger)
+	public MovableService(ICacheFactory cacheFactory, IYandexJsClientNotifier yandexJsClientNotifier, IYandexJsClientAdapter yandexJsClientAdapter, ITaskDelay taskDelay, ILogger<MovableService> logger)
 	{
-		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
+		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
 		_yandexJsClientNotifier = yandexJsClientNotifier ?? throw new ArgumentNullException(nameof(yandexJsClientNotifier));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
@@ -30,11 +31,11 @@ internal class MovableService : IMovableService
 	public async Task StartMoveAlongRoute(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = await _mapStorage.GetUnit(unitId).ConfigureAwait(true);
+		var user = _unitsStorage.GetItem(unitId);
 
 		var routingMode = user.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
-		var points = await _yandexJsClientAdapter.GetRoute(new[] { user.CurrentLatitude, user.CurrentLongitude },
+		var points = await _yandexJsClientAdapter.GetRoute(new[] { user.Latitude, user.Longitude },
 			new[] { latitude, longitude }, routingMode).ConfigureAwait(true);
 
 		var stopWatch = new Stopwatch();
@@ -76,18 +77,18 @@ internal class MovableService : IMovableService
 				}
 				stopWatch.Restart();
 				user.RotateUnit(points[index][1], points[index][0], points[index - 1][1], points[index - 1][0]);
-				await _mapStorage.SetUnit(user).ConfigureAwait(true);
+				_unitsStorage.SetItem(user);
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
 		user.SaveCurrentLocation();
-		await _mapStorage.SetUnit(user).ConfigureAwait(true);
+		_unitsStorage.SetItem(user);
 	}
 
 	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = await _mapStorage.GetUnit(unitId).ConfigureAwait(true);
+		var user = _unitsStorage.GetItem(unitId);
 
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
@@ -117,29 +118,29 @@ internal class MovableService : IMovableService
 				user.SaveCurrentLocation();
 
 				stopWatch.Restart();
-				user.RotateUnit(longitude, latitude, user.CurrentLongitude, user.CurrentLatitude);
-				await _mapStorage.SetUnit(user).ConfigureAwait(true);
+				user.RotateUnit(longitude, latitude, user.Longitude, user.Latitude);
+				_unitsStorage.SetItem(user);
 			}
 		}
 		user.SaveCurrentLocation();
-		await _mapStorage.SetUnit(user).ConfigureAwait(true);
+		_unitsStorage.SetItem(user);
 	}
 
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
-		var myUnit = await _mapStorage.GetUnit(unitId).ConfigureAwait(true);
+		var myUnit = _unitsStorage.GetItem(unitId);
 		var startDateTime = DateTime.Now;
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			var targetUnit = await _mapStorage.GetUnit(targetGuid).ConfigureAwait(true);
+			var targetUnit = _unitsStorage.GetItem(targetGuid);
 
 			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
 
-			Move(myUnit, DateTime.Now - startDateTime, targetUnit.CurrentLongitude, targetUnit.CurrentLatitude);
-			await _mapStorage.SetUnit(myUnit).ConfigureAwait(true);
+			Move(myUnit, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
+			_unitsStorage.SetItem(myUnit);
 
-			if (myUnit.IsWithinReach(targetUnit.CurrentLongitude, targetUnit.CurrentLatitude, distance))
+			if (myUnit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude, distance))
 			{
 				break;
 			}

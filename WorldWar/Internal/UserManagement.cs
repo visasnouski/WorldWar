@@ -4,6 +4,7 @@ using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
+using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
 using WorldWar.Repository.interfaces;
 
@@ -11,14 +12,14 @@ namespace WorldWar.Internal;
 
 public class UserManagement : IUserManagement
 {
-	private readonly IMapStorage _mapStorage;
+	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IDbRepository _dbRepository;
 	private readonly IUnitManagementService _unitManagementService;
 	private readonly IAuthUser _authUser;
 
-	public UserManagement(IMapStorage mapStorage, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser)
+	public UserManagement(ICacheFactory cacheFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser)
 	{
-		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
+		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
 		_unitManagementService = unitManagementService ?? throw new ArgumentNullException(nameof(unitManagementService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
@@ -30,7 +31,7 @@ public class UserManagement : IUserManagement
 		try
 		{
 			var unit = await _dbRepository.GetUnit(identity.GuidId).ConfigureAwait(true);
-			await _mapStorage.SetUnit(unit).ConfigureAwait(true);
+			_unitsStorage.SetItem(unit);
 		}
 		catch (UnitNotFoundException)
 		{
@@ -47,7 +48,7 @@ public class UserManagement : IUserManagement
 				});
 
 			await _dbRepository.SetUnit(unit).ConfigureAwait(true);
-			await _mapStorage.SetUnit(unit).ConfigureAwait(true);
+			_unitsStorage.SetItem(unit);
 		}
 	}
 

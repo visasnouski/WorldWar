@@ -22,7 +22,8 @@
 
 @code
 {
-	[CascadingParameter] protected Task<AuthenticationState> AuthStat { get; set; }
+	[CascadingParameter] 
+	protected Task<AuthenticationState> AuthStat { get; set; }
 
 	protected override async Task OnInitializedAsync()
 	{

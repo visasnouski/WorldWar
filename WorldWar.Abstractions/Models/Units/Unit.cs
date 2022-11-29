@@ -6,7 +6,7 @@ using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Units;
 
-public abstract class Unit
+public abstract class Unit: IStorable
 {
 	public string Name { get; init; }
 
@@ -26,9 +26,9 @@ public abstract class Unit
 
 	public Loot Loot { get; init; }
 
-	public float CurrentLatitude => Location.CurrentPos.Y;
+	public float Latitude => Location.CurrentPos.Y;
 
-	public float CurrentLongitude => Location.CurrentPos.X;
+	public float Longitude => Location.CurrentPos.X;
 
 	public abstract float Speed { get; }
 	

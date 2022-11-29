@@ -1,8 +1,10 @@
 ﻿using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Components.States;
+using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 
@@ -10,14 +12,16 @@ namespace WorldWar.Internal;
 
 public class InteractionObjectsService : IInteractionObjectsService
 {
+	private readonly IStorage<Unit> _unitsStorage;
+	private readonly IStorage<Box> _boxStorage;
 	private readonly IMovableService _movableService;
-	private readonly IMapStorage _mapStorage;
 	private readonly IAuthUser _authUser;
 	private readonly InteractStates _interactStates;
 
-	public InteractionObjectsService(IMovableService movableService, IMapStorage mapStorage, IAuthUser authUser, InteractStates interactStates)
+	public InteractionObjectsService(ICacheFactory cacheFactory, IMovableService movableService, IAuthUser authUser, InteractStates interactStates)
 	{
-		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
+		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_boxStorage = cacheFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(cacheFactory));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_interactStates = interactStates ?? throw new ArgumentNullException(nameof(interactStates));
@@ -26,8 +30,8 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = await _mapStorage.GetUnit(identity.GuidId).ConfigureAwait(true);
-		var coords = await GetCoordinates(isUnit, guidId, _mapStorage).ConfigureAwait(true);
+		var user = _unitsStorage.GetItem(identity.GuidId);
+		var coords = GetCoordinates(isUnit, guidId, _unitsStorage, _boxStorage);
 
 		if (!user.IsWithinReach(coords.longitude, coords.latitude))
 		{
@@ -50,17 +54,17 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task GetIn(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = await _mapStorage.GetUnit(identity.GuidId).ConfigureAwait(true);
+		var user = _unitsStorage.GetItem(identity.GuidId);
 		if (user.Id == guidId)
 		{
 			await GetOut(guidId, cancellationToken).ConfigureAwait(true);
 			return;
 		}
-		var unit = await _mapStorage.GetUnit(guidId).ConfigureAwait(true);
+		var unit = _unitsStorage.GetItem(guidId);
 
-		if (!user.IsWithinReach(unit.CurrentLongitude, unit.CurrentLatitude))
+		if (!user.IsWithinReach(unit.Longitude, unit.Latitude))
 		{
-			await _movableService.StartMoveAlongRoute(user.Id, unit.CurrentLatitude, unit.CurrentLongitude, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMoveAlongRoute(user.Id, unit.Latitude, unit.Longitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
@@ -70,30 +74,30 @@ public class InteractionObjectsService : IInteractionObjectsService
 		if (unit is Car)
 		{
 			user.ChangeUnitType(UnitTypes.Car);
-			await _mapStorage.SetUnit(user).ConfigureAwait(true);
-			await _mapStorage.RemoveUnit(unit).ConfigureAwait(true);
+			_unitsStorage.SetItem(user);
+			_unitsStorage.RemoveItem(unit);
 		}
 	}
 
 	public async Task GetOut(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = await _mapStorage.GetUnit(identity.GuidId).ConfigureAwait(true);
+		var user = _unitsStorage.GetItem(identity.GuidId);
 		user.ChangeUnitType(UnitTypes.Player);
 
-		await _mapStorage.SetUnit(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.CurrentLatitude, user.CurrentLongitude, 100)).ConfigureAwait(true);
-		await _mapStorage.SetUnit(user).ConfigureAwait(true);
+		_unitsStorage.SetItem(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
+		_unitsStorage.SetItem(user);
 	}
 
-	private static async Task<(float latitude, float longitude)> GetCoordinates(bool isUnit, Guid id, IMapStorage mapStorage)
+	private static (float latitude, float longitude) GetCoordinates(bool isUnit, Guid id, IStorage<Unit> unitStorage, IStorage<Box> boxStorage)
 	{
 		if (isUnit)
 		{
-			var unit = await mapStorage.GetUnit(id).ConfigureAwait(true);
-			return (unit.CurrentLatitude, unit.CurrentLongitude);
+			var unit = unitStorage.GetItem(id);
+			return (unit.Latitude, unit.Longitude);
 		}
 
-		var box = await mapStorage.GetItem(id).ConfigureAwait(true);
+		var box = boxStorage.GetItem(id);
 		return (box.Latitude, box.Longitude);
 	}
 }

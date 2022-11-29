@@ -1,9 +1,10 @@
 ﻿using System.Collections.Concurrent;
-using System.Diagnostics;
 using ConcurrentCollections;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
+using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
+using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 using WorldWar.YandexClient.Interfaces;
@@ -12,15 +13,17 @@ namespace WorldWar.Internal;
 
 public class WorldWarMapService : IWorldWarMapService
 {
-	private readonly IMapStorage _mapStorage;
+	private readonly IStorage<Unit> _unitsStorage;
+	private readonly IStorage<Box> _boxStorage;
 	private readonly IAuthUser _authUser;
 	private readonly ITaskDelay _taskDelay;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly ILogger<WorldWarMapService> _logger;
 
-	public WorldWarMapService(IMapStorage mapStorage, IAuthUser authUser, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter, ILogger<WorldWarMapService> logger)
+	public WorldWarMapService(ICacheFactory cacheFactory, IAuthUser authUser, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter, ILogger<WorldWarMapService> logger)
 	{
-		_mapStorage = mapStorage ?? throw new ArgumentNullException(nameof(mapStorage));
+		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_boxStorage = cacheFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(cacheFactory));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
@@ -33,61 +36,50 @@ public class WorldWarMapService : IWorldWarMapService
 		{
 			var authUser = await _authUser.GetIdentity().ConfigureAwait(true);
 			var mapGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
-			Stopwatch sw = new Stopwatch();
 
-			try
+			while (true)
 			{
-				while (true)
+				var visibleGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
+
+				var user = _unitsStorage.GetItem(authUser.GuidId);
+				var units = viewAllUnits
+					? _unitsStorage.GetItems()
+					: _unitsStorage.GetVisibleItems(user.Latitude, user.Longitude, user.ViewingDistance);
+
+				var toUpdateList = new ConcurrentBag<Unit>();
+
+				await Parallel.ForEachAsync(units, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, async (unit, token) =>
 				{
-					var visibleGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
+					token.ThrowIfCancellationRequested();
 
-					var task = viewAllUnits
-						? _mapStorage.GetUnits()
-						: _mapStorage.GetVisibleUnits(authUser.GuidId);
-
-					var units = await task.ConfigureAwait(true);
-					var toUpdateList = new ConcurrentBag<Unit>();
-					sw.Reset();
-					sw.Start();
-					await Parallel.ForEachAsync(units, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, async (unit, token) =>
+					if (!mapGuids.Contains((unit.Id, unit.UnitType)))
 					{
-						token.ThrowIfCancellationRequested();
-
-						if (!mapGuids.Contains((unit.Id, unit.UnitType)))
-						{
-							await _yandexJsClientAdapter.AddUnit(unit).ConfigureAwait(true);
-							mapGuids.Add((unit.Id, unit.UnitType));
-						}
-
-						visibleGuids.Add((unit.Id, unit.UnitType));
-						toUpdateList.Add(unit);
-					}).ConfigureAwait(true);
-					sw.Stop();
-					_logger.LogInformation("time: {ElapsetTime}", sw.ElapsedMilliseconds);
-
-					if (toUpdateList.Any())
-					{
-						await _yandexJsClientAdapter.UpdateUnits(toUpdateList.ToArray()).ConfigureAwait(true);
+						await _yandexJsClientAdapter.AddUnit(unit).ConfigureAwait(true);
+						mapGuids.Add((unit.Id, unit.UnitType));
 					}
 
-					var removableGuids = mapGuids.Except(visibleGuids).ToArray();
-					if (removableGuids.Any())
-					{
-						await _yandexJsClientAdapter.RemoveGeoObjects(removableGuids.Select(x => x.Item1).ToArray()).ConfigureAwait(true);
+					visibleGuids.Add((unit.Id, unit.UnitType));
+					toUpdateList.Add(unit);
+				}).ConfigureAwait(true);
 
-						foreach (var removableGuid in removableGuids)
-						{
-							mapGuids.TryRemove(removableGuid);
-						}
-					}
-					await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(true);
+				if (toUpdateList.Any())
+				{
+					await _yandexJsClientAdapter.UpdateUnits(toUpdateList.ToArray()).ConfigureAwait(true);
 				}
+
+				var removableGuids = mapGuids.Except(visibleGuids).ToArray();
+				if (removableGuids.Any())
+				{
+					await _yandexJsClientAdapter.RemoveGeoObjects(removableGuids.Select(x => x.Item1).ToArray()).ConfigureAwait(true);
+
+					foreach (var removableGuid in removableGuids)
+					{
+						mapGuids.TryRemove(removableGuid);
+					}
+				}
+				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(true);
 			}
-			catch (Exception e)
-			{
-				Console.WriteLine(e);
-				throw;
-			}
+
 		}, CancellationToken.None);
 
 		return Task.CompletedTask;
@@ -105,11 +97,11 @@ public class WorldWarMapService : IWorldWarMapService
 			{
 				var visibleGuids = new HashSet<Guid>();
 
-				var task = viewAllItems
-					? _mapStorage.GetItems()
-					: _mapStorage.GetVisibleItems(authUser.GuidId);
+				var user = _unitsStorage.GetItem(authUser.GuidId);
 
-				var items = await task.ConfigureAwait(true);
+				var items = viewAllItems
+					? _boxStorage.GetItems()
+					: _boxStorage.GetVisibleItems(user.Latitude, user.Longitude, user.ViewingDistance);
 
 				foreach (var item in items)
 				{
