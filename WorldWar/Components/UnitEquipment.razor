@@ -1,10 +1,12 @@
 ﻿@using WorldWar.Core.Interfaces
 @using WorldWar.Abstractions.Interfaces
 @using WorldWar.Abstractions.Models
+@using WorldWar.Abstractions.Models.Items.Base
 @using WorldWar.Abstractions.Models.Units
 @using WorldWar.Components.States
+@using WorldWar.Core.Cache
 
-@inject IMapStorage MapStorage
+@inject ICacheFactory CacheFactory
 @inject IAuthUser AuthUser
 @inject DraggableItem DraggableItem
 @inject UnitEquipmentDialogState UnitEquipmentDialogState;
@@ -28,8 +30,13 @@
 	private string _modalDisplay = "none;";
 	private Unit? _unit;
 
+	private IStorage<Box> _boxStorage;
+	private IStorage<Unit> _unitsStorage;
+	
 	protected override void OnInitialized()
 	{
+		_boxStorage = CacheFactory.Create<Box>();
+		_unitsStorage = CacheFactory.Create<Unit>();
 		UnitEquipmentDialogState.OnChange += UnitEquipmentDialogStateOnChange();
 	}
 
@@ -37,11 +44,11 @@
 	{
 		return async () => await Open();
 	}
-	
+
 	[JSInvokable("Open")]
-	public async Task Open(Guid guid)
+	public void Open(Guid guid)
 	{
-		_unit = await MapStorage.GetUnit(guid).ConfigureAwait(true);
+		_unit = _unitsStorage.GetItem(guid);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -49,7 +56,7 @@
 	public async Task Open()
 	{
 		var user = await AuthUser.GetIdentity();
-		_unit = await MapStorage.GetUnit(user.GuidId).ConfigureAwait(true);
+		_unit = _unitsStorage.GetItem(user.GuidId);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -63,13 +70,13 @@
 		return Task.CompletedTask;
 	}
 
-	public async Task Save()
+	public void Save()
 	{
 		_modalDisplay = "none";
-		await MapStorage.SetUnit(_bodyEquipment!.Unit!);
+		_unitsStorage.SetItem(_bodyEquipment!.Unit!);
 		StateHasChanged();
 	}
-	
+
 	private bool IsShow()
 	{
 		return _modalDisplay.Equals("block;", StringComparison.Ordinal);

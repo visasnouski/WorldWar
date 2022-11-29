@@ -3,10 +3,11 @@
 @using WorldWar.Abstractions.Models.Items.Base
 @using WorldWar.Abstractions.Models.Units
 @using WorldWar.Components.States
+@using WorldWar.Core.Cache
 @using WorldWar.Core.Interfaces
 
+@inject ICacheFactory CacheFactory
 @inject IAuthUser AuthUser
-@inject IMapStorage MapStorage
 @inject InteractStates InteractStates
 @inject DraggableItem DraggableItem
 
@@ -32,6 +33,9 @@
 </div>
 
 @code {
+	private IStorage<Box> _boxStorage;
+	private IStorage<Unit> _unitsStorage;
+
 	private BodyEquipment? _bodyEquipment;
 	private BoxContents? _boxContents;
 	private string _modalDisplay = string.Empty;
@@ -40,6 +44,8 @@
 
 	protected override void OnInitialized()
 	{
+		_unitsStorage = CacheFactory.Create<Unit>();
+		_boxStorage = CacheFactory.Create<Box>();
 		DraggableItem.OnChange += StateHasChanged;
 		InteractStates.OnChange += InteractStatesOnChange();
 	}
@@ -57,7 +63,7 @@
 	{
 		if (isUnit)
 		{
-			var unit = await MapStorage.GetUnit(id);
+			var unit = _unitsStorage.GetItem(id);
 
 			var trophies = new List<Item>(unit.Loot.Items)
 			{
@@ -66,17 +72,17 @@
 				unit.HeadProtection,
 			};
 
-			_box = new Box(Guid.NewGuid(), unit.CurrentLatitude, unit.CurrentLongitude, trophies, unit.Rotate);
-			await MapStorage.SetItem(_box);
-			await MapStorage.RemoveUnit(unit);
+			_box = new Box(Guid.NewGuid(), unit.Latitude, unit.Longitude, trophies, unit.Rotate);
+			_boxStorage.SetItem(_box);
+			_unitsStorage.RemoveItem(unit);
 		}
 		else
 		{
-			_box = await MapStorage.GetItem(id);
+			_box = _boxStorage.GetItem(id);
 		}
 
 		var user = await AuthUser.GetIdentity();
-		_unit = await MapStorage.GetUnit(user.GuidId);
+		_unit = _unitsStorage.GetItem(user.GuidId);
 		_modalDisplay = "block;";
 	}
 
@@ -86,13 +92,13 @@
 		return Task.CompletedTask;
 	}
 
-	public async Task Save()
+	public void Save()
 	{
 		_modalDisplay = "none";
-		await MapStorage.SetUnit(_unit!);
+		_unitsStorage.SetItem(_unit!);
 		if (!_box!.Loot.Items.Any())
 		{
-			await MapStorage.RemoveItem(_box);
+			_boxStorage.RemoveItem(_box);
 		}
 		StateHasChanged();
 	}

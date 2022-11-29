@@ -8,9 +8,10 @@
 @using WorldWar.Abstractions.Models.Units
 @using WorldWar.Components
 @using WorldWar.Abstractions.Extensions
+@using WorldWar.Core.Cache
 
+@inject ICacheFactory CacheFactory
 @inject IWorldWarMapService WorldWarMapService
-@inject IMapStorage MapStorage
 @inject IYandexJsClientAdapter YandexJsClientAdapter
 @inject IUserManagement UserManagement;
 @inject DraggableItem DraggableItem;
@@ -51,12 +52,21 @@
 </body>
 
 @code {
+	private IStorage<Unit> _unitsStorage;
+	private IStorage<Box> _boxStorage;
+
 	private UnitEquipment? _unitEquipment;
 	private Interact? _interact;
 	private ItemsObserver? _itemsObserver;
 	private ModalDialogBoxContents? _modalDialogBoxContents;
 
 	private string _sideNavWidth = "0px";
+
+	protected override void OnInitialized()
+	{
+		_unitsStorage = CacheFactory.Create<Unit>();
+		_boxStorage = CacheFactory.Create<Box>();
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -93,7 +103,7 @@
 	{
 		var coords = await YandexJsClientAdapter.GetCenterCoords();
 		var guid = Guid.NewGuid();
-		await MapStorage.SetUnit(new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
+		_unitsStorage.SetItem(new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
 	}
 
 	private async Task HandleDrop(DragEventArgs arg)
@@ -102,7 +112,7 @@
 		{
 			var coords = await YandexJsClientAdapter.ConvertPixelCoordsToGlobal(arg.PageX, arg.PageY);
 			var box = new Box(Guid.NewGuid(), coords[0], coords[1], new List<Item>() { DraggableItem.Value.Item });
-			await MapStorage.SetItem(box);
+			_boxStorage.SetItem(box);
 		}
 	}
 }

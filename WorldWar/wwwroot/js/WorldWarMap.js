@@ -106,7 +106,7 @@ export function addUnit(unit) {
     const myGeoObject = new window.ymaps.GeoObject({
         geometry: {
             type: 'Point',
-            coordinates: [unit.currentLatitude, unit.currentLongitude]
+            coordinates: [unit.latitude, unit.longitude]
         },
         properties: {
             hintContent: unit.mobTypesString + ' ' + unit.health,
@@ -190,7 +190,7 @@ export function addCar(car) {
     const myGeoObject = new window.ymaps.GeoObject({
         geometry: {
             type: 'Point',
-            coordinates: [car.currentLatitude, car.currentLongitude]
+            coordinates: [car.latitude, car.longitude]
         },
         properties: {
             hintContent: car.mobTypesString + ' ' + car.health,
@@ -447,7 +447,7 @@ export function updateUnit(unit) {
             geoObject.properties.set('weaponType', unit.weapon.weaponType);
             geoObject.properties.set('rotate', unit.rotate);
             const startCoords = geoObject.geometry.getCoordinates();
-            const endCoords = [unit.currentLatitude, unit.currentLongitude];
+            const endCoords = [unit.latitude, unit.longitude];
 
             if (unit.health <= 0) {
                 geoObject.properties.set('spriteX', 360);

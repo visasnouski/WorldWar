@@ -1,8 +1,11 @@
 ﻿@using WorldWar.Abstractions
 @using WorldWar.Abstractions.Models.Items.Base
+@using WorldWar.Abstractions.Models.Units
 @using WorldWar.Core;
+@using WorldWar.Core.Cache
 @using WorldWar.Core.Interfaces
-@inject IMapStorage MapStorage
+
+@inject ICacheFactory CacheFactory
 
 <div class="modal show" role="dialog" style="position: fixed; display: @_modalDisplay" ondragover="event.preventDefault();">
 	<div class="modal-dialog" role="document">
@@ -24,23 +27,31 @@
 	private Box? _box;
 	private BoxContents? _boxContents;
 	private string _modalDisplay = "none;";
-	
-	private async Task Save()
+
+	private IStorage<Box> _boxStorage;
+	private IStorage<Unit> _unitsStorage;
+
+	protected override void OnInitialized()
+	{
+		_unitsStorage = CacheFactory.Create<Unit>();
+		_boxStorage = CacheFactory.Create<Box>();
+	}
+
+	private void Save()
 	{
 		if (!_box!.Loot.Items.Any())
 		{
-			await MapStorage.RemoveItem(_box);
+			_boxStorage.RemoveItem(_box);
 		}
 		_modalDisplay = "none;";
 		StateHasChanged();
 	}
 
 	[JSInvokable("Open")]
-	public async Task Open(Guid boxId)
+	public void Open(Guid boxId)
 	{
-		_box = await MapStorage.GetItem(boxId);
+		_box = _boxStorage.GetItem(boxId);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
-
 }
