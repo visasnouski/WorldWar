@@ -30,7 +30,7 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.GetItem(identity.GuidId);
+		var user = _unitsStorage.Get(identity.GuidId);
 		var coords = GetCoordinates(isUnit, guidId, _unitsStorage, _boxStorage);
 
 		if (!user.IsWithinReach(coords.longitude, coords.latitude))
@@ -54,13 +54,13 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task GetIn(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.GetItem(identity.GuidId);
+		var user = _unitsStorage.Get(identity.GuidId);
 		if (user.Id == guidId)
 		{
 			await GetOut(guidId, cancellationToken).ConfigureAwait(true);
 			return;
 		}
-		var unit = _unitsStorage.GetItem(guidId);
+		var unit = _unitsStorage.Get(guidId);
 
 		if (!user.IsWithinReach(unit.Longitude, unit.Latitude))
 		{
@@ -74,30 +74,30 @@ public class InteractionObjectsService : IInteractionObjectsService
 		if (unit is Car)
 		{
 			user.ChangeUnitType(UnitTypes.Car);
-			_unitsStorage.SetItem(user);
-			_unitsStorage.RemoveItem(unit);
+			_unitsStorage.Set(user);
+			_unitsStorage.Remove(unit);
 		}
 	}
 
 	public async Task GetOut(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.GetItem(identity.GuidId);
+		var user = _unitsStorage.Get(identity.GuidId);
 		user.ChangeUnitType(UnitTypes.Player);
 
-		_unitsStorage.SetItem(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
-		_unitsStorage.SetItem(user);
+		_unitsStorage.Set(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
+		_unitsStorage.Set(user);
 	}
 
 	private static (float latitude, float longitude) GetCoordinates(bool isUnit, Guid id, IStorage<Unit> unitStorage, IStorage<Box> boxStorage)
 	{
 		if (isUnit)
 		{
-			var unit = unitStorage.GetItem(id);
+			var unit = unitStorage.Get(id);
 			return (unit.Latitude, unit.Longitude);
 		}
 
-		var box = boxStorage.GetItem(id);
+		var box = boxStorage.Get(id);
 		return (box.Latitude, box.Longitude);
 	}
 }

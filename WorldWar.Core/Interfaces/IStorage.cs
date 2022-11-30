@@ -5,16 +5,16 @@ namespace WorldWar.Core.Interfaces
 	public interface IStorage<T>
 	where T : IStorable
 	{
-		public T GetItem(Guid id);
+		public T Get(Guid id);
 
-		public void SetItem(T item);
+		public void Set(T item);
 
-		public IEnumerable<T> GetItems();
+		public IEnumerable<T> Get();
 
-		public void RemoveItem(T item);
+		public void Remove(T item);
 
-		public IEnumerable<T> GetVisibleItems(float latitude, float longitude, float viewingDistance);
+		public IEnumerable<T> GetByFilter(Func<T, bool> predicate);
 
-		void SetItem(IReadOnlyCollection<T> items);
+		void Set(IReadOnlyCollection<T> items);
 	}
 }

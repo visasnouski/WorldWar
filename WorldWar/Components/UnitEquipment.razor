@@ -48,7 +48,7 @@
 	[JSInvokable("Open")]
 	public void Open(Guid guid)
 	{
-		_unit = _unitsStorage.GetItem(guid);
+		_unit = _unitsStorage.Get(guid);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -56,7 +56,7 @@
 	public async Task Open()
 	{
 		var user = await AuthUser.GetIdentity();
-		_unit = _unitsStorage.GetItem(user.GuidId);
+		_unit = _unitsStorage.Get(user.GuidId);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -73,7 +73,7 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.SetItem(_bodyEquipment!.Unit!);
+		_unitsStorage.Set(_bodyEquipment!.Unit!);
 		StateHasChanged();
 	}
 

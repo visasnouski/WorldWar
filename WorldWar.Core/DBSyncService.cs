@@ -22,12 +22,12 @@ public class DbSyncService : BackgroundService
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		var dbUnits = _dbRepository.Units;
-		_unitsStorage.SetItem(dbUnits);
+		_unitsStorage.Set(dbUnits);
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
 			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(true);
-			var mapUnits = _unitsStorage.GetItems();
+			var mapUnits = _unitsStorage.Get();
 			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(true);
 		}
 	}

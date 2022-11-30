@@ -33,13 +33,14 @@ internal class AiService : BackgroundService
 		while (!cancellationToken.IsCancellationRequested)
 		{
 
-			var units = _unitsStorage.GetItems();
+			var units = _unitsStorage.Get();
 			var mobs = units.Where(unit => unit.UnitType == UnitTypes.Mob
 										   && unit.Location.StartPos == unit.Location.CurrentPos
 										   && unit.Health > 0);
-			await Parallel.ForEachAsync(mobs, cancellationToken, (unit, token) =>
+
+			foreach (var unit in mobs)
 			{
-				token.ThrowIfCancellationRequested();
+				cancellationToken.ThrowIfCancellationRequested();
 
 				var latitudeRnd = (float)RandomNumberGenerator.GetInt32(-99, 99) / 100;
 				var longitudeRnd = (float)RandomNumberGenerator.GetInt32(-99, 99) / 100;
@@ -47,9 +48,8 @@ internal class AiService : BackgroundService
 				var newLongitude = unit.Longitude + longitudeRnd;
 
 				unit.RotateUnit(newLongitude, newLatitude);
-				managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
-				return ValueTask.CompletedTask;
-			}).ConfigureAwait(true);
+				await managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
+			}
 
 			await _taskDelay.Delay(TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(true);
 		}

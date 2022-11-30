@@ -41,7 +41,7 @@
 	{
 		if (!_box!.Loot.Items.Any())
 		{
-			_boxStorage.RemoveItem(_box);
+			_boxStorage.Remove(_box);
 		}
 		_modalDisplay = "none;";
 		StateHasChanged();
@@ -50,7 +50,7 @@
 	[JSInvokable("Open")]
 	public void Open(Guid boxId)
 	{
-		_box = _boxStorage.GetItem(boxId);
+		_box = _boxStorage.Get(boxId);
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}

@@ -116,7 +116,7 @@
 		{
 			case Weapon weapon
 				when _equipmentPosition is EquipmentPosition.LeftHand or EquipmentPosition.RightHand:
-				Unit?.SetWeapon(weapon);
+				Unit!.SetWeapon(weapon);
 				await RemoveItemFromSource();
 
 				break;

@@ -103,7 +103,7 @@
 	{
 		var coords = await YandexJsClientAdapter.GetCenterCoords();
 		var guid = Guid.NewGuid();
-		_unitsStorage.SetItem(new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
+		_unitsStorage.Set(new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
 	}
 
 	private async Task HandleDrop(DragEventArgs arg)
@@ -112,7 +112,7 @@
 		{
 			var coords = await YandexJsClientAdapter.ConvertPixelCoordsToGlobal(arg.PageX, arg.PageY);
 			var box = new Box(Guid.NewGuid(), coords[0], coords[1], new List<Item>() { DraggableItem.Value.Item });
-			_boxStorage.SetItem(box);
+			_boxStorage.Set(box);
 		}
 	}
 }
