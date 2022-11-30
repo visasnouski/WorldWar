@@ -80,6 +80,7 @@ namespace WorldWar.Abstractions.Extensions
 		
 		public static void ChangeUnitType(this Unit unit, UnitTypes unitType)
 		{
+			// TODO The state change is not implemented very well.
 			if (unit == null)
 			{
 				throw new ArgumentNullException(nameof(unit));

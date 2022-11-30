@@ -28,6 +28,7 @@ internal class YandexJsClient : IYandexJsClient
 		var yandexSrc = $"https://api-maps.yandex.ru/2.1/?apikey={_yandexSettings.ApiKey}&lang=ru_RU";
 		await yandexMapJs.InvokeVoidAsync("addScript", yandexSrc).ConfigureAwait(true);
 
+		// TODO Find a way to await for the initialization of the Yandex map in javascript
 		await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(true);
 
 		var worldMapJs = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", jsSrc).ConfigureAwait(true);

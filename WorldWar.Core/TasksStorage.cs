@@ -31,8 +31,8 @@ public class TasksStorage : ITasksStorage
 		return false;
 	}
 
-	public void TryRemove(Guid unitId)
+	public bool TryRemove(Guid unitId)
 	{
-		_storage.TryRemove(unitId, out _);
+		return _storage.TryRemove(unitId, out _);
 	}
 }

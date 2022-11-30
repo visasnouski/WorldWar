@@ -6,5 +6,5 @@ public interface ITasksStorage
 
     public bool TryGetValue(Guid unitId, out (CancellationTokenSource, Task)? task);
 
-    public void TryRemove(Guid unitId);
+    public bool TryRemove(Guid unitId);
 }
