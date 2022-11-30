@@ -31,7 +31,7 @@ internal class MovableService : IMovableService
 	public async Task StartMoveAlongRoute(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.GetItem(unitId);
+		var user = _unitsStorage.Get(unitId);
 
 		var routingMode = user.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
@@ -77,18 +77,18 @@ internal class MovableService : IMovableService
 				}
 				stopWatch.Restart();
 				user.RotateUnit(points[index][1], points[index][0], points[index - 1][1], points[index - 1][0]);
-				_unitsStorage.SetItem(user);
+				_unitsStorage.Set(user);
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.SetItem(user);
+		_unitsStorage.Set(user);
 	}
 
 	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.GetItem(unitId);
+		var user = _unitsStorage.Get(unitId);
 
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
@@ -119,26 +119,26 @@ internal class MovableService : IMovableService
 
 				stopWatch.Restart();
 				user.RotateUnit(longitude, latitude, user.Longitude, user.Latitude);
-				_unitsStorage.SetItem(user);
+				_unitsStorage.Set(user);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.SetItem(user);
+		_unitsStorage.Set(user);
 	}
 
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
-		var myUnit = _unitsStorage.GetItem(unitId);
+		var myUnit = _unitsStorage.Get(unitId);
 		var startDateTime = DateTime.Now;
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			var targetUnit = _unitsStorage.GetItem(targetGuid);
+			var targetUnit = _unitsStorage.Get(targetGuid);
 
 			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
 
 			Move(myUnit, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
-			_unitsStorage.SetItem(myUnit);
+			_unitsStorage.Set(myUnit);
 
 			if (myUnit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude, distance))
 			{

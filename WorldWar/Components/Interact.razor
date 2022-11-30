@@ -63,7 +63,7 @@
 	{
 		if (isUnit)
 		{
-			var unit = _unitsStorage.GetItem(id);
+			var unit = _unitsStorage.Get(id);
 
 			var trophies = new List<Item>(unit.Loot.Items)
 			{
@@ -73,16 +73,16 @@
 			};
 
 			_box = new Box(Guid.NewGuid(), unit.Latitude, unit.Longitude, trophies, unit.Rotate);
-			_boxStorage.SetItem(_box);
-			_unitsStorage.RemoveItem(unit);
+			_boxStorage.Set(_box);
+			_unitsStorage.Remove(unit);
 		}
 		else
 		{
-			_box = _boxStorage.GetItem(id);
+			_box = _boxStorage.Get(id);
 		}
 
 		var user = await AuthUser.GetIdentity();
-		_unit = _unitsStorage.GetItem(user.GuidId);
+		_unit = _unitsStorage.Get(user.GuidId);
 		_modalDisplay = "block;";
 	}
 
@@ -95,10 +95,10 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.SetItem(_unit!);
+		_unitsStorage.Set(_unit!);
 		if (!_box!.Loot.Items.Any())
 		{
-			_boxStorage.RemoveItem(_box);
+			_boxStorage.Remove(_box);
 		}
 		StateHasChanged();
 	}

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Numerics;
 using ConcurrentCollections;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
@@ -41,10 +42,10 @@ public class WorldWarMapService : IWorldWarMapService
 			{
 				var visibleGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
 
-				var user = _unitsStorage.GetItem(authUser.GuidId);
+				var user = _unitsStorage.Get(authUser.GuidId);
 				var units = viewAllUnits
-					? _unitsStorage.GetItems()
-					: _unitsStorage.GetVisibleItems(user.Latitude, user.Longitude, user.ViewingDistance);
+					? _unitsStorage.Get()
+					: _unitsStorage.GetByFilter(item => CanSee(user.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
 
 				var toUpdateList = new ConcurrentBag<Unit>();
 
@@ -85,7 +86,6 @@ public class WorldWarMapService : IWorldWarMapService
 		return Task.CompletedTask;
 	}
 
-
 	public Task RunItemsAutoRefresh(bool viewAllItems = false)
 	{
 		_ = Task.Run(async () =>
@@ -97,11 +97,11 @@ public class WorldWarMapService : IWorldWarMapService
 			{
 				var visibleGuids = new HashSet<Guid>();
 
-				var user = _unitsStorage.GetItem(authUser.GuidId);
+				var user = _unitsStorage.Get(authUser.GuidId);
 
 				var items = viewAllItems
-					? _boxStorage.GetItems()
-					: _boxStorage.GetVisibleItems(user.Latitude, user.Longitude, user.ViewingDistance);
+					? _boxStorage.Get()
+					: _boxStorage.GetByFilter(item => CanSee(user.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
 
 				foreach (var item in items)
 				{
@@ -125,5 +125,10 @@ public class WorldWarMapService : IWorldWarMapService
 		}, CancellationToken.None);
 
 		return Task.CompletedTask;
+	}
+
+	private static bool CanSee(float centerLatitude, float centerLongitude, float latitude, float longitude, float viewingDistance)
+	{
+		return Vector2.Distance(new Vector2(centerLongitude, centerLatitude), new Vector2(longitude, latitude)) < viewingDistance;
 	}
 }

@@ -31,7 +31,7 @@ public class UserManagement : IUserManagement
 		try
 		{
 			var unit = await _dbRepository.GetUnit(identity.GuidId).ConfigureAwait(true);
-			_unitsStorage.SetItem(unit);
+			_unitsStorage.Set(unit);
 		}
 		catch (UnitNotFoundException)
 		{
@@ -48,7 +48,7 @@ public class UserManagement : IUserManagement
 				});
 
 			await _dbRepository.SetUnit(unit).ConfigureAwait(true);
-			_unitsStorage.SetItem(unit);
+			_unitsStorage.Set(unit);
 		}
 	}
 

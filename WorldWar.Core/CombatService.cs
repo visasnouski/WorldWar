@@ -32,8 +32,8 @@ internal class CombatService : ICombatService
 	public async Task AttackUnit(Guid enemyGuid, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.GetItem(identity.GuidId);
-		var enemy = _unitsStorage.GetItem(enemyGuid);
+		var user = _unitsStorage.Get(identity.GuidId);
+		var enemy = _unitsStorage.Get(enemyGuid);
 
 		if (user.Weapon.WeaponType == WeaponTypes.Handguns && !user.IsWithinReach(enemy.Longitude, enemy.Latitude, user.Weapon.Distance))
 		{
@@ -48,7 +48,7 @@ internal class CombatService : ICombatService
 
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			enemy = _unitsStorage.GetItem(enemyGuid);
+			enemy = _unitsStorage.Get(enemyGuid);
 			user.RotateUnit(enemy.Longitude, enemy.Latitude);
 
 			if (user.Weapon.Ammo <= 0)
@@ -74,7 +74,7 @@ internal class CombatService : ICombatService
 				break;
 			}
 
-			_unitsStorage.SetItem(enemy);
+			_unitsStorage.Set(enemy);
 
 			if (user.Health <= 0)
 			{
@@ -82,7 +82,7 @@ internal class CombatService : ICombatService
 				break;
 			}
 
-			_unitsStorage.SetItem(user);
+			_unitsStorage.Set(user);
 		}
 	}
 

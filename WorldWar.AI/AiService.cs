@@ -33,7 +33,7 @@ internal class AiService : BackgroundService
 		while (!cancellationToken.IsCancellationRequested)
 		{
 
-			var units = _unitsStorage.GetItems();
+			var units = _unitsStorage.Get();
 			var mobs = units.Where(unit => unit.UnitType == UnitTypes.Mob
 										   && unit.Location.StartPos == unit.Location.CurrentPos
 										   && unit.Health > 0);

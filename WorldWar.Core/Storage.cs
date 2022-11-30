@@ -11,7 +11,7 @@ public class Storage<T> : IStorage<T>
 {
 	private static readonly ConcurrentDictionary<Guid, T> ItemsStorage = new();
 
-	public T GetItem(Guid id)
+	public T Get(Guid id)
 	{
 		if (ItemsStorage.TryGetValue(id, out var item))
 		{
@@ -21,7 +21,7 @@ public class Storage<T> : IStorage<T>
 		throw new ItemNotFoundException("item not found");
 	}
 
-	public void SetItem(T item)
+	public void Set(T item)
 	{
 		if (item == null)
 		{
@@ -31,12 +31,12 @@ public class Storage<T> : IStorage<T>
 		ItemsStorage.AddOrUpdate(item.Id, item, (_, _) => item);
 	}
 
-	public IEnumerable<T> GetItems()
+	public IEnumerable<T> Get()
 	{
 		return ItemsStorage.Values.Select(x => x);
 	}
 
-	public void RemoveItem(T item)
+	public void Remove(T item)
 	{
 		if (item == null)
 		{
@@ -46,13 +46,12 @@ public class Storage<T> : IStorage<T>
 		ItemsStorage.TryRemove(item.Id, out _);
 	}
 
-	public IEnumerable<T> GetVisibleItems(float latitude, float longitude, float viewingDistance)
+	public IEnumerable<T> GetByFilter(Func<T,bool> predicate)
 	{
-		return ItemsStorage.Values.Where(item =>
-			CanSee(latitude, longitude, item.Latitude, item.Longitude, viewingDistance));
+		return ItemsStorage.Values.Where(predicate);
 	}
 
-	public void SetItem(IReadOnlyCollection<T> items)
+	public void Set(IReadOnlyCollection<T> items)
 	{
 		if (items == null)
 		{
@@ -61,13 +60,7 @@ public class Storage<T> : IStorage<T>
 
 		foreach (var item in items)
 		{
-			SetItem(item);
+			Set(item);
 		}
-	}
-
-
-	private static bool CanSee(float centerLatitude, float centerLongitude, float latitude, float longitude, float viewingDistance)
-	{
-		return Vector2.Distance(new Vector2(centerLongitude, centerLatitude), new Vector2(longitude, latitude)) < viewingDistance;
 	}
 }
