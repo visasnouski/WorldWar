@@ -5,7 +5,7 @@ using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.YandexClient.Internal;
 
-internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
+internal sealed class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 {
 	private readonly Lazy<Task<HubConnection>> _hubConnection;
 	private bool _isDisposed;
@@ -18,39 +18,39 @@ internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 				.WithUrl(navigationManager.ToAbsoluteUri("/yandexMapHub"))
 				.Build();
 
-			await hubConnection.StartAsync().ConfigureAwait(true);
+			await hubConnection.StartAsync().ConfigureAwait(false);
 			return hubConnection;
 		});
 	}
 
 	public async Task KillUnit(Guid id)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendKillUnit), id).ConfigureAwait(true);
+		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendKillUnit), id).ConfigureAwait(false);
 	}
 
 	public async Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendShootUnit), id, enemyLatitude, enemyLongitude).ConfigureAwait(true);
+		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendShootUnit), id, enemyLatitude, enemyLongitude).ConfigureAwait(false);
 	}
 
 	public async Task SendMessage(Guid id, string message)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendMessage), id, message).ConfigureAwait(true);
+		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendMessage), id, message).ConfigureAwait(false);
 	}
 
 	public async Task PlaySound(string id, string src)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendPlaySound), id, src).ConfigureAwait(true);
+		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendPlaySound), id, src).ConfigureAwait(false);
 	}
 
 	public async Task RotateUnit(Guid id, float latitude, float longitude)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(true);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendRotateUnit), id, latitude, longitude).ConfigureAwait(true);
+		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendRotateUnit), id, latitude, longitude).ConfigureAwait(false);
 	}
 
 	public void Dispose()
@@ -59,7 +59,7 @@ internal class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposable
 		GC.SuppressFinalize(this);
 	}
 
-	protected virtual void Dispose(bool disposing)
+	private void Dispose(bool disposing)
 	{
 		if (_isDisposed)
 		{
