@@ -14,10 +14,6 @@ export function setModalDialogBoxContents(value) {
     window.modalDialogBoxContents = value;
 }
 
-export function setUserGuid(value) {
-    window.userGuid = value;
-}
-
 // When click on an object on the map, a general click event is triggered, which leads to a double move.
 // Ignore the global right-click event.
 var ignoreRightClick = false;

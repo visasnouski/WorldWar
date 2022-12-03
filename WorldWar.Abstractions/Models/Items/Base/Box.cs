@@ -1,9 +1,8 @@
-﻿using WorldWar.Abstractions.Models.Units;
-using WorldWar.Abstractions.Models.Units.Base;
+﻿using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Items.Base;
 
-public class Box : IStorable
+public class Box
 {
 	public float Latitude { get; }
 

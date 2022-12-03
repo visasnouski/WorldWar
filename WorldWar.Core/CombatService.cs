@@ -74,7 +74,7 @@ internal class CombatService : ICombatService
 				break;
 			}
 
-			_unitsStorage.Set(enemy);
+			_unitsStorage.Set(enemy.Id, enemy);
 
 			if (user.Health <= 0)
 			{
@@ -82,7 +82,7 @@ internal class CombatService : ICombatService
 				break;
 			}
 
-			_unitsStorage.Set(user);
+			_unitsStorage.Set(user.Id, user);
 		}
 	}
 

@@ -32,7 +32,7 @@
 
 	private IStorage<Box> _boxStorage;
 	private IStorage<Unit> _unitsStorage;
-	
+
 	protected override void OnInitialized()
 	{
 		_boxStorage = CacheFactory.Create<Box>();
@@ -73,7 +73,7 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.Set(_bodyEquipment!.Unit!);
+		_unitsStorage.Set(_bodyEquipment!.Unit!.Id, _bodyEquipment!.Unit!);
 		StateHasChanged();
 	}
 

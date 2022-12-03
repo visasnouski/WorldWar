@@ -19,10 +19,15 @@ public class DbSyncService : BackgroundService
 		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 	}
+
 	protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 	{
 		var dbUnits = _dbRepository.Units;
-		_unitsStorage.Set(dbUnits);
+
+		foreach (var unit in dbUnits)
+		{
+			_unitsStorage.Set(unit.Id, unit);
+		}
 
 		while (!stoppingToken.IsCancellationRequested)
 		{

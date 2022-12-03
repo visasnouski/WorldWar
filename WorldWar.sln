@@ -15,7 +15,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Abstractions", "Wo
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Tests", "WorldWar.Tests\WorldWar.Tests.csproj", "{7A52B150-0B67-4ADB-8196-E96C52E8A3D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldWar.Repository", "WorldWar.Repository\WorldWar.Repository.csproj", "{F905466A-8BDB-4EAF-A165-A5130A79CDA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Repository", "WorldWar.Repository\WorldWar.Repository.csproj", "{F905466A-8BDB-4EAF-A165-A5130A79CDA2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9F3E771D-1AEE-48B7-A5CC-33BEFA54CB11}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldWar.YandexClient.Tests", "WorldWar.YandexClient.Tests\WorldWar.YandexClient.Tests.csproj", "{3D779006-C201-4FF2-96EB-F975788A8BD7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,9 +55,16 @@ Global
 		{F905466A-8BDB-4EAF-A165-A5130A79CDA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F905466A-8BDB-4EAF-A165-A5130A79CDA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F905466A-8BDB-4EAF-A165-A5130A79CDA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D779006-C201-4FF2-96EB-F975788A8BD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D779006-C201-4FF2-96EB-F975788A8BD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D779006-C201-4FF2-96EB-F975788A8BD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D779006-C201-4FF2-96EB-F975788A8BD7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3D779006-C201-4FF2-96EB-F975788A8BD7} = {9F3E771D-1AEE-48B7-A5CC-33BEFA54CB11}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {95CADF16-EBEA-4ECC-A068-13BC0D1F090C}

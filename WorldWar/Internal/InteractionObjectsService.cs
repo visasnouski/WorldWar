@@ -74,8 +74,8 @@ public class InteractionObjectsService : IInteractionObjectsService
 		if (unit is Car)
 		{
 			user.ChangeUnitType(UnitTypes.Car);
-			_unitsStorage.Set(user);
-			_unitsStorage.Remove(unit);
+			_unitsStorage.Set(user.Id, user);
+			_unitsStorage.Remove(unit.Id);
 		}
 	}
 
@@ -84,9 +84,9 @@ public class InteractionObjectsService : IInteractionObjectsService
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
 		var user = _unitsStorage.Get(identity.GuidId);
 		user.ChangeUnitType(UnitTypes.Player);
-
-		_unitsStorage.Set(new Car(Guid.NewGuid(), GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
-		_unitsStorage.Set(user);
+		var id = Guid.NewGuid();
+		_unitsStorage.Set(id, new Car(id, GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
+		_unitsStorage.Set(user.Id, user);
 	}
 
 	private static (float latitude, float longitude) GetCoordinates(bool isUnit, Guid id, IStorage<Unit> unitStorage, IStorage<Box> boxStorage)
