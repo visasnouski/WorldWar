@@ -41,7 +41,7 @@
 	{
 		if (!_box!.Loot.Items.Any())
 		{
-			_boxStorage.Remove(_box);
+			_boxStorage.Remove(_box.Id);
 		}
 		_modalDisplay = "none;";
 		StateHasChanged();

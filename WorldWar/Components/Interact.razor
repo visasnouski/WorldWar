@@ -73,8 +73,8 @@
 			};
 
 			_box = new Box(Guid.NewGuid(), unit.Latitude, unit.Longitude, trophies, unit.Rotate);
-			_boxStorage.Set(_box);
-			_unitsStorage.Remove(unit);
+			_boxStorage.Set(_box.Id, _box);
+			_unitsStorage.Remove(unit.Id);
 		}
 		else
 		{
@@ -95,10 +95,10 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.Set(_unit!);
+		_unitsStorage.Set(_unit!.Id, _unit!);
 		if (!_box!.Loot.Items.Any())
 		{
-			_boxStorage.Remove(_box);
+			_boxStorage.Remove(_box.Id);
 		}
 		StateHasChanged();
 	}

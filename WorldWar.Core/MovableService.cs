@@ -77,12 +77,12 @@ internal class MovableService : IMovableService
 				}
 				stopWatch.Restart();
 				user.RotateUnit(points[index][1], points[index][0], points[index - 1][1], points[index - 1][0]);
-				_unitsStorage.Set(user);
+				_unitsStorage.Set(user.Id, user);
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.Set(user);
+		_unitsStorage.Set(user.Id, user);
 	}
 
 	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
@@ -119,11 +119,11 @@ internal class MovableService : IMovableService
 
 				stopWatch.Restart();
 				user.RotateUnit(longitude, latitude, user.Longitude, user.Latitude);
-				_unitsStorage.Set(user);
+				_unitsStorage.Set(user.Id, user);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.Set(user);
+		_unitsStorage.Set(user.Id, user);
 	}
 
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
@@ -138,7 +138,7 @@ internal class MovableService : IMovableService
 			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
 
 			Move(myUnit, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
-			_unitsStorage.Set(myUnit);
+			_unitsStorage.Set(myUnit.Id, myUnit);
 
 			if (myUnit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude, distance))
 			{

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using WorldWar.Abstractions.Models.Units;
 using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core.Cache
@@ -15,8 +14,8 @@ namespace WorldWar.Core.Cache
 			_provider = provider ?? throw new ArgumentNullException(nameof(provider));
 			_types = options.Value.Types;
 		}
+
 		public IStorage<T> Create<T>()
-		where T : IStorable
 		{
 			if (_types.TryGetValue(typeof(T).Name, out var type))
 			{

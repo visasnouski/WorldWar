@@ -1,5 +1,4 @@
 ﻿using Microsoft.JSInterop;
-using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 
@@ -25,9 +24,8 @@ public interface IYandexJsClientAdapter
 
 	public Task AddBox(Box box);
 
-	public Task SetUnitManagementService(IUserManagement userManagement);
-
-	public Task SetUserGuid(Guid id);
+	public Task SetUnitManagementService<TValue>(DotNetObjectReference<TValue> userManagement)
+		where TValue : class;
 
 	public Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)
 		where TValue : class;

@@ -28,6 +28,6 @@ public class AuthUser : IAuthUser
     {
         var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(true);
         var user = await _userManager.GetUserAsync(authState.User).ConfigureAwait(true);
-        return user ?? throw new AuthenticationException("bad identity");
+        return user ?? throw new AuthenticationException("Unknown identity");
     }
 }

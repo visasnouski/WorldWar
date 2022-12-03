@@ -6,7 +6,7 @@ using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Units;
 
-public abstract class Unit: IStorable
+public abstract class Unit
 {
 	public string Name { get; init; }
 
