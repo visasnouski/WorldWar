@@ -1,4 +1,5 @@
-﻿using WorldWar.Abstractions.Extensions;
+﻿using WorldWar.Abstractions.Exceptions;
+using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
@@ -30,12 +31,17 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.Get(identity.GuidId);
+
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			return;
+		}
+
 		var coords = GetCoordinates(isUnit, guidId, _unitsStorage, _boxStorage);
 
-		if (!user.IsWithinReach(coords.longitude, coords.latitude))
+		if (!user!.IsWithinReach(coords.longitude, coords.latitude))
 		{
-			await _movableService.StartMoveAlongRoute(user.Id, coords.latitude, coords.longitude, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMoveAlongRoute(user!.Id, coords.latitude, coords.longitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
@@ -54,15 +60,23 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task GetIn(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.Get(identity.GuidId);
-		if (user.Id == guidId)
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			return;
+		}
+
+		if (user!.Id == guidId)
 		{
 			await GetOut(guidId, cancellationToken).ConfigureAwait(true);
 			return;
 		}
-		var unit = _unitsStorage.Get(guidId);
 
-		if (!user.IsWithinReach(unit.Longitude, unit.Latitude))
+		if (!_unitsStorage.TryGetValue(guidId, out var unit))
+		{
+			return;
+		}
+
+		if (!user.IsWithinReach(unit!.Longitude, unit.Latitude))
 		{
 			await _movableService.StartMoveAlongRoute(user.Id, unit.Latitude, unit.Longitude, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
@@ -74,7 +88,7 @@ public class InteractionObjectsService : IInteractionObjectsService
 		if (unit is Car)
 		{
 			user.ChangeUnitType(UnitTypes.Car);
-			_unitsStorage.Set(user.Id, user);
+			_unitsStorage.AddOrUpdate(user.Id, user);
 			_unitsStorage.Remove(unit.Id);
 		}
 	}
@@ -82,23 +96,30 @@ public class InteractionObjectsService : IInteractionObjectsService
 	public async Task GetOut(Guid guidId, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.Get(identity.GuidId);
-		user.ChangeUnitType(UnitTypes.Player);
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			return;
+		}
+
+		user!.ChangeUnitType(UnitTypes.Player);
 		var id = Guid.NewGuid();
-		_unitsStorage.Set(id, new Car(id, GenerateName.Generate(7), user.Latitude, user.Longitude, 100));
-		_unitsStorage.Set(user.Id, user);
+		_unitsStorage.AddOrUpdate(id, new Car(id, GenerateName.Generate(7), user!.Latitude, user.Longitude, 100));
+		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
 
 	private static (float latitude, float longitude) GetCoordinates(bool isUnit, Guid id, IStorage<Unit> unitStorage, IStorage<Box> boxStorage)
 	{
-		if (isUnit)
+		if (isUnit && unitStorage.TryGetValue(id, out var unit))
 		{
-			var unit = unitStorage.Get(id);
-			return (unit.Latitude, unit.Longitude);
+			return (unit!.Latitude, unit.Longitude);
 		}
 
-		var box = boxStorage.Get(id);
-		return (box.Latitude, box.Longitude);
+		if (boxStorage.TryGetValue(id, out var box))
+		{
+			return (box!.Latitude, box.Longitude);
+		}
+
+		throw new ItemNotFoundException($"Item {id} not found.");
 	}
 }
 

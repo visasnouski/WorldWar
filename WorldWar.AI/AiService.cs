@@ -48,6 +48,8 @@ internal class AiService : BackgroundService
 				var newLongitude = unit.Longitude + longitudeRnd;
 
 				unit.RotateUnit(newLongitude, newLatitude);
+
+				_logger.LogInformation("Move unit {id} to [{latitude}, {longitude}]", unit.Id, newLatitude, newLongitude);
 				await managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
 			}
 

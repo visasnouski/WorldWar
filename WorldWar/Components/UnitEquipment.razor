@@ -30,8 +30,8 @@
 	private string _modalDisplay = "none;";
 	private Unit? _unit;
 
-	private IStorage<Box> _boxStorage;
-	private IStorage<Unit> _unitsStorage;
+	private IStorage<Box> _boxStorage = null!;
+	private IStorage<Unit> _unitsStorage = null!;
 
 	protected override void OnInitialized()
 	{
@@ -48,7 +48,10 @@
 	[JSInvokable("Open")]
 	public void Open(Guid guid)
 	{
-		_unit = _unitsStorage.Get(guid);
+		if (!_unitsStorage.TryGetValue(guid, out _unit))
+		{
+			return;
+		}
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -56,7 +59,10 @@
 	public async Task Open()
 	{
 		var user = await AuthUser.GetIdentity();
-		_unit = _unitsStorage.Get(user.GuidId);
+		if (!_unitsStorage.TryGetValue(user.GuidId, out _unit))
+		{
+			return;
+		}
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}
@@ -73,7 +79,7 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.Set(_bodyEquipment!.Unit!.Id, _bodyEquipment!.Unit!);
+		_unitsStorage.AddOrUpdate(_bodyEquipment!.Unit!.Id, _bodyEquipment!.Unit!);
 		StateHasChanged();
 	}
 

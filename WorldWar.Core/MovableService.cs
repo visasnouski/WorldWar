@@ -31,12 +31,15 @@ internal class MovableService : IMovableService
 	public async Task StartMoveAlongRoute(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var user))
+		{
+			return;
+		}
 
-		var routingMode = user.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
+		var routingMode = user!.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
 		var points = await _yandexJsClientAdapter.GetRoute(new[] { user.Latitude, user.Longitude },
-			new[] { latitude, longitude }, routingMode).ConfigureAwait(true);
+			new[] { latitude, longitude }, routingMode).ConfigureAwait(false);
 
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
@@ -56,6 +59,7 @@ internal class MovableService : IMovableService
 			var remainingTime = stopWatch.Elapsed - lastTime;
 
 			// the remainingTime is greater than zero, then the endpoint was skipped
+			_logger.LogDebug("The unit {id} will reach the intermediate point in {remainingTime} seconds", user.Id, remainingTime.TotalSeconds);
 			if (remainingTime.TotalMilliseconds < 0)
 			{
 				if (user.UnitType == UnitTypes.Car)
@@ -64,7 +68,7 @@ internal class MovableService : IMovableService
 				}
 
 				Move(user, lastTime + remainingTime, points[index][1], points[index][0]);
-				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(true);
+				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
 			}
 			else
 			{
@@ -77,24 +81,27 @@ internal class MovableService : IMovableService
 				}
 				stopWatch.Restart();
 				user.RotateUnit(points[index][1], points[index][0], points[index - 1][1], points[index - 1][0]);
-				_unitsStorage.Set(user.Id, user);
+				_unitsStorage.AddOrUpdate(user.Id, user);
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.Set(user.Id, user);
+		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
 
 	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var user))
+		{
+			return;
+		}
 
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
 
 		// get the travel time of the segment of the path
-		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(longitude, latitude)) / user.Speed);
+		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user!.Location.StartPos, new Vector2(longitude, latitude)) / user.Speed);
 
 		while (!cancellationToken.IsCancellationRequested)
 		{
@@ -110,7 +117,7 @@ internal class MovableService : IMovableService
 				}
 
 				Move(user, lastTime + remainingTime, longitude, latitude);
-				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(true);
+				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
 			}
 			else
 			{
@@ -119,26 +126,34 @@ internal class MovableService : IMovableService
 
 				stopWatch.Restart();
 				user.RotateUnit(longitude, latitude, user.Longitude, user.Latitude);
-				_unitsStorage.Set(user.Id, user);
+				_unitsStorage.AddOrUpdate(user.Id, user);
 			}
 		}
 		user.SaveCurrentLocation();
-		_unitsStorage.Set(user.Id, user);
+		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
 
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
-		var myUnit = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var myUnit))
+		{
+			return;
+		}
+
 		var startDateTime = DateTime.Now;
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			var targetUnit = _unitsStorage.Get(targetGuid);
+			if (!_unitsStorage.TryGetValue(targetGuid, out var targetUnit))
+			{
+				break;
+			}
 
-			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
+			myUnit!.RotateUnit(targetUnit!.Longitude, targetUnit.Latitude);
+			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(false);
 
-			Move(myUnit, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
-			_unitsStorage.Set(myUnit.Id, myUnit);
+			Move(myUnit!, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
+			_unitsStorage.AddOrUpdate(myUnit!.Id, myUnit);
 
 			if (myUnit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude, distance))
 			{
@@ -146,12 +161,12 @@ internal class MovableService : IMovableService
 			}
 		}
 
-		myUnit.SaveCurrentLocation();
+		myUnit!.SaveCurrentLocation();
 	}
 
 	public async Task Rotate(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken)
 	{
-		await _yandexJsClientNotifier.RotateUnit(unitId, latitude, longitude).ConfigureAwait(true);
+		await _yandexJsClientNotifier.RotateUnit(unitId, latitude, longitude).ConfigureAwait(false);
 	}
 
 	private static void Move(Unit unit, TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)

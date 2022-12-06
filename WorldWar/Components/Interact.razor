@@ -33,8 +33,8 @@
 </div>
 
 @code {
-	private IStorage<Box> _boxStorage;
-	private IStorage<Unit> _unitsStorage;
+	private IStorage<Box> _boxStorage = null!;
+	private IStorage<Unit> _unitsStorage = null!;
 
 	private BodyEquipment? _bodyEquipment;
 	private BoxContents? _boxContents;
@@ -63,9 +63,12 @@
 	{
 		if (isUnit)
 		{
-			var unit = _unitsStorage.Get(id);
+			if (!_unitsStorage.TryGetValue(id, out var unit))
+			{
+				return;
+			}
 
-			var trophies = new List<Item>(unit.Loot.Items)
+			var trophies = new List<Item>(unit!.Loot.Items)
 			{
 				unit.Weapon,
 				unit.BodyProtection,
@@ -73,16 +76,21 @@
 			};
 
 			_box = new Box(Guid.NewGuid(), unit.Latitude, unit.Longitude, trophies, unit.Rotate);
-			_boxStorage.Set(_box.Id, _box);
+			_boxStorage.AddOrUpdate(_box.Id, _box);
 			_unitsStorage.Remove(unit.Id);
 		}
 		else
 		{
-			_box = _boxStorage.Get(id);
+			if (!_boxStorage.TryGetValue(id, out var box))
+			{
+				return;
+			}
+
+			_box = box;
 		}
 
 		var user = await AuthUser.GetIdentity();
-		_unit = _unitsStorage.Get(user.GuidId);
+		_unitsStorage.TryGetValue(user.GuidId, out _unit);
 		_modalDisplay = "block;";
 	}
 
@@ -95,7 +103,7 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.Set(_unit!.Id, _unit!);
+		_unitsStorage.AddOrUpdate(_unit!.Id, _unit!);
 		if (!_box!.Loot.Items.Any())
 		{
 			_boxStorage.Remove(_box.Id);

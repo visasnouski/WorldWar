@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using WorldWar.Abstractions.Exceptions;
 using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core;
@@ -8,17 +7,12 @@ public class Storage<T> : IStorage<T>
 {
 	private static readonly ConcurrentDictionary<Guid, T> ItemsStorage = new();
 
-	public T Get(Guid id)
+	public bool TryGetValue(Guid id, out T? item)
 	{
-		if (ItemsStorage.TryGetValue(id, out var item))
-		{
-			return item;
-		}
-
-		throw new ItemNotFoundException("item not found");
+		return ItemsStorage.TryGetValue(id, out item);
 	}
 
-	public void Set(Guid key, T item)
+	public void AddOrUpdate(Guid key, T item)
 	{
 		if (item == null)
 		{

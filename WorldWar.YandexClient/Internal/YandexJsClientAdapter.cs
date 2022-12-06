@@ -136,7 +136,6 @@ internal sealed class YandexJsClientAdapter : IYandexJsClientAdapter, IDisposabl
 	public void Dispose()
 	{
 		Dispose(true);
-		GC.SuppressFinalize(this);
 	}
 
 	private void Dispose(bool disposing)

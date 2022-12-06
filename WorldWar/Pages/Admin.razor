@@ -52,8 +52,8 @@
 </body>
 
 @code {
-	private IStorage<Unit> _unitsStorage;
-	private IStorage<Box> _boxStorage;
+	private IStorage<Unit> _unitsStorage = null!;
+	private IStorage<Box> _boxStorage = null!;
 
 	private UnitEquipment? _unitEquipment;
 	private Interact? _interact;
@@ -103,7 +103,7 @@
 	{
 		var coords = await YandexJsClientAdapter.GetCenterCoords();
 		var guid = Guid.NewGuid();
-		_unitsStorage.Set(guid, new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
+		_unitsStorage.AddOrUpdate(guid, new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
 	}
 
 	private async Task HandleDrop(DragEventArgs arg)
@@ -112,7 +112,7 @@
 		{
 			var coords = await YandexJsClientAdapter.ConvertPixelCoordsToGlobal(arg.PageX, arg.PageY);
 			var box = new Box(Guid.NewGuid(), coords[0], coords[1], new List<Item>() { DraggableItem.Value.Item });
-			_boxStorage.Set(box.Id, box);
+			_boxStorage.AddOrUpdate(box.Id, box);
 		}
 	}
 }
