@@ -10,6 +10,6 @@ namespace WorldWar.YandexClient.Tests.Internal.Data
 		{
 		}
 
-		public override float Speed { get; }
+		public override float Speed => 0.01f;
 	}
 }

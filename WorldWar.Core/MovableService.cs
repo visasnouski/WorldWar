@@ -31,9 +31,12 @@ internal class MovableService : IMovableService
 	public async Task StartMoveAlongRoute(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var user))
+		{
+			return;
+		}
 
-		var routingMode = user.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
+		var routingMode = user!.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
 		var points = await _yandexJsClientAdapter.GetRoute(new[] { user.Latitude, user.Longitude },
 			new[] { latitude, longitude }, routingMode).ConfigureAwait(true);
@@ -56,6 +59,7 @@ internal class MovableService : IMovableService
 			var remainingTime = stopWatch.Elapsed - lastTime;
 
 			// the remainingTime is greater than zero, then the endpoint was skipped
+			_logger.LogDebug("The unit {id} will reach the intermediate point in {remainingTime} seconds", user.Id, remainingTime.TotalSeconds);
 			if (remainingTime.TotalMilliseconds < 0)
 			{
 				if (user.UnitType == UnitTypes.Car)
@@ -88,13 +92,16 @@ internal class MovableService : IMovableService
 	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
 		float? weaponDistance = null)
 	{
-		var user = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var user))
+		{
+			return;
+		}
 
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
 
 		// get the travel time of the segment of the path
-		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(longitude, latitude)) / user.Speed);
+		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user!.Location.StartPos, new Vector2(longitude, latitude)) / user.Speed);
 
 		while (!cancellationToken.IsCancellationRequested)
 		{
@@ -129,16 +136,24 @@ internal class MovableService : IMovableService
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
-		var myUnit = _unitsStorage.Get(unitId);
+		if (!_unitsStorage.TryGetValue(unitId, out var myUnit))
+		{
+			return;
+		}
+
 		var startDateTime = DateTime.Now;
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			var targetUnit = _unitsStorage.Get(targetGuid);
+			if (!_unitsStorage.TryGetValue(targetGuid, out var targetUnit))
+			{
+				break;
+			}
 
+			myUnit!.RotateUnit(targetUnit!.Longitude, targetUnit.Latitude);
 			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(true);
 
-			Move(myUnit, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
-			_unitsStorage.Set(myUnit.Id, myUnit);
+			Move(myUnit!, DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
+			_unitsStorage.Set(myUnit!.Id, myUnit);
 
 			if (myUnit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude, distance))
 			{
@@ -146,7 +161,7 @@ internal class MovableService : IMovableService
 			}
 		}
 
-		myUnit.SaveCurrentLocation();
+		myUnit!.SaveCurrentLocation();
 	}
 
 	public async Task Rotate(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken)

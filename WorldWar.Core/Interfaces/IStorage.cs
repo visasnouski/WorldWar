@@ -2,7 +2,7 @@
 {
 	public interface IStorage<T>
 	{
-		public T Get(Guid id);
+		public bool TryGetValue(Guid id, out T? item);
 
 		public void Set(Guid key, T item);
 

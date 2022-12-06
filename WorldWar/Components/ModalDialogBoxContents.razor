@@ -28,8 +28,8 @@
 	private BoxContents? _boxContents;
 	private string _modalDisplay = "none;";
 
-	private IStorage<Box> _boxStorage;
-	private IStorage<Unit> _unitsStorage;
+	private IStorage<Box> _boxStorage = null!;
+	private IStorage<Unit> _unitsStorage = null!;
 
 	protected override void OnInitialized()
 	{
@@ -50,7 +50,10 @@
 	[JSInvokable("Open")]
 	public void Open(Guid boxId)
 	{
-		_box = _boxStorage.Get(boxId);
+		if (!_boxStorage.TryGetValue(boxId, out _box))
+		{
+			return;
+		}
 		_modalDisplay = "block;";
 		StateHasChanged();
 	}

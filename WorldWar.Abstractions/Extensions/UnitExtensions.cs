@@ -33,7 +33,7 @@ namespace WorldWar.Abstractions.Extensions
 			return currentDistance < weaponDistance;
 		}
 
-		public static void AddDamage(this Unit unit,int damage)
+		public static void AddDamage(this Unit unit, int damage)
 		{
 			if (unit == null)
 			{
@@ -77,7 +77,7 @@ namespace WorldWar.Abstractions.Extensions
 			unit.Loot.Items.Add(unit.HeadProtection);
 			unit.HeadProtection = headProtection;
 		}
-		
+
 		public static void ChangeUnitType(this Unit unit, UnitTypes unitType)
 		{
 			// TODO The state change is not implemented very well.

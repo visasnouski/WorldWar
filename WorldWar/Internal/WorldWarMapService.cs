@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
 using ConcurrentCollections;
+using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
@@ -42,10 +43,7 @@ public class WorldWarMapService : IWorldWarMapService
 			{
 				var visibleGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
 
-				var user = _unitsStorage.Get(authUser.GuidId);
-				var units = viewAllUnits
-					? _unitsStorage.Get()
-					: _unitsStorage.GetByFilter(item => CanSee(user.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
+				var units = GetUnits(viewAllUnits, authUser.GuidId);
 
 				var toUpdateList = new ConcurrentBag<Unit>();
 
@@ -97,11 +95,7 @@ public class WorldWarMapService : IWorldWarMapService
 			{
 				var visibleGuids = new HashSet<Guid>();
 
-				var user = _unitsStorage.Get(authUser.GuidId);
-
-				var items = viewAllItems
-					? _boxStorage.Get()
-					: _boxStorage.GetByFilter(item => CanSee(user.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
+				var items = GetItems(viewAllItems, authUser.GuidId);
 
 				foreach (var item in items)
 				{
@@ -125,6 +119,49 @@ public class WorldWarMapService : IWorldWarMapService
 		}, CancellationToken.None);
 
 		return Task.CompletedTask;
+	}
+
+	private IEnumerable<Box> GetItems(bool viewAllItems, Guid id)
+	{
+		try
+		{
+			if (!_unitsStorage.TryGetValue(id, out var user))
+			{
+				return Enumerable.Empty<Box>();
+			}
+			var items = viewAllItems
+				? _boxStorage.Get()
+				: _boxStorage.GetByFilter(item =>
+					CanSee(user!.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
+			return items;
+		}
+		catch (ItemNotFoundException)
+		{
+			_logger.LogWarning("The User {id} not found.", id);
+			return Enumerable.Empty<Box>();
+		}
+	}
+
+	private IEnumerable<Unit> GetUnits(bool viewAllUnits, Guid id)
+	{
+		try
+		{
+			if (!_unitsStorage.TryGetValue(id, out var user))
+			{
+				return Enumerable.Empty<Unit>();
+			}
+
+			var units = viewAllUnits
+			? _unitsStorage.Get()
+			: _unitsStorage.GetByFilter(item =>
+				CanSee(user!.Latitude, user.Longitude, item.Latitude, item.Longitude, user.ViewingDistance));
+			return units;
+		}
+		catch (ItemNotFoundException)
+		{
+			_logger.LogWarning("The User {id} not found.", id);
+			return Enumerable.Empty<Unit>();
+		}
 	}
 
 	private static bool CanSee(float centerLatitude, float centerLongitude, float latitude, float longitude, float viewingDistance)

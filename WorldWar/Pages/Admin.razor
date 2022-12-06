@@ -52,8 +52,8 @@
 </body>
 
 @code {
-	private IStorage<Unit> _unitsStorage;
-	private IStorage<Box> _boxStorage;
+	private IStorage<Unit> _unitsStorage = null!;
+	private IStorage<Box> _boxStorage = null!;
 
 	private UnitEquipment? _unitEquipment;
 	private Interact? _interact;

@@ -32,10 +32,13 @@ internal class CombatService : ICombatService
 	public async Task AttackUnit(Guid enemyGuid, CancellationToken cancellationToken)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		var user = _unitsStorage.Get(identity.GuidId);
-		var enemy = _unitsStorage.Get(enemyGuid);
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user)
+			|| !_unitsStorage.TryGetValue(enemyGuid, out var enemy))
+		{
+			return;
+		}
 
-		if (user.Weapon.WeaponType == WeaponTypes.Handguns && !user.IsWithinReach(enemy.Longitude, enemy.Latitude, user.Weapon.Distance))
+		if (user!.Weapon.WeaponType == WeaponTypes.Handguns && !user.IsWithinReach(enemy!.Longitude, enemy.Latitude, user.Weapon.Distance))
 		{
 			await _movableService.StartMove(user.Id, enemy.Id, cancellationToken, user.Weapon.Distance).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
@@ -44,12 +47,16 @@ internal class CombatService : ICombatService
 			}
 		}
 
-		await _movableService.Rotate(user.Id, enemy.Latitude, enemy.Longitude, cancellationToken).ConfigureAwait(true);
+		await _movableService.Rotate(user.Id, enemy!.Latitude, enemy.Longitude, cancellationToken).ConfigureAwait(true);
 
 		while (!cancellationToken.IsCancellationRequested)
 		{
-			enemy = _unitsStorage.Get(enemyGuid);
-			user.RotateUnit(enemy.Longitude, enemy.Latitude);
+			if (!_unitsStorage.TryGetValue(enemyGuid, out enemy))
+			{
+				return;
+			}
+
+			user.RotateUnit(enemy!.Longitude, enemy.Latitude);
 
 			if (user.Weapon.Ammo <= 0)
 			{
@@ -58,7 +65,9 @@ internal class CombatService : ICombatService
 			}
 			else
 			{
-				var damage = user.GetDamage(enemy);
+				var damage = user.CalculateDamage(enemy);
+				enemy.AddDamage(damage);
+
 				await _yandexJsClientNotifier.ShootUnit(user.Id, enemy.Latitude, enemy.Longitude).ConfigureAwait(true);
 				await _yandexJsClientNotifier.PlaySound("sound", user.Weapon.ShotSoundLocation).ConfigureAwait(true);
 
