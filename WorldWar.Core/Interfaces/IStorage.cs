@@ -4,7 +4,7 @@
 	{
 		public bool TryGetValue(Guid id, out T? item);
 
-		public void Set(Guid key, T item);
+		public void AddOrUpdate(Guid key, T item);
 
 		public IEnumerable<T> Get();
 

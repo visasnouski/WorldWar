@@ -2,5 +2,5 @@
 
 public interface ICombatService
 {
-    public Task AttackUnit(Guid enemyGuid, CancellationToken cancellationToken);
+	public Task AttackUnit(Guid userGuid, Guid enemyGuid, CancellationToken cancellationToken);
 }

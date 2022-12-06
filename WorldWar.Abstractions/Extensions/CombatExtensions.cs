@@ -10,7 +10,7 @@ public static class CombatExtensions
 	{
 		var distance = Vector2.Distance(user.Location.CurrentPos, enemy.Location.CurrentPos);
 
-		var ratioDistanceToLocation = user.Weapon.Distance / 2 / distance;
+		var ratioDistanceToLocation = (distance != 0) ? user.Weapon.Distance / 2 / distance : 1;
 		var random = RandomNumberGenerator.GetInt32(1, 100);
 		if (random > user.Weapon.Accuracy * ratioDistanceToLocation)
 		{

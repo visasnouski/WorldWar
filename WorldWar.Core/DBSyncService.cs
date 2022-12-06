@@ -26,14 +26,14 @@ public class DbSyncService : BackgroundService
 
 		foreach (var unit in dbUnits)
 		{
-			_unitsStorage.Set(unit.Id, unit);
+			_unitsStorage.AddOrUpdate(unit.Id, unit);
 		}
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(true);
+			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(false);
 			var mapUnits = _unitsStorage.Get();
-			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(true);
+			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(false);
 		}
 	}
 }

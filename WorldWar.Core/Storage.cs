@@ -12,7 +12,7 @@ public class Storage<T> : IStorage<T>
 		return ItemsStorage.TryGetValue(id, out item);
 	}
 
-	public void Set(Guid key, T item)
+	public void AddOrUpdate(Guid key, T item)
 	{
 		if (item == null)
 		{

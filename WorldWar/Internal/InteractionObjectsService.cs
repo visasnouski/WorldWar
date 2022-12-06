@@ -88,7 +88,7 @@ public class InteractionObjectsService : IInteractionObjectsService
 		if (unit is Car)
 		{
 			user.ChangeUnitType(UnitTypes.Car);
-			_unitsStorage.Set(user.Id, user);
+			_unitsStorage.AddOrUpdate(user.Id, user);
 			_unitsStorage.Remove(unit.Id);
 		}
 	}
@@ -103,8 +103,8 @@ public class InteractionObjectsService : IInteractionObjectsService
 
 		user!.ChangeUnitType(UnitTypes.Player);
 		var id = Guid.NewGuid();
-		_unitsStorage.Set(id, new Car(id, GenerateName.Generate(7), user!.Latitude, user.Longitude, 100));
-		_unitsStorage.Set(user.Id, user);
+		_unitsStorage.AddOrUpdate(id, new Car(id, GenerateName.Generate(7), user!.Latitude, user.Longitude, 100));
+		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
 
 	private static (float latitude, float longitude) GetCoordinates(bool isUnit, Guid id, IStorage<Unit> unitStorage, IStorage<Box> boxStorage)

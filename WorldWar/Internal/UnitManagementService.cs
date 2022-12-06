@@ -51,7 +51,7 @@ public class UnitManagementService : IUnitManagementService
 	public async Task Attack(Guid unitId, Guid enemyGuid)
 	{
 		await StopUnit(unitId).ConfigureAwait(true);
-		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _combatService.AttackUnit(enemyGuid, cs.Token)));
+		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _combatService.AttackUnit(unitId, enemyGuid, cs.Token)));
 	}
 
 	public async Task GetInCar(Guid unitId, Guid itemGuid)

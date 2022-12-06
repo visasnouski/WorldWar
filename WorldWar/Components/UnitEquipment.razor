@@ -79,7 +79,7 @@
 	public void Save()
 	{
 		_modalDisplay = "none";
-		_unitsStorage.Set(_bodyEquipment!.Unit!.Id, _bodyEquipment!.Unit!);
+		_unitsStorage.AddOrUpdate(_bodyEquipment!.Unit!.Id, _bodyEquipment!.Unit!);
 		StateHasChanged();
 	}
 
