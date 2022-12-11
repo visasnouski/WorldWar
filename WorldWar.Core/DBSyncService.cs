@@ -13,10 +13,10 @@ public class DbSyncService : BackgroundService
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly ITaskDelay _taskDelay;
 
-	public DbSyncService(IDbRepository dbRepository, ICacheFactory cacheFactory, ITaskDelay taskDelay)
+	public DbSyncService(IDbRepository dbRepository, IStorageFactory storageFactory, ITaskDelay taskDelay)
 	{
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 	}
 

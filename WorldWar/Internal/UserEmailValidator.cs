@@ -3,7 +3,7 @@ using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;
 
-public class UserEmailValidator<TUser> : IUserValidator<TUser>
+internal class UserEmailValidator<TUser> : IUserValidator<TUser>
 	where TUser : WorldWarIdentity
 {
 	public async Task<IdentityResult> ValidateAsync(UserManager<TUser> manager, TUser user)
@@ -12,7 +12,7 @@ public class UserEmailValidator<TUser> : IUserValidator<TUser>
 
 		var owner = await manager.FindByEmailAsync(user.Email).ConfigureAwait(true);
 		if (owner != null &&
-		    !string.Equals(await manager.GetUserIdAsync(owner), await manager.GetUserIdAsync(user)))
+			!string.Equals(await manager.GetUserIdAsync(owner), await manager.GetUserIdAsync(user)))
 		{
 			errors.Add((new IdentityErrorDescriber()).DuplicateEmail(user.Email));
 		}

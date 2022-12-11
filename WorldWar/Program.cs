@@ -28,7 +28,7 @@ builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
-builder.Services.AddScoped<IUserManagement, UserManagement>();
+builder.Services.AddScoped<IPlayerManager, PlayerManager>();
 
 builder.Services.AddScoped<IAuthUser, AuthUser>();
 builder.Services.AddScoped<UserManager<WorldWarIdentity>>();

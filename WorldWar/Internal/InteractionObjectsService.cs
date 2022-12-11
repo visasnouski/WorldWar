@@ -11,7 +11,7 @@ using WorldWar.Interfaces;
 
 namespace WorldWar.Internal;
 
-public class InteractionObjectsService : IInteractionObjectsService
+internal class InteractionObjectsService : IInteractionObjectsService
 {
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IStorage<Box> _boxStorage;
@@ -19,10 +19,10 @@ public class InteractionObjectsService : IInteractionObjectsService
 	private readonly IAuthUser _authUser;
 	private readonly InteractStates _interactStates;
 
-	public InteractionObjectsService(ICacheFactory cacheFactory, IMovableService movableService, IAuthUser authUser, InteractStates interactStates)
+	public InteractionObjectsService(IStorageFactory storageFactory, IMovableService movableService, IAuthUser authUser, InteractStates interactStates)
 	{
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
-		_boxStorage = cacheFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
+		_boxStorage = storageFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_interactStates = interactStates ?? throw new ArgumentNullException(nameof(interactStates));
@@ -41,7 +41,11 @@ public class InteractionObjectsService : IInteractionObjectsService
 
 		if (!user!.IsWithinReach(coords.longitude, coords.latitude))
 		{
-			await _movableService.StartMoveAlongRoute(user!.Id, coords.latitude, coords.longitude, cancellationToken).ConfigureAwait(true);
+			float[][] route = {
+				new[] { coords.latitude,coords.longitude }
+			};
+
+			await _movableService.StartMove(user!.Id, route, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
@@ -78,7 +82,11 @@ public class InteractionObjectsService : IInteractionObjectsService
 
 		if (!user.IsWithinReach(unit!.Longitude, unit.Latitude))
 		{
-			await _movableService.StartMoveAlongRoute(user.Id, unit.Latitude, unit.Longitude, cancellationToken).ConfigureAwait(true);
+			float[][] route = {
+				new[] { unit.Latitude, unit.Longitude }
+			};
+
+			await _movableService.StartMove(user.Id, route, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;

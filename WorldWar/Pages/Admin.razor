@@ -10,10 +10,10 @@
 @using WorldWar.Abstractions.Extensions
 @using WorldWar.Core.Cache
 
-@inject ICacheFactory CacheFactory
+@inject IStorageFactory StorageFactory
 @inject IWorldWarMapService WorldWarMapService
 @inject IYandexJsClientAdapter YandexJsClientAdapter
-@inject IUserManagement UserManagement;
+@inject IPlayerManager PlayerManager;
 @inject DraggableItem DraggableItem;
 
 <PageTitle>WorldWarMap Editor</PageTitle>
@@ -64,15 +64,15 @@
 
 	protected override void OnInitialized()
 	{
-		_unitsStorage = CacheFactory.Create<Unit>();
-		_boxStorage = CacheFactory.Create<Box>();
+		_unitsStorage = StorageFactory.Create<Unit>();
+		_boxStorage = StorageFactory.Create<Box>();
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(UserManagement));
+			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(PlayerManager));
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
 			await YandexJsClientAdapter.SetModalDialogBoxContents(DotNetObjectReference.Create(_modalDialogBoxContents!));
 

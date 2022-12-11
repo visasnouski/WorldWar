@@ -27,10 +27,10 @@ namespace WorldWar.Core.Tests
 			var unitStorageMock = new Mock<IStorage<Unit>>();
 			unitStorageMock.Setup(x => x.TryGetValue(userGuid, out bot)).Returns(false);
 
-			var cacheFactoryMock = new Mock<ICacheFactory>();
-			cacheFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
+			var storageFactoryMock = new Mock<IStorageFactory>();
+			storageFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
 
-			mocker.Use(cacheFactoryMock);
+			mocker.Use(storageFactoryMock);
 
 			var target = mocker.CreateInstance<CombatService>();
 
@@ -57,10 +57,10 @@ namespace WorldWar.Core.Tests
 			unitStorageMock.Setup(x => x.TryGetValue(userGuid, out bot)).Returns(true);
 			unitStorageMock.Setup(x => x.TryGetValue(enemyGuid, out bot)).Returns(false);
 
-			var cacheFactoryMock = new Mock<ICacheFactory>();
-			cacheFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
+			var storageFactoryMock = new Mock<IStorageFactory>();
+			storageFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
 
-			mocker.Use(cacheFactoryMock);
+			mocker.Use(storageFactoryMock);
 
 			var target = mocker.CreateInstance<CombatService>();
 
@@ -105,10 +105,10 @@ namespace WorldWar.Core.Tests
 				return true;
 			});
 
-			var cacheFactoryMock = new Mock<ICacheFactory>();
-			cacheFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
+			var storageFactoryMock = new Mock<IStorageFactory>();
+			storageFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
 
-			mocker.Use(cacheFactoryMock);
+			mocker.Use(storageFactoryMock);
 
 			var target = mocker.CreateInstance<CombatService>();
 
@@ -141,10 +141,10 @@ namespace WorldWar.Core.Tests
 			unitStorageMock.Setup(x => x.TryGetValue(userGuid, out user)).Returns(true);
 			unitStorageMock.Setup(x => x.TryGetValue(enemyGuid, out bot)).Returns(true);
 
-			var cacheFactoryMock = new Mock<ICacheFactory>();
-			cacheFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
+			var storageFactoryMock = new Mock<IStorageFactory>();
+			storageFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
 
-			mocker.Use(cacheFactoryMock);
+			mocker.Use(storageFactoryMock);
 
 			var target = mocker.CreateInstance<CombatService>();
 

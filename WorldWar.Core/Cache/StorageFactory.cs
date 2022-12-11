@@ -4,12 +4,12 @@ using WorldWar.Core.Interfaces;
 
 namespace WorldWar.Core.Cache
 {
-	public class CacheFactory : ICacheFactory
+	internal class StorageFactory : IStorageFactory
 	{
 		private readonly IServiceProvider _provider;
 		private readonly IDictionary<string, Type> _types;
 
-		public CacheFactory(IServiceProvider provider, IOptions<CacheFactoryOptions> options)
+		public StorageFactory(IServiceProvider provider, IOptions<CacheFactoryOptions> options)
 		{
 			_provider = provider ?? throw new ArgumentNullException(nameof(provider));
 			_types = options.Value.Types;

@@ -15,43 +15,35 @@ internal class MovableService : IMovableService
 {
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IYandexJsClientNotifier _yandexJsClientNotifier;
-	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly ITaskDelay _taskDelay;
 	private readonly ILogger<MovableService> _logger;
 
-	public MovableService(ICacheFactory cacheFactory, IYandexJsClientNotifier yandexJsClientNotifier, IYandexJsClientAdapter yandexJsClientAdapter, ITaskDelay taskDelay, ILogger<MovableService> logger)
+	public MovableService(IStorageFactory storageFactory, IYandexJsClientNotifier yandexJsClientNotifier, ITaskDelay taskDelay, ILogger<MovableService> logger)
 	{
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_yandexJsClientNotifier = yandexJsClientNotifier ?? throw new ArgumentNullException(nameof(yandexJsClientNotifier));
-		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
-	public async Task StartMoveAlongRoute(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
-		float? weaponDistance = null)
+	public async Task StartMove(Guid unitId, float[][] route, CancellationToken cancellationToken)
 	{
 		if (!_unitsStorage.TryGetValue(unitId, out var user))
 		{
 			return;
 		}
 
-		var routingMode = user!.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
-
-		var points = await _yandexJsClientAdapter.GetRoute(new[] { user.Latitude, user.Longitude },
-			new[] { latitude, longitude }, routingMode).ConfigureAwait(false);
-
 		var stopWatch = new Stopwatch();
 		stopWatch.Start();
 		var index = 0;
 
-		if (!points.Any())
+		if (!route.Any())
 		{
 			return;
 		}
 
 		// get the travel time of the segment of the path
-		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
+		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user!.Location.StartPos, new Vector2(route[index][1], route[index][0])) / user.Speed);
 
 		while (!cancellationToken.IsCancellationRequested)
 		{
@@ -67,72 +59,28 @@ internal class MovableService : IMovableService
 					//ToDo Acceleration
 				}
 
-				Move(user, lastTime + remainingTime, points[index][1], points[index][0]);
+				Move(user, lastTime + remainingTime, route[index][1], route[index][0]);
 				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
 			}
 			else
 			{
-				Move(user, lastTime, points[index][1], points[index][0]);
+				Move(user, lastTime, route[index][1], route[index][0]);
 				user.SaveCurrentLocation();
 				index++;
-				if (points.Length <= index)
+				if (route.Length <= index)
 				{
 					break;
 				}
 				stopWatch.Restart();
-				user.RotateUnit(points[index][1], points[index][0], points[index - 1][1], points[index - 1][0]);
+				user.RotateUnit(route[index][1], route[index][0], route[index - 1][1], route[index - 1][0]);
 				_unitsStorage.AddOrUpdate(user.Id, user);
-				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(points[index][1], points[index][0])) / user.Speed);
+				lastTime = TimeSpan.FromSeconds(Vector2.Distance(user.Location.StartPos, new Vector2(route[index][1], route[index][0])) / user.Speed);
 			}
 		}
 		user.SaveCurrentLocation();
 		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
-
-	public async Task StartMoveToCoordinates(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken,
-		float? weaponDistance = null)
-	{
-		if (!_unitsStorage.TryGetValue(unitId, out var user))
-		{
-			return;
-		}
-
-		var stopWatch = new Stopwatch();
-		stopWatch.Start();
-
-		// get the travel time of the segment of the path
-		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(user!.Location.StartPos, new Vector2(longitude, latitude)) / user.Speed);
-
-		while (!cancellationToken.IsCancellationRequested)
-		{
-			// to avoid a miss, stop or turn
-			var remainingTime = stopWatch.Elapsed - lastTime;
-
-			// the remainingTime is greater than zero, then the endpoint was skipped
-			if (remainingTime.TotalMilliseconds < 0)
-			{
-				if (user.UnitType == UnitTypes.Car)
-				{
-					//ToDo Acceleration
-				}
-
-				Move(user, lastTime + remainingTime, longitude, latitude);
-				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
-			}
-			else
-			{
-				Move(user, lastTime, longitude, latitude);
-				user.SaveCurrentLocation();
-
-				stopWatch.Restart();
-				user.RotateUnit(longitude, latitude, user.Longitude, user.Latitude);
-				_unitsStorage.AddOrUpdate(user.Id, user);
-			}
-		}
-		user.SaveCurrentLocation();
-		_unitsStorage.AddOrUpdate(user.Id, user);
-	}
-
+	
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
@@ -175,6 +123,7 @@ internal class MovableService : IMovableService
 		var movVec = Vector2.Subtract(endPos, unit.Location.StartPos);
 		var normMovVec = Vector2.Normalize(movVec);
 
+		// When the waypoint matches the unit's location
 		if (normMovVec.X is Single.NaN || normMovVec.Y is Single.NaN)
 		{
 			return;

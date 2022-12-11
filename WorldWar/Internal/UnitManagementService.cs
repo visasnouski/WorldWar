@@ -4,7 +4,7 @@ using WorldWar.Interfaces;
 
 namespace WorldWar.Internal;
 
-public class UnitManagementService : IUnitManagementService
+internal class UnitManagementService : IUnitManagementService
 {
 	private readonly ITasksStorage _tasksStorage;
 	private readonly ICombatService _combatService;
@@ -19,16 +19,16 @@ public class UnitManagementService : IUnitManagementService
 		_interactionObjectsService = interactionObjectsService ?? throw new ArgumentNullException(nameof(interactionObjectsService));
 	}
 
-	public async Task MoveUnit(Guid unitId, float latitude, float longitude, bool useRoute = false)
+	public async Task MoveUnit(Guid unitId, float[][] route)
 	{
 		await StopUnit(unitId).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _movableService.StartMove(unitId, route, cs.Token)));
+	}
 
-		Task Func(CancellationTokenSource cs) =>
-			useRoute
-				? _movableService.StartMoveAlongRoute(unitId, latitude, longitude, cs.Token)
-				: _movableService.StartMoveToCoordinates(unitId, latitude, longitude, cs.Token);
-
-		_tasksStorage.AddOrUpdate(unitId, GetTask(Func));
+	public async Task MoveUnit(Guid unitId, float latitude, float longitude)
+	{
+		float[][] route = { new[] { latitude, longitude } };
+		await MoveUnit(unitId, route);
 	}
 
 	public async Task StopUnit(Guid unitId)

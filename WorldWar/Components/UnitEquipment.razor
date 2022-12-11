@@ -6,7 +6,7 @@
 @using WorldWar.Components.States
 @using WorldWar.Core.Cache
 
-@inject ICacheFactory CacheFactory
+@inject IStorageFactory StorageFactory
 @inject IAuthUser AuthUser
 @inject DraggableItem DraggableItem
 @inject UnitEquipmentDialogState UnitEquipmentDialogState;
@@ -35,8 +35,8 @@
 
 	protected override void OnInitialized()
 	{
-		_boxStorage = CacheFactory.Create<Box>();
-		_unitsStorage = CacheFactory.Create<Unit>();
+		_boxStorage = StorageFactory.Create<Box>();
+		_unitsStorage = StorageFactory.Create<Unit>();
 		UnitEquipmentDialogState.OnChange += UnitEquipmentDialogStateOnChange();
 	}
 

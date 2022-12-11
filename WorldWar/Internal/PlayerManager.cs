@@ -1,28 +1,32 @@
 ﻿using Microsoft.JSInterop;
 using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Interfaces;
+using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
 using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
 using WorldWar.Repository.interfaces;
+using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Internal;
 
-public class UserManagement : IUserManagement
+internal class PlayerManager : IPlayerManager
 {
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IDbRepository _dbRepository;
 	private readonly IUnitManagementService _unitManagementService;
+	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly IAuthUser _authUser;
 
-	public UserManagement(ICacheFactory cacheFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser)
+	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter)
 	{
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
 		_unitManagementService = unitManagementService ?? throw new ArgumentNullException(nameof(unitManagementService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
+		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 	}
 
 	public async Task AddUnit()
@@ -56,7 +60,18 @@ public class UserManagement : IUserManagement
 	public async Task MoveUnit(float latitude, float longitude)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.MoveUnit(identity.GuidId, latitude, longitude, true).ConfigureAwait(true);
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var unit))
+		{
+			return;
+		}
+
+		var startCoords = new[] { unit!.Latitude, unit.Longitude };
+		var endCoords = new[] { latitude, longitude };
+
+		var routingMode = unit.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
+
+		var route = await _yandexJsClientAdapter.GetRoute(startCoords, endCoords, routingMode);
+		await _unitManagementService.MoveUnit(identity.GuidId, route).ConfigureAwait(true);
 	}
 
 	[JSInvokable("Attack")]

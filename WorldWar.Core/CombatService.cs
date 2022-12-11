@@ -20,9 +20,9 @@ public class CombatService : ICombatService
 	private readonly IYandexJsClientNotifier _yandexJsClientNotifier;
 	private readonly ILogger<CombatService> _logger;
 
-	public CombatService(ICacheFactory cacheFactory, IMovableService movableService, ITasksStorage tasksStorage, ITaskDelay taskDelay, IYandexJsClientNotifier yandexJsClientNotifier, ILogger<CombatService> logger)
+	public CombatService(IStorageFactory storageFactory, IMovableService movableService, ITasksStorage tasksStorage, ITaskDelay taskDelay, IYandexJsClientNotifier yandexJsClientNotifier, ILogger<CombatService> logger)
 	{
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_tasksStorage = tasksStorage ?? throw new ArgumentNullException(nameof(tasksStorage));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));

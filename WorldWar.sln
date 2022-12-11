@@ -21,7 +21,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{9F3E771D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.YandexClient.Tests", "WorldWar.YandexClient.Tests\WorldWar.YandexClient.Tests.csproj", "{3D779006-C201-4FF2-96EB-F975788A8BD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorldWar.Core.Tests", "WorldWar.Core.Tests\WorldWar.Core.Tests.csproj", "{7F0AA402-50F7-43D1-9E13-BD8D5647DCC3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Core.Tests", "WorldWar.Core.Tests\WorldWar.Core.Tests.csproj", "{7F0AA402-50F7-43D1-9E13-BD8D5647DCC3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

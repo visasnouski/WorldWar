@@ -199,7 +199,7 @@ namespace WorldWar.YandexClient.Tests.Internal
 			// Arrange
 
 			var mocker = SetupMocker(out var jsObjectMock);
-			var userManagement = DotNetObjectReference.Create(Mock.Of<IUserManagement>());
+			var userManagement = DotNetObjectReference.Create(Mock.Of<IPlayerManager>());
 
 			var target = mocker.CreateInstance<YandexJsClientAdapter>();
 

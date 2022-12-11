@@ -2,13 +2,15 @@
 
 public interface IUnitManagementService
 {
-    Task MoveUnit(Guid unitId, float latitude, float longitude, bool useRoute = false);
+	Task MoveUnit(Guid unitId, float[][] route);
 
-    Task StopUnit(Guid unitId);
+	Task MoveUnit(Guid unitId, float latitude, float longitude);
 
-    Task Attack(Guid unitId, Guid enemyGuid);
+	Task Attack(Guid unitId, Guid enemyGuid);
 
     Task GetInCar(Guid unitId, Guid itemGuid);
 
     Task PickUp(Guid unitId, Guid itemGuid, bool isUnit);
+
+    Task StopUnit(Guid unitId);
 }
