@@ -11,6 +11,7 @@
 @using WorldWar.Core.Cache
 
 @inject IStorageFactory StorageFactory
+@inject IUnitFactory UnitFactory
 @inject IWorldWarMapService WorldWarMapService
 @inject IYandexJsClientAdapter YandexJsClientAdapter
 @inject IPlayerManager PlayerManager;
@@ -96,14 +97,14 @@
 	{
 		var coords = await YandexJsClientAdapter.GetCenterCoords();
 		var guid = Guid.NewGuid();
-		await _unitEquipment!.Open(new Bot(guid, GenerateName.Generate(7), UnitTypes.Mob, coords[0], coords[1], 100));
+		await _unitEquipment!.Open(UnitFactory.Create(UnitTypes.Mob, guid, GenerateName.Generate(7), coords[0], coords[1], 100));
 	}
 
 	private async Task AddCar()
 	{
 		var coords = await YandexJsClientAdapter.GetCenterCoords();
 		var guid = Guid.NewGuid();
-		_unitsStorage.AddOrUpdate(guid, new Car(guid, GenerateName.Generate(7), coords[0], coords[1], 100));
+		_unitsStorage.AddOrUpdate(guid, UnitFactory.Create(UnitTypes.Car, guid, GenerateName.Generate(7), coords[0], coords[1], 100));
 	}
 
 	private async Task HandleDrop(DragEventArgs arg)

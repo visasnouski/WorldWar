@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Utils;
@@ -24,7 +25,10 @@ identityBuilder.AddUserValidator<UserEmailValidator<WorldWarIdentity>>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<WorldWarIdentity>>();
+
 builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
+builder.Services.AddSingleton<IUnitFactory, UnitFactory>();
+
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();

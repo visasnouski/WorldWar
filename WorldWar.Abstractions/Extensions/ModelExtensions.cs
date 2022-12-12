@@ -1,4 +1,5 @@
 ﻿using WorldWar.Abstractions.DTOs;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Items.Base.Protections;
@@ -12,30 +13,16 @@ namespace WorldWar.Abstractions.Extensions;
 
 public static class ModelExtensions
 {
-	public static Unit ToUnit(this UnitDto unitDto, Func<ICollection<int>, ICollection<ItemDto>> funcItem)
+	public static Unit ToUnit(this UnitDto unitDto, IUnitFactory unitFactory, Func<ICollection<int>, ICollection<ItemDto>> funcItem)
 	{
 		if (unitDto == null) throw new ArgumentNullException(nameof(unitDto));
 		if (funcItem == null) throw new ArgumentNullException(nameof(funcItem));
 
 		var items = funcItem(unitDto.Loot.ItemIds);
 
-		return unitDto.UnitType switch
-		{
-			UnitTypes.Car => new Car(unitDto.Id, unitDto.Name, unitDto.Latitude, unitDto.Longitude, 100,
-				unitDto.Weapon.ToWeapon(), unitDto.HeadProtection.ToHeadProtection(),
-				unitDto.BodyProtection.ToBodyProtection(), unitDto.Loot.ToLoot(items)),
-
-			UnitTypes.Player => new Player(unitDto.Id, unitDto.Name, unitDto.Latitude, unitDto.Longitude, 100,
-				unitDto.Weapon.ToWeapon(), unitDto.HeadProtection.ToHeadProtection(),
-				unitDto.BodyProtection.ToBodyProtection(), unitDto.Loot.ToLoot(items)),
-
-			UnitTypes.Mob => new Bot(unitDto.Id, unitDto.Name, unitDto.UnitType, unitDto.Latitude,
-				unitDto.Longitude, 100, unitDto.Weapon.ToWeapon(),
-				unitDto.HeadProtection.ToHeadProtection(), unitDto.BodyProtection.ToBodyProtection(),
-				unitDto.Loot.ToLoot(items)),
-
-			_ => throw new InvalidOperationException("Unknown unit type")
-		};
+		return unitFactory.Create(unitDto.UnitType, unitDto.Id, unitDto.Name, unitDto.Latitude, unitDto.Longitude, 100,
+			unitDto.Weapon.ToWeapon(), unitDto.HeadProtection.ToHeadProtection(),
+			unitDto.BodyProtection.ToBodyProtection(), unitDto.Loot.ToLoot(items));
 	}
 
 	public static UnitDto ToUnitDto(this Unit unit)

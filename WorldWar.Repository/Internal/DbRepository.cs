@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Extensions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Body;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Head;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
@@ -14,10 +15,12 @@ internal class DbRepository : IDbRepository
 {
 	private readonly SemaphoreSlim _semaphore = new(1, 1);
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly IUnitFactory _unitFactory;
 
-	public DbRepository(IServiceScopeFactory scopeFactory)
+	public DbRepository(IServiceScopeFactory scopeFactory, IUnitFactory unitFactory)
 	{
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
+		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
 	}
 
 	public IReadOnlyCollection<Weapon> Weapons
@@ -47,7 +50,7 @@ internal class DbRepository : IDbRepository
 
 				var items = applicationDbContext.Items.ToArray();
 
-				return unitDtos.Select(x => x.ToUnit(itemIds =>
+				return unitDtos.Select(x => x.ToUnit(_unitFactory, itemIds =>
 						itemIds.Select(itemId => items.First(item => itemId == item.Id))
 							.ToArray()))
 					.ToArray();
@@ -137,7 +140,7 @@ internal class DbRepository : IDbRepository
 			throw new UnitNotFoundException($"Unit with id {id} not found");
 		}
 
-		return unitDto.ToUnit(itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
+		return unitDto.ToUnit(_unitFactory, itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
 	}
 
 	public async Task SetUnit(Unit unit)

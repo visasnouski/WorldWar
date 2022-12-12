@@ -80,7 +80,7 @@ internal class MovableService : IMovableService
 		user.SaveCurrentLocation();
 		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
-	
+
 	public async Task StartMove(Guid unitId, Guid targetGuid, CancellationToken cancellationToken,
 		float? distance = null)
 	{
@@ -114,7 +114,14 @@ internal class MovableService : IMovableService
 
 	public async Task Rotate(Guid unitId, float latitude, float longitude, CancellationToken cancellationToken)
 	{
+		if (!_unitsStorage.TryGetValue(unitId, out var user))
+		{
+			return;
+		}
+
+		user!.RotateUnit(longitude, latitude);
 		await _yandexJsClientNotifier.RotateUnit(unitId, latitude, longitude).ConfigureAwait(false);
+		_unitsStorage.AddOrUpdate(user!.Id, user);
 	}
 
 	private static void Move(Unit unit, TimeSpan time, float endLongitude, float endLatitude, int acceleration = 1)

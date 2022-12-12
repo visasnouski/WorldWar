@@ -18,14 +18,16 @@ internal class InteractionObjectsService : IInteractionObjectsService
 	private readonly IMovableService _movableService;
 	private readonly IAuthUser _authUser;
 	private readonly InteractStates _interactStates;
+	private readonly IUnitFactory _unitFactory;
 
-	public InteractionObjectsService(IStorageFactory storageFactory, IMovableService movableService, IAuthUser authUser, InteractStates interactStates)
+	public InteractionObjectsService(IStorageFactory storageFactory, IMovableService movableService, IAuthUser authUser, InteractStates interactStates, IUnitFactory unitFactory)
 	{
 		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_boxStorage = storageFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_interactStates = interactStates ?? throw new ArgumentNullException(nameof(interactStates));
+		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
 	}
 
 	public async Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken)
@@ -111,7 +113,7 @@ internal class InteractionObjectsService : IInteractionObjectsService
 
 		user!.ChangeUnitType(UnitTypes.Player);
 		var id = Guid.NewGuid();
-		_unitsStorage.AddOrUpdate(id, new Car(id, GenerateName.Generate(7), user!.Latitude, user.Longitude, 100));
+		_unitsStorage.AddOrUpdate(id, _unitFactory.Create(UnitTypes.Car, id, GenerateName.Generate(7), user!.Latitude, user.Longitude, 100));
 		_unitsStorage.AddOrUpdate(user.Id, user);
 	}
 

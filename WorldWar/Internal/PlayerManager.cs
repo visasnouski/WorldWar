@@ -19,14 +19,16 @@ internal class PlayerManager : IPlayerManager
 	private readonly IUnitManagementService _unitManagementService;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly IAuthUser _authUser;
+	private readonly IUnitFactory _unitFactory;
 
-	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter)
+	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter, IUnitFactory unitFactory)
 	{
 		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
 		_unitManagementService = unitManagementService ?? throw new ArgumentNullException(nameof(unitManagementService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
+		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
 	}
 
 	public async Task AddUnit()
@@ -39,7 +41,7 @@ internal class PlayerManager : IPlayerManager
 		}
 		catch (UnitNotFoundException)
 		{
-			var unit = new Player(
+			var unit = _unitFactory.Create(UnitTypes.Player,
 				identity.GuidId,
 				identity.UserName,
 				(float)identity.Latitude,
@@ -48,7 +50,7 @@ internal class PlayerManager : IPlayerManager
 				loot: new Loot()
 				{
 					Id = identity.GuidId.GetHashCode(),
-					Items = new List<Item>() { WeaponModels.TT, WeaponModels.Ak47, WeaponModels.DesertEagle, BodyProtectionModels.Waistcoat, HeadProtectionModels.Cap, WeaponModels.TT, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.DesertEagle, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, WeaponModels.TT, },
+					Items = new List<Item>(),
 				});
 
 			await _dbRepository.SetUnit(unit).ConfigureAwait(true);
