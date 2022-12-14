@@ -5,10 +5,9 @@
 @using WorldWar.Components
 
 @inject IWorldWarMapService WorldWarMapService
-@inject IUserManagement UserManagement
+@inject IPlayerManager PlayerManager
 @inject IYandexJsClientAdapter YandexJsClientAdapter
 @inject IYandexHubConnection YandexHubConnection;
-@inject NavigationManager NavigationManager
 
 @implements IAsyncDisposable
 
@@ -27,7 +26,7 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-		await YandexHubConnection.ConfigureHubConnection(NavigationManager.ToAbsoluteUri("/yandexMapHub"));
+		await YandexHubConnection.ConfigureHubConnection();
 	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -35,12 +34,12 @@
 		if (firstRender)
 		{
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
-			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(UserManagement));
+			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(PlayerManager));
 
 			await WorldWarMapService.RunUnitsAutoRefreshAsync();
 			await WorldWarMapService.RunItemsAutoRefresh();
 
-			await UserManagement.AddUnit();
+			await PlayerManager.AddUnit();
 			StateHasChanged();
 		}
 	}

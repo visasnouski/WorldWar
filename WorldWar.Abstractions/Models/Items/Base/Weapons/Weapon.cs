@@ -1,4 +1,6 @@
-﻿namespace WorldWar.Abstractions.Models.Items.Base.Weapons;
+﻿using System.Security.Cryptography;
+
+namespace WorldWar.Abstractions.Models.Items.Base.Weapons;
 
 public class Weapon : Item
 {
@@ -31,4 +33,19 @@ public class Weapon : Item
 	public override string IconPath { get; init; } = null!;
 
 	public override int Size => WeaponType is WeaponTypes.Rifles or WeaponTypes.Shotguns ? 2 : 1;
+
+	public int CalculateDamage(float distance)
+	{
+		var ratioDistanceToLocation = (distance != 0) ? Distance / 2 / distance : 1;
+		var random = RandomNumberGenerator.GetInt32(1, 100);
+		if (random > Accuracy * ratioDistanceToLocation)
+		{
+			// Missed
+			return 0;
+		}
+
+		var rndDamage = (float)RandomNumberGenerator.GetInt32(1, Damage + 1);
+		var damage = (int)(rndDamage * (Accuracy * ratioDistanceToLocation / 100));
+		return damage;
+	}
 }

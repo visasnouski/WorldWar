@@ -13,7 +13,7 @@ using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Internal;
 
-public class WorldWarMapService : IWorldWarMapService
+internal class WorldWarMapService : IWorldWarMapService
 {
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IStorage<Box> _boxStorage;
@@ -22,10 +22,10 @@ public class WorldWarMapService : IWorldWarMapService
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly ILogger<WorldWarMapService> _logger;
 
-	public WorldWarMapService(ICacheFactory cacheFactory, IAuthUser authUser, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter, ILogger<WorldWarMapService> logger)
+	public WorldWarMapService(IStorageFactory storageFactory, IAuthUser authUser, ITaskDelay taskDelay, IYandexJsClientAdapter yandexJsClientAdapter, ILogger<WorldWarMapService> logger)
 	{
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
-		_boxStorage = cacheFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
+		_boxStorage = storageFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));

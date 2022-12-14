@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Units;
@@ -18,11 +17,11 @@ internal class AiService : BackgroundService
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly ITaskDelay _taskDelay;
 
-	public AiService(ILogger<AiService> logger, IServiceScopeFactory serviceScopeFactory, ICacheFactory cacheFactory, ITaskDelay taskDelay)
+	public AiService(ILogger<AiService> logger, IServiceScopeFactory serviceScopeFactory, IStorageFactory storageFactory, ITaskDelay taskDelay)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		_serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-		_unitsStorage = cacheFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(cacheFactory));
+		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_taskDelay = taskDelay ?? throw new ArgumentNullException(nameof(taskDelay));
 	}
 
@@ -47,7 +46,7 @@ internal class AiService : BackgroundService
 				var newLatitude = unit.Latitude + latitudeRnd;
 				var newLongitude = unit.Longitude + longitudeRnd;
 
-				unit.RotateUnit(newLongitude, newLatitude);
+				await unit.RotateUnit(newLongitude, newLatitude);
 
 				_logger.LogInformation("Move unit {id} to [{latitude}, {longitude}]", unit.Id, newLatitude, newLongitude);
 				await managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);

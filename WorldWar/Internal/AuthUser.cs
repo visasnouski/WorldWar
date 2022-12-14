@@ -6,7 +6,7 @@ using WorldWar.Repository.Models;
 
 namespace WorldWar.Internal;
 
-public class AuthUser : IAuthUser
+internal class AuthUser : IAuthUser
 {
     private readonly AuthenticationStateProvider _authenticationStateProvider;
     private readonly UserManager<WorldWarIdentity> _userManager;

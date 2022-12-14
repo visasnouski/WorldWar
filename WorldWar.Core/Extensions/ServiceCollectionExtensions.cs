@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
 		}
 	
 		serviceCollection.AddHostedService<DbSyncService>();
-		serviceCollection.AddSingleton<ICacheFactory,CacheFactory>();
+		serviceCollection.AddSingleton<IStorageFactory,StorageFactory>();
 		serviceCollection.AddSingleton<Storage<Unit>>();
 		serviceCollection.AddSingleton<Storage<Box>>();
 		serviceCollection.Configure<CacheFactoryOptions>(options => options.Register<Unit>());

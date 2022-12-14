@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Extensions;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Body;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Head;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
@@ -36,7 +37,7 @@ internal class DbRepository : IDbRepository
 		{
 			using var scope = _scopeFactory.CreateScope();
 			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
+			var unitFactory = scope.ServiceProvider.GetRequiredService<IUnitFactory>();
 			return Lock(() =>
 			{
 				var unitDtos = applicationDbContext.Units
@@ -47,7 +48,7 @@ internal class DbRepository : IDbRepository
 
 				var items = applicationDbContext.Items.ToArray();
 
-				return unitDtos.Select(x => x.ToUnit(itemIds =>
+				return unitDtos.Select(x => x.ToUnit(unitFactory, itemIds =>
 						itemIds.Select(itemId => items.First(item => itemId == item.Id))
 							.ToArray()))
 					.ToArray();
@@ -123,6 +124,7 @@ internal class DbRepository : IDbRepository
 	{
 		using var scope = _scopeFactory.CreateScope();
 		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		var unitFactory = scope.ServiceProvider.GetRequiredService<IUnitFactory>();
 
 		var unitDto = await LockAsync(() => applicationDbContext.Units
 				.Include(x => x.Weapon)
@@ -137,7 +139,7 @@ internal class DbRepository : IDbRepository
 			throw new UnitNotFoundException($"Unit with id {id} not found");
 		}
 
-		return unitDto.ToUnit(itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
+		return unitDto.ToUnit(unitFactory, itemIds => itemIds.Select(itemId => applicationDbContext.Items.First(x => itemId == x.Id)).ToArray());
 	}
 
 	public async Task SetUnit(Unit unit)

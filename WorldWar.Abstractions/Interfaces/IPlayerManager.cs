@@ -1,6 +1,6 @@
 ﻿namespace WorldWar.Abstractions.Interfaces;
 
-public interface IUserManagement
+public interface IPlayerManager
 {
     Task AddUnit();
 

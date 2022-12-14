@@ -6,7 +6,7 @@
 @using WorldWar.Core.Cache
 @using WorldWar.Core.Interfaces
 
-@inject ICacheFactory CacheFactory
+@inject IStorageFactory StorageFactory
 @inject IAuthUser AuthUser
 @inject InteractStates InteractStates
 @inject DraggableItem DraggableItem
@@ -44,8 +44,8 @@
 
 	protected override void OnInitialized()
 	{
-		_unitsStorage = CacheFactory.Create<Unit>();
-		_boxStorage = CacheFactory.Create<Box>();
+		_unitsStorage = StorageFactory.Create<Unit>();
+		_boxStorage = StorageFactory.Create<Box>();
 		DraggableItem.OnChange += StateHasChanged;
 		InteractStates.OnChange += InteractStatesOnChange();
 	}

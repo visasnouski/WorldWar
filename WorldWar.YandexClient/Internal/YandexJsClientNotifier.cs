@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using WorldWar.YandexClient.Hubs;
 using WorldWar.YandexClient.Interfaces;
 
@@ -10,12 +9,12 @@ internal sealed class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposa
 	private readonly Lazy<Task<HubConnection>> _hubConnection;
 	private bool _isDisposed;
 
-	public YandexJsClientNotifier(NavigationManager navigationManager)
+	public YandexJsClientNotifier(IHttpBaseUrlAccessor httpBaseUrlAccessor)
 	{
 		_hubConnection = new Lazy<Task<HubConnection>>(async () =>
 		{
 			var hubConnection = new HubConnectionBuilder()
-				.WithUrl(navigationManager.ToAbsoluteUri("/yandexMapHub"))
+				.WithUrl(httpBaseUrlAccessor.GetUri())
 				.Build();
 
 			await hubConnection.StartAsync().ConfigureAwait(false);

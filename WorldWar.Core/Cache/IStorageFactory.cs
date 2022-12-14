@@ -2,7 +2,7 @@
 
 namespace WorldWar.Core.Cache
 {
-	public interface ICacheFactory
+	public interface IStorageFactory
 	{
 		public IStorage<T> Create<T>();
 	}

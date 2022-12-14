@@ -24,11 +24,14 @@ identityBuilder.AddUserValidator<UserEmailValidator<WorldWarIdentity>>();
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<WorldWarIdentity>>();
+
 builder.Services.AddSingleton<ITaskDelay, TaskDelay>();
+builder.Services.AddSingleton<IUnitFactory, UnitFactory>();
+
 builder.Services.AddScoped<IWorldWarMapService, WorldWarMapService>();
 
 builder.Services.AddScoped<IUnitManagementService, UnitManagementService>();
-builder.Services.AddScoped<IUserManagement, UserManagement>();
+builder.Services.AddScoped<IPlayerManager, PlayerManager>();
 
 builder.Services.AddScoped<IAuthUser, AuthUser>();
 builder.Services.AddScoped<UserManager<WorldWarIdentity>>();
@@ -40,6 +43,9 @@ builder.Services.AddScoped<InteractStates>();
 builder.Services.AddScoped<IInteractionObjectsService, InteractionObjectsService>();
 
 builder.Services.AddYandexClient(options => builder.Configuration.GetSection("YandexMap").Bind(options));
+builder.Services.UseHttpBaseUrlAccessor<HttpBaseUrlAccessor>();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddAiService();
 
 builder.Services.AddStorage();

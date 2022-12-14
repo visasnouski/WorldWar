@@ -679,8 +679,3 @@ function toBearing(radians) {
     // convert radians to degrees (as bearing: 0...360)
     return (toDegrees(radians) + 360) % 360;
 }
-
-function mouseCoords(e) {
-    mouseX = e.pageX;
-    mouseY = e.pageY;
-}
