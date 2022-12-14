@@ -1,6 +1,5 @@
 ﻿using WorldWar.Abstractions.DTOs;
 using WorldWar.Abstractions.Interfaces;
-using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Items.Base.Protections;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Body;

@@ -2,5 +2,5 @@
 
 public interface IYandexHubConnection : IAsyncDisposable
 {
-	public Task ConfigureHubConnection(Uri uri);
+	public Task ConfigureHubConnection();
 }

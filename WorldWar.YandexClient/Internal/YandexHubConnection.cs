@@ -8,18 +8,20 @@ internal class YandexHubConnection : IYandexHubConnection
 {
 	private HubConnection? _hubConnection;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
+	private readonly IHttpBaseUrlAccessor _httpBaseUrlAccessor;
 	private readonly ILogger<YandexHubConnection> _logger;
 
-	public YandexHubConnection(IYandexJsClientAdapter yandexJsClientAdapter, ILogger<YandexHubConnection> logger)
+	public YandexHubConnection(IYandexJsClientAdapter yandexJsClientAdapter, IHttpBaseUrlAccessor httpBaseUrlAccessor, ILogger<YandexHubConnection> logger)
 	{
 		this._yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
+		this._httpBaseUrlAccessor = httpBaseUrlAccessor ?? throw new ArgumentNullException(nameof(httpBaseUrlAccessor));
 		this._logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
-	public async Task ConfigureHubConnection(Uri uri)
+	public async Task ConfigureHubConnection()
 	{
 		_hubConnection = new HubConnectionBuilder()
-			.WithUrl(uri)
+			.WithUrl(_httpBaseUrlAccessor.GetUri())
 			.WithAutomaticReconnect()
 			.Build();
 

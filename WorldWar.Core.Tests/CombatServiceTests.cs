@@ -7,7 +7,6 @@ using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Core.Cache;
 using WorldWar.Core.Interfaces;
-using WorldWar.YandexClient.Interfaces;
 
 namespace WorldWar.Core.Tests
 {
@@ -126,7 +125,7 @@ namespace WorldWar.Core.Tests
 		}
 
 		[TestMethod]
-		public async Task AttackUnit_KillsEnemy()
+		public async Task AttackUnit_KillsEnemy_RemovesTasksForEnemy()
 		{
 			// Arrange
 
@@ -143,8 +142,10 @@ namespace WorldWar.Core.Tests
 
 			var storageFactoryMock = new Mock<IStorageFactory>();
 			storageFactoryMock.Setup(x => x.Create<Unit>()).Returns(unitStorageMock.Object);
-
 			mocker.Use(storageFactoryMock);
+
+			var taskStorageMock = new Mock<ITasksStorage>();
+			mocker.Use(taskStorageMock);
 
 			var target = mocker.CreateInstance<CombatService>();
 
@@ -154,8 +155,8 @@ namespace WorldWar.Core.Tests
 
 			// Assert
 
-			mocker.Verify<IYandexJsClientNotifier>(x =>
-				x.KillUnit(enemyGuid), Times.Once);
+			taskStorageMock.Verify(x =>
+				x.TryRemove(enemyGuid), Times.Once);
 		}
 	}
 }

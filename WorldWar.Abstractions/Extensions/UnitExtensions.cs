@@ -9,18 +9,6 @@ namespace WorldWar.Abstractions.Extensions
 {
 	public static class UnitExtensions
 	{
-		public static void RotateUnit(this Unit unit, float endLongitude, float endLatitude, float? fromLongitude = null, float? fromLatitude = null)
-		{
-			if (unit == null)
-			{
-				throw new ArgumentNullException(nameof(unit));
-			}
-
-			fromLongitude ??= unit.Location.StartPos.X;
-			fromLatitude ??= unit.Location.StartPos.Y;
-			unit.Rotate = -90 + BearingCalculator.Calculate(fromLatitude.Value, fromLongitude.Value, endLatitude, endLongitude);
-		}
-
 		public static bool IsWithinReach(this Unit unit, float endLongitude, float endLatitude, float? weaponDistance = null)
 		{
 			if (unit == null)
@@ -31,18 +19,6 @@ namespace WorldWar.Abstractions.Extensions
 			weaponDistance ??= unit.Speed * 10;
 			var currentDistance = Vector2.Distance(unit.Location.CurrentPos, new Vector2(endLongitude, endLatitude));
 			return currentDistance < weaponDistance;
-		}
-
-		public static void AddDamage(this Unit unit, int damage)
-		{
-			if (unit == null)
-			{
-				throw new ArgumentNullException(nameof(unit));
-			}
-
-			var protection = unit.HeadProtection.Defense + unit.BodyProtection.Defense;
-			var realDamage = damage - damage * protection / 100;
-			unit.Health -= realDamage;
 		}
 
 		public static void SetWeapon(this Unit unit, Weapon weapon)

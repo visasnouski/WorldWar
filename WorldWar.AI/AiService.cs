@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Security.Cryptography;
-using WorldWar.Abstractions.Extensions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Units;
@@ -47,7 +46,7 @@ internal class AiService : BackgroundService
 				var newLatitude = unit.Latitude + latitudeRnd;
 				var newLongitude = unit.Longitude + longitudeRnd;
 
-				unit.RotateUnit(newLongitude, newLatitude);
+				await unit.RotateUnit(newLongitude, newLatitude);
 
 				_logger.LogInformation("Move unit {id} to [{latitude}, {longitude}]", unit.Id, newLatitude, newLongitude);
 				await managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);

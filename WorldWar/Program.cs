@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using WorldWar.Abstractions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Utils;
@@ -44,6 +43,9 @@ builder.Services.AddScoped<InteractStates>();
 builder.Services.AddScoped<IInteractionObjectsService, InteractionObjectsService>();
 
 builder.Services.AddYandexClient(options => builder.Configuration.GetSection("YandexMap").Bind(options));
+builder.Services.UseHttpBaseUrlAccessor<HttpBaseUrlAccessor>();
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddAiService();
 
 builder.Services.AddStorage();
