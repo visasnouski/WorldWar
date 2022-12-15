@@ -65,6 +65,7 @@ internal class DbRepository : IDbRepository
 			return Lock(() => applicationDbContext.BodyProtections.Select(x => x.ToBodyProtection()).ToList());
 		}
 	}
+
 	public IReadOnlyCollection<HeadProtection> HeadProtections
 	{
 		get

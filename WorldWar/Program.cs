@@ -36,10 +36,10 @@ builder.Services.AddScoped<IPlayerManager, PlayerManager>();
 builder.Services.AddScoped<IAuthUser, AuthUser>();
 builder.Services.AddScoped<UserManager<WorldWarIdentity>>();
 builder.Services.AddScoped<IRegisterModelServices, RegisterModelServices>();
+
 builder.Services.AddScoped<DraggableItem>();
 builder.Services.AddScoped<UnitEquipmentDialogState>();
 builder.Services.AddScoped<InteractStates>();
-
 builder.Services.AddScoped<IInteractionObjectsService, InteractionObjectsService>();
 
 builder.Services.AddYandexClient(options => builder.Configuration.GetSection("YandexMap").Bind(options));

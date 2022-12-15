@@ -10,6 +10,7 @@ using WorldWar.Core.Interfaces;
 
 namespace WorldWar.AI;
 
+// Supports only movement
 internal class AiService : BackgroundService
 {
 	private readonly ILogger<AiService> _logger;
@@ -31,7 +32,6 @@ internal class AiService : BackgroundService
 		var managementService = scope.ServiceProvider.GetRequiredService<IUnitManagementService>();
 		while (!cancellationToken.IsCancellationRequested)
 		{
-
 			var units = _unitsStorage.Get();
 			var mobs = units.Where(unit => unit.UnitType == UnitTypes.Mob
 										   && unit.Location.StartPos == unit.Location.CurrentPos

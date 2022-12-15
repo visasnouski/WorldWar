@@ -164,6 +164,7 @@ public abstract class Unit
 			var message = damage > 0 ? damage.ToString(NumberFormatInfo.CurrentInfo) : "missed!";
 			await _damageNotificationFunc.Invoke(Id, message);
 		}
+
 		Health -= realDamage;
 
 		if (_deathNotificationFunc != null && Health <= 0)
