@@ -49,7 +49,7 @@ internal class AiService : BackgroundService
 				await unit.RotateUnit(newLongitude, newLatitude);
 
 				_logger.LogInformation("Move unit {id} to [{latitude}, {longitude}]", unit.Id, newLatitude, newLongitude);
-				await managementService.MoveUnit(unit.Id, newLatitude, newLongitude).ConfigureAwait(true);
+				await managementService.MoveUnit(unit, newLatitude, newLongitude).ConfigureAwait(true);
 			}
 
 			await _taskDelay.Delay(TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(true);

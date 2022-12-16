@@ -1,4 +1,6 @@
 ﻿using WorldWar.Abstractions.Interfaces;
+using WorldWar.Abstractions.Models.Items.Base;
+using WorldWar.Abstractions.Models.Units;
 using WorldWar.Core.Interfaces;
 using WorldWar.Interfaces;
 
@@ -19,16 +21,16 @@ internal class UnitManagementService : IUnitManagementService
 		_interactionObjectsService = interactionObjectsService ?? throw new ArgumentNullException(nameof(interactionObjectsService));
 	}
 
-	public async Task MoveUnit(Guid unitId, float[][] route)
+	public async Task MoveUnit(Unit unit, float[][] route)
 	{
-		await StopUnit(unitId).ConfigureAwait(true);
-		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _movableService.StartMove(unitId, route, cs.Token)));
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _movableService.StartMove(unit, route, cs.Token)));
 	}
 
-	public async Task MoveUnit(Guid unitId, float latitude, float longitude)
+	public async Task MoveUnit(Unit unit, float latitude, float longitude)
 	{
 		float[][] route = { new[] { latitude, longitude } };
-		await MoveUnit(unitId, route);
+		await MoveUnit(unit, route);
 	}
 
 	public async Task StopUnit(Guid unitId)
@@ -40,30 +42,37 @@ internal class UnitManagementService : IUnitManagementService
 			try
 			{
 				await task.Value.Item2.ConfigureAwait(true);
-				_tasksStorage.TryRemove(unitId);
 			}
 			catch (TaskCanceledException)
 			{
 			}
+
+			_tasksStorage.TryRemove(unitId);
 		}
 	}
 
-	public async Task Attack(Guid unitId, Guid enemyGuid)
+	public async Task Attack(Unit unit, Unit enemy)
 	{
-		await StopUnit(unitId).ConfigureAwait(true);
-		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _combatService.AttackUnit(unitId, enemyGuid, cs.Token)));
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _combatService.AttackUnit(unit, enemy, cs.Token)));
 	}
 
-	public async Task GetInCar(Guid unitId, Guid itemGuid)
+	public async Task GetInCar(Unit unit, Unit targetUnit)
 	{
-		await StopUnit(unitId).ConfigureAwait(true);
-		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _interactionObjectsService.GetIn(itemGuid, cs.Token)));
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.GetIn(unit, targetUnit, cs.Token)));
 	}
 
-	public async Task PickUp(Guid unitId, Guid itemGuid, bool isUnit)
+	public async Task PickUp(Unit unit, Box item)
 	{
-		await StopUnit(unitId).ConfigureAwait(true);
-		_tasksStorage.AddOrUpdate(unitId, GetTask(cs => _interactionObjectsService.PickUp(itemGuid, isUnit, cs.Token)));
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.PickUp(unit, item, cs.Token)));
+	}
+
+	public async Task PickUp(Unit unit, Unit targetUnit)
+	{
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.PickUp(unit, targetUnit, cs.Token)));
 	}
 
 	private static (CancellationTokenSource cs, Task task) GetTask(Func<CancellationTokenSource, Task> func)

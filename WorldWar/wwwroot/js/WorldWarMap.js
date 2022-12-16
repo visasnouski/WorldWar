@@ -3,8 +3,8 @@
 var myMap;
 var yandexRoute;
 
-export function setUnitManagementService(value) {
-    window.unitManagementService = value;
+export function setPlayerManager(value) {
+    window.playerManager = value;
 }
 export function setUnitEquipmentComponent(value) {
     window.unitEquipmentComponent = value;
@@ -39,7 +39,7 @@ function init() {
             const coords = e.get('coords');
             if (!ignoreRightClick) {
                 window.stopMotionAnimation = false;
-                window.unitManagementService.invokeMethodAsync('MoveUnit', coords[0], coords[1]);
+                window.playerManager.invokeMethodAsync('MoveUnit', coords[0], coords[1]);
             }
             ignoreRightClick = false;
         });
@@ -142,13 +142,13 @@ export function addUnit(unit) {
     });
 
     myGeoObject.events.add('contextmenu', function (e) {
-        if (window.unitManagementService) {
+        if (window.playerManager) {
             const properties = e.get('target').properties;
             ignoreRightClick = true;
             if (properties.get('health') > 0) {
-                window.unitManagementService.invokeMethodAsync('Attack', properties.get('id'));
+                window.playerManager.invokeMethodAsync('Attack', properties.get('id'));
             } else {
-                window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), true);
+                window.playerManager.invokeMethodAsync('PickUp', properties.get('id'), true);
             }
         }
     });
@@ -219,10 +219,10 @@ export function addCar(car) {
 
     myGeoObject.events.add('contextmenu',
         function (e) {
-            if (window.unitManagementService) {
+            if (window.playerManager) {
                 const properties = e.get('target').properties;
                 ignoreRightClick = true;
-                window.unitManagementService.invokeMethodAsync('GetInCar', properties.get('id'));
+                window.playerManager.invokeMethodAsync('GetInCar', properties.get('id'));
             }
         });
 
@@ -367,10 +367,10 @@ export function addBox(box) {
 
     myGeoObject.events.add('contextmenu', function (e) {
         const properties = e.get('target').properties;
-        if (window.unitManagementService) {
+        if (window.playerManager) {
             window.stopMotionAnimation = false;
             ignoreRightClick = true;
-            window.unitManagementService.invokeMethodAsync('PickUp', properties.get('id'), false);
+            window.playerManager.invokeMethodAsync('PickUp', properties.get('id'), false);
         }
     });
 
@@ -629,7 +629,7 @@ export function addMob(mob) {
 
     myGeoObject.events.add('contextmenu', function (e) {
         ignoreRightClick = true;
-        window.unitManagementService.invokeMethodAsync('Attack', e.get('target').properties.get('id'));
+        window.playerManager.invokeMethodAsync('Attack', e.get('target').properties.get('id'));
     });
 
     myMap.geoObjects.add(myGeoObject);

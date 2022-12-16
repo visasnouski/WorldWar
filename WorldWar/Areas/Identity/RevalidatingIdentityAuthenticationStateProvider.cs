@@ -32,13 +32,13 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         try
         {
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<TUser>>();
-            return await ValidateSecurityStampAsync(userManager, authenticationState.User).ConfigureAwait(true);
+            return await ValidateSecurityStampAsync(userManager, authenticationState.User);
         }
         finally
         {
             if (scope is IAsyncDisposable asyncDisposable)
             {
-                await asyncDisposable.DisposeAsync().ConfigureAwait(true);
+                await asyncDisposable.DisposeAsync();
             }
             else
             {
@@ -49,7 +49,7 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
 
     private async Task<bool> ValidateSecurityStampAsync(UserManager<TUser> userManager, ClaimsPrincipal principal)
     {
-        var user = await userManager.GetUserAsync(principal).ConfigureAwait(true);
+        var user = await userManager.GetUserAsync(principal);
         if (user == null)
         {
             return false;
@@ -61,7 +61,7 @@ public class RevalidatingIdentityAuthenticationStateProvider<TUser>
         else
         {
             var principalStamp = principal.FindFirstValue(_options.ClaimsIdentity.SecurityStampClaimType);
-            var userStamp = await userManager.GetSecurityStampAsync(user).ConfigureAwait(true);
+            var userStamp = await userManager.GetSecurityStampAsync(user);
             return principalStamp == userStamp;
         }
     }

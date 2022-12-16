@@ -12,11 +12,13 @@ namespace WorldWar.Internal
 	internal class UnitFactory : IUnitFactory
 	{
 		private readonly IYandexJsClientNotifier _notifier;
+		private readonly ILogger<UnitFactory> _logger;
 
-		public UnitFactory(IServiceScopeFactory scopeFactory)
+		public UnitFactory(IServiceScopeFactory scopeFactory, ILogger<UnitFactory> logger)
 		{
 			_notifier = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IYandexJsClientNotifier>() ??
 						throw new ArgumentNullException(nameof(scopeFactory));
+			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		public Unit Create(UnitTypes type, Guid id, string userName, float latitude, float longitude, int health, Weapon? weapon = null, HeadProtection? headProtection = null, BodyProtection? bodyProtection = null, Loot? loot = null)
@@ -28,6 +30,8 @@ namespace WorldWar.Internal
 			unit.AddSoundNotifier(_notifier.PlaySound);
 			unit.AddShootNotifier(_notifier.ShootUnit);
 
+			_logger.LogInformation("The new unit {id} was created: [ type:{unitType}, lat:{latitude},lon: {longitude}]", unit.Id,
+				unit.UnitType, unit.Latitude, unit.Longitude);
 			return unit;
 		}
 

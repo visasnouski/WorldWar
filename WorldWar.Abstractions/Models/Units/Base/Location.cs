@@ -23,11 +23,6 @@ public class Location
 		}
 	}
 
-	public void ChangeLocation(Vector2 newPos)
-	{
-		_currentPos = newPos;
-	}
-
 	public float GetDistance(Location targetLocation)
 	{
 		return Vector2.Distance(CurrentPos, targetLocation.CurrentPos);
@@ -46,6 +41,6 @@ public class Location
 		}
 
 		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * speed;
-		ChangeLocation(Vector2.Add(StartPos, deltaVec));
+		_currentPos = Vector2.Add(StartPos, deltaVec);
 	}
 }

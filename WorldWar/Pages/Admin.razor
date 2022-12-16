@@ -73,7 +73,7 @@
 	{
 		if (firstRender)
 		{
-			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(PlayerManager));
+			await YandexJsClientAdapter.SetPlayerManager(DotNetObjectReference.Create(PlayerManager));
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
 			await YandexJsClientAdapter.SetModalDialogBoxContents(DotNetObjectReference.Create(_modalDialogBoxContents!));
 

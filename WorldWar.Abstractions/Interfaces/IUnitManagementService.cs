@@ -1,16 +1,21 @@
-﻿namespace WorldWar.Abstractions.Interfaces;
+﻿using WorldWar.Abstractions.Models.Items.Base;
+using WorldWar.Abstractions.Models.Units;
+
+namespace WorldWar.Abstractions.Interfaces;
 
 public interface IUnitManagementService
 {
-	Task MoveUnit(Guid unitId, float[][] route);
+	Task MoveUnit(Unit unit, float[][] route);
 
-	Task MoveUnit(Guid unitId, float latitude, float longitude);
+	Task MoveUnit(Unit unit, float latitude, float longitude);
 
-	Task Attack(Guid unitId, Guid enemyGuid);
+	Task Attack(Unit unit, Unit enemy);
 
-    Task GetInCar(Guid unitId, Guid itemGuid);
+	Task GetInCar(Unit unit, Unit targetUnit);
 
-    Task PickUp(Guid unitId, Guid itemGuid, bool isUnit);
+	Task PickUp(Unit unit, Box targetItem);
 
-    Task StopUnit(Guid unitId);
+	Task PickUp(Unit unit, Unit targetUnit);
+
+	Task StopUnit(Guid unitId);
 }

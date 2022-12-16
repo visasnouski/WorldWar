@@ -194,22 +194,22 @@ namespace WorldWar.YandexClient.Tests.Internal
 		}
 
 		[TestMethod]
-		public async Task SetUnitManagementService_CallsCorrect()
+		public async Task SetPlayerManager_CallsCorrect()
 		{
 			// Arrange
 
 			var mocker = SetupMocker(out var jsObjectMock);
-			var userManagement = DotNetObjectReference.Create(Mock.Of<IPlayerManager>());
+			var playerManager = DotNetObjectReference.Create(Mock.Of<IPlayerManager>());
 
 			var target = mocker.CreateInstance<YandexJsClientAdapter>();
 
 			// Act
 
-			await target.SetUnitManagementService(userManagement);
+			await target.SetPlayerManager(playerManager);
 
 			// Assert
 
-			jsObjectMock.Verify(x => x.InvokeAsync<IJSVoidResult>("setUnitManagementService", new object?[] { userManagement }), Times.Once);
+			jsObjectMock.Verify(x => x.InvokeAsync<IJSVoidResult>("setPlayerManager", new object?[] { playerManager }), Times.Once);
 		}
 
 		[TestMethod]

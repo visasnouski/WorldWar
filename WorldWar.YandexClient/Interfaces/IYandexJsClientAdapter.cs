@@ -108,7 +108,7 @@ public interface IYandexJsClientAdapter
 	/// <returns></returns>
 	public Task UpdateUnits(Unit[] units);
 
-	public Task SetUnitManagementService<TValue>(DotNetObjectReference<TValue> userManagement)
+	public Task SetPlayerManager<TValue>(DotNetObjectReference<TValue> playerManager)
 		where TValue : class;
 
 	public Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)

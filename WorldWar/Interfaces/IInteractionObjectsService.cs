@@ -1,10 +1,15 @@
-﻿namespace WorldWar.Interfaces;
+﻿using WorldWar.Abstractions.Models.Items.Base;
+using WorldWar.Abstractions.Models.Units;
+
+namespace WorldWar.Interfaces;
 
 public interface IInteractionObjectsService
 {
-	public Task PickUp(Guid guidId, bool isUnit, CancellationToken cancellationToken);
+	public Task PickUp(Unit unit, Unit targetUnit, CancellationToken cancellationToken);
 
-	public Task GetIn(Guid guidId, CancellationToken cancellationToken);
+	public Task PickUp(Unit unit, Box targetItem, CancellationToken cancellationToken);
 
-	public Task GetOut(Guid guidId, CancellationToken cancellationToken);
+	public Task GetIn(Unit unit, Unit targetUnit, CancellationToken cancellationToken);
+
+	public Task GetOut(Unit unit, Unit targetUnit, CancellationToken cancellationToken);
 }

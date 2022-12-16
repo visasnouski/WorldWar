@@ -15,28 +15,32 @@ namespace WorldWar.Internal;
 internal class PlayerManager : IPlayerManager
 {
 	private readonly IStorage<Unit> _unitsStorage;
+	private readonly IStorage<Box> _itemsStorage;
 	private readonly IDbRepository _dbRepository;
 	private readonly IUnitManagementService _unitManagementService;
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly IAuthUser _authUser;
 	private readonly IUnitFactory _unitFactory;
+	private readonly ILogger<PlayerManager> _logger;
 
-	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter, IUnitFactory unitFactory)
+	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter, IUnitFactory unitFactory, ILogger<PlayerManager> logger)
 	{
 		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
+		_itemsStorage = storageFactory.Create<Box>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
 		_unitManagementService = unitManagementService ?? throw new ArgumentNullException(nameof(unitManagementService));
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task AddUnit()
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
 		try
 		{
-			var unit = await _dbRepository.GetUnit(identity.GuidId).ConfigureAwait(true);
+			var unit = await _dbRepository.GetUnit(identity.GuidId);
 			_unitsStorage.AddOrUpdate(unit.Id, unit);
 		}
 		catch (UnitNotFoundException)
@@ -53,7 +57,8 @@ internal class PlayerManager : IPlayerManager
 					Items = new List<Item>(),
 				});
 
-			await _dbRepository.SetUnit(unit).ConfigureAwait(true);
+			// TODO Can remove
+			await _dbRepository.SetUnit(unit);
 			_unitsStorage.AddOrUpdate(unit.Id, unit);
 		}
 	}
@@ -61,7 +66,7 @@ internal class PlayerManager : IPlayerManager
 	[JSInvokable("MoveUnit")]
 	public async Task MoveUnit(float latitude, float longitude)
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
 		if (!_unitsStorage.TryGetValue(identity.GuidId, out var unit))
 		{
 			return;
@@ -73,34 +78,86 @@ internal class PlayerManager : IPlayerManager
 		var routingMode = unit.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
 		var route = await _yandexJsClientAdapter.GetRoute(startCoords, endCoords, routingMode);
-		await _unitManagementService.MoveUnit(identity.GuidId, route).ConfigureAwait(true);
+		await _unitManagementService.MoveUnit(unit, route);
 	}
 
 	[JSInvokable("Attack")]
 	public async Task Attack(Guid enemyGuid)
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.Attack(identity.GuidId, enemyGuid).ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
+
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			_logger.LogWarning("The user {guid} not found.", identity.GuidId);
+			return;
+		}
+
+		if (!_unitsStorage.TryGetValue(enemyGuid, out var enemy))
+		{
+			_logger.LogWarning("The enemy {guid} not found.", enemyGuid);
+			return;
+		}
+
+		await _unitManagementService.Attack(user!, enemy!);
 	}
 
 	[JSInvokable("PickUp")]
 	public async Task PickUp(Guid itemGuid, bool isUnit)
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.PickUp(identity.GuidId, itemGuid, isUnit).ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
+
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			_logger.LogWarning("The user {guid} not found.", identity.GuidId);
+			return;
+		}
+
+		if (isUnit)
+		{
+			if (!_unitsStorage.TryGetValue(itemGuid, out var targetUnit))
+			{
+				_logger.LogWarning("The target unit {guid} not found.", itemGuid);
+				return;
+			}
+
+			await _unitManagementService.PickUp(user!, targetUnit!);
+		}
+		else
+		{
+			if (!_itemsStorage.TryGetValue(itemGuid, out var targetItem))
+			{
+				_logger.LogWarning("The target item {guid} not found.", itemGuid);
+				return;
+			}
+
+			await _unitManagementService.PickUp(user!, targetItem!);
+		}
 	}
 
 	[JSInvokable("GetInCar")]
 	public async Task GetInCar(Guid itemGuid)
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.GetInCar(identity.GuidId, itemGuid).ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
+
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			_logger.LogWarning("The user {guid} not found.", identity.GuidId);
+			return;
+		}
+
+		if (!_unitsStorage.TryGetValue(itemGuid, out var targetUnit))
+		{
+			_logger.LogWarning("The target unit {guid} not found.", identity.GuidId);
+			return;
+		}
+
+		await _unitManagementService.GetInCar(user!, targetUnit!);
 	}
 
 	[JSInvokable("StopUnit")]
 	public async Task StopUnit()
 	{
-		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.StopUnit(identity.GuidId).ConfigureAwait(true);
+		var identity = await _authUser.GetIdentity();
+		await _unitManagementService.StopUnit(identity.GuidId);
 	}
 }
