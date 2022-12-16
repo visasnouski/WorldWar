@@ -8,6 +8,8 @@ namespace WorldWar.Internal
 	{
 		private readonly IHttpContextAccessor _httpContextAccessor;
 		private readonly YandexSettings _yandexSettings;
+		private Uri? _baseUri;
+
 		public HttpBaseUrlAccessor(IHttpContextAccessor httpContextAccessor, IOptions<YandexSettings> yandexSetting)
 		{
 			_httpContextAccessor = httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
@@ -16,8 +18,13 @@ namespace WorldWar.Internal
 
 		public Uri GetUri()
 		{
+			return _baseUri ??= GetBaseUri();
+		}
+
+		private Uri GetBaseUri()
+		{
 			var request = _httpContextAccessor.HttpContext?.Request;
-			return new Uri($"{request!.Scheme}://{request.Host}{request.PathBase}{_yandexSettings.HubConnectionUri}");
+			return new Uri($"{request?.Scheme}://{request?.Host}{request?.PathBase}{_yandexSettings.HubConnectionUri}");
 		}
 	}
 }

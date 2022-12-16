@@ -1,6 +1,8 @@
-﻿namespace WorldWar.Core.Interfaces;
+﻿using WorldWar.Abstractions.Models.Units;
+
+namespace WorldWar.Core.Interfaces;
 
 public interface ICombatService
 {
-	public Task AttackUnit(Guid userGuid, Guid enemyGuid, CancellationToken cancellationToken);
+	public Task AttackUnit(Unit user, Unit enemy, CancellationToken cancellationToken);
 }
