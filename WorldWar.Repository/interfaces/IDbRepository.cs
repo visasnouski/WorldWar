@@ -21,7 +21,6 @@ public interface IDbRepository
 
     Task<HeadProtection> GetHeadProtection(int id);
 
-    // Get unit by id
     public Task<Unit> GetUnit(Guid id);
 
     public Task SetUnit(Unit unit);

@@ -47,7 +47,7 @@ internal class InteractionObjectsService : IInteractionObjectsService
 				new[] { coords.latitude,coords.longitude }
 			};
 
-			await _movableService.StartMove(user!.Id, route, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMove(user!, route, cancellationToken).ConfigureAwait(true);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
@@ -85,7 +85,7 @@ internal class InteractionObjectsService : IInteractionObjectsService
 		if (!user.IsWithinReach(unit!.Longitude, unit.Latitude))
 		{
 			float[][] route = { new[] { unit.Latitude, unit.Longitude } };
-			await _movableService.StartMove(user.Id, route, cancellationToken).ConfigureAwait(true);
+			await _movableService.StartMove(user, route, cancellationToken).ConfigureAwait(true);
 
 			if (cancellationToken.IsCancellationRequested)
 			{

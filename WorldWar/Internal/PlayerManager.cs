@@ -20,8 +20,9 @@ internal class PlayerManager : IPlayerManager
 	private readonly IYandexJsClientAdapter _yandexJsClientAdapter;
 	private readonly IAuthUser _authUser;
 	private readonly IUnitFactory _unitFactory;
+	private readonly ILogger<PlayerManager> _logger;
 
-	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter, IUnitFactory unitFactory)
+	public PlayerManager(IStorageFactory storageFactory, IDbRepository dbRepository, IUnitManagementService unitManagementService, IAuthUser authUser, IYandexJsClientAdapter yandexJsClientAdapter, IUnitFactory unitFactory, ILogger<PlayerManager> logger)
 	{
 		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_dbRepository = dbRepository ?? throw new ArgumentNullException(nameof(dbRepository));
@@ -29,6 +30,7 @@ internal class PlayerManager : IPlayerManager
 		_authUser = authUser ?? throw new ArgumentNullException(nameof(authUser));
 		_yandexJsClientAdapter = yandexJsClientAdapter ?? throw new ArgumentNullException(nameof(yandexJsClientAdapter));
 		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
+		_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 	}
 
 	public async Task AddUnit()
@@ -73,14 +75,27 @@ internal class PlayerManager : IPlayerManager
 		var routingMode = unit.UnitType == UnitTypes.Car ? "auto" : "pedestrian";
 
 		var route = await _yandexJsClientAdapter.GetRoute(startCoords, endCoords, routingMode);
-		await _unitManagementService.MoveUnit(identity.GuidId, route).ConfigureAwait(true);
+		await _unitManagementService.MoveUnit(unit, route).ConfigureAwait(true);
 	}
 
 	[JSInvokable("Attack")]
 	public async Task Attack(Guid enemyGuid)
 	{
 		var identity = await _authUser.GetIdentity().ConfigureAwait(true);
-		await _unitManagementService.Attack(identity.GuidId, enemyGuid).ConfigureAwait(true);
+
+		if (!_unitsStorage.TryGetValue(identity.GuidId, out var user))
+		{
+			_logger.LogWarning("The user {guid} not found.", identity.GuidId);
+			return;
+		}
+
+		if (!_unitsStorage.TryGetValue(enemyGuid, out var enemy))
+		{
+			_logger.LogWarning("The enemy {guid} not found.", enemyGuid);
+			return;
+		}
+
+		await _unitManagementService.Attack(user!, enemy!).ConfigureAwait(true);
 	}
 
 	[JSInvokable("PickUp")]

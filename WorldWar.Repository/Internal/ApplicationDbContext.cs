@@ -41,18 +41,15 @@ internal class ApplicationDbContext : IdentityDbContext<WorldWarIdentity>
 			WeaponModels.TT.ToWeaponDto(),
 			WeaponModels.Fist.ToWeaponDto(),
 			WeaponModels.DesertEagle.ToWeaponDto(),
-			WeaponModels.Ak47.ToWeaponDto()
-		);
+			WeaponModels.Ak47.ToWeaponDto());
 
 		builder.Entity<BodyProtectionDto>().HasData(
 			BodyProtectionModels.WifeBeater.ToBodyProtectionDto(),
-			BodyProtectionModels.Waistcoat.ToBodyProtectionDto()
-		);
+			BodyProtectionModels.Waistcoat.ToBodyProtectionDto());
 
 		builder.Entity<HeadProtectionDto>().HasData(
 			HeadProtectionModels.Bandana.ToHeadProtectionDto(),
-			HeadProtectionModels.Cap.ToHeadProtectionDto()
-			);
+			HeadProtectionModels.Cap.ToHeadProtectionDto());
 
 		var valueComparer = new ValueComparer<ICollection<int>>(
 			(c1, c2) => c1!.SequenceEqual(c2!),
