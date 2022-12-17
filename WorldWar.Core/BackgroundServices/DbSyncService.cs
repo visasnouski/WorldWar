@@ -34,10 +34,8 @@ public class DbSyncService : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			await _taskDelay.Delay(TimeSpan.FromSeconds(10), CancellationToken.None).ConfigureAwait(false);
-			var mapUnits = _unitsStorage.Get().ToArray();
-			var unit777 = mapUnits.FirstOrDefault(x => x.Id.Equals(Guid.Parse("6588ED78-0FF0-4CB2-917C-9A70373F54B2")));
-			_logger.LogInformation(unit777!.Weapon.Ammo.ToString());
+			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(false);
+			var mapUnits = _unitsStorage.Get();
 			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(false);
 		}
 	}

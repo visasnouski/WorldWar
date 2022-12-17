@@ -31,6 +31,8 @@ internal class MovableService : IMovableService
 			return;
 		}
 
+		await Rotate(unit, route[index][0], route[index][1], cancellationToken);
+
 		// get the travel time of the segment of the path
 		var lastTime = TimeSpan.FromSeconds(Vector2.Distance(unit.Location.StartPos, new Vector2(route[index][1], route[index][0])) / unit.Speed);
 

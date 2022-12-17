@@ -87,11 +87,11 @@ internal sealed class YandexJsClientAdapter : IYandexJsClientAdapter, IDisposabl
 		await module.InvokeVoidAsync("addBox", box).ConfigureAwait(false);
 	}
 
-	public async Task SetUnitManagementService<TValue>(DotNetObjectReference<TValue> userManagement)
+	public async Task SetPlayerManager<TValue>(DotNetObjectReference<TValue> playerManager)
 		where TValue : class
 	{
 		var module = await _yandexJsModule.Value.ConfigureAwait(false);
-		await module.InvokeVoidAsync("setUnitManagementService", userManagement).ConfigureAwait(false);
+		await module.InvokeVoidAsync("setPlayerManager", playerManager).ConfigureAwait(false);
 	}
 
 	public async Task SetUnitEquipmentComponent<TValue>(DotNetObjectReference<TValue> unitEquipment)

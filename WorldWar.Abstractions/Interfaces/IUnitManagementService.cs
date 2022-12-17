@@ -1,4 +1,5 @@
-﻿using WorldWar.Abstractions.Models.Units;
+﻿using WorldWar.Abstractions.Models.Items.Base;
+using WorldWar.Abstractions.Models.Units;
 
 namespace WorldWar.Abstractions.Interfaces;
 
@@ -10,10 +11,11 @@ public interface IUnitManagementService
 
 	Task Attack(Unit unit, Unit enemy);
 
+	Task GetInCar(Unit unit, Unit targetUnit);
 
-	Task GetInCar(Guid unitId, Guid itemGuid);
+	Task PickUp(Unit unit, Box targetItem);
 
-    Task PickUp(Guid unitId, Guid itemGuid, bool isUnit);
+	Task PickUp(Unit unit, Unit targetUnit);
 
-    Task StopUnit(Guid unitId);
+	Task StopUnit(Guid unitId);
 }

@@ -34,7 +34,7 @@
 		if (firstRender)
 		{
 			await YandexJsClientAdapter.SetUnitEquipmentComponent(DotNetObjectReference.Create(_unitEquipment!));
-			await YandexJsClientAdapter.SetUnitManagementService(DotNetObjectReference.Create(PlayerManager));
+			await YandexJsClientAdapter.SetPlayerManager(DotNetObjectReference.Create(PlayerManager));
 
 			await WorldWarMapService.RunUnitsAutoRefreshAsync();
 			await WorldWarMapService.RunItemsAutoRefresh();
