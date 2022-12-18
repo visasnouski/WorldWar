@@ -63,6 +63,12 @@ internal class UnitManagementService : IUnitManagementService
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.GetIn(unit, targetUnit, cs.Token)));
 	}
 
+	public async Task GetOutCar(Unit unit)
+	{
+		await StopUnit(unit.Id).ConfigureAwait(true);
+		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.GetOut(unit, cs.Token)));
+	}
+
 	public async Task PickUp(Unit unit, Box item)
 	{
 		await StopUnit(unit.Id).ConfigureAwait(true);

@@ -43,4 +43,9 @@ public class Location
 		var deltaVec = normMovVec * Convert.ToInt64(time.TotalSeconds) * speed;
 		_currentPos = Vector2.Add(StartPos, deltaVec);
 	}
+
+	public void ChangeLocation(float latitude, float longitude)
+	{
+		_currentPos = new Vector2(longitude, latitude);
+	}
 }

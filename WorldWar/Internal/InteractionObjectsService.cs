@@ -1,6 +1,4 @@
 ﻿using WorldWar.Abstractions.Extensions;
-using WorldWar.Abstractions.Interfaces;
-using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Components.States;
@@ -15,19 +13,17 @@ internal class InteractionObjectsService : IInteractionObjectsService
 	private readonly IStorage<Unit> _unitsStorage;
 	private readonly IMovableService _movableService;
 	private readonly InteractStates _interactStates;
-	private readonly IUnitFactory _unitFactory;
 
-	public InteractionObjectsService(IStorageFactory storageFactory, IMovableService movableService, InteractStates interactStates, IUnitFactory unitFactory)
+	public InteractionObjectsService(IStorageFactory storageFactory, IMovableService movableService, InteractStates interactStates)
 	{
 		_unitsStorage = storageFactory.Create<Unit>() ?? throw new ArgumentNullException(nameof(storageFactory));
 		_movableService = movableService ?? throw new ArgumentNullException(nameof(movableService));
 		_interactStates = interactStates ?? throw new ArgumentNullException(nameof(interactStates));
-		_unitFactory = unitFactory ?? throw new ArgumentNullException(nameof(unitFactory));
 	}
 
 	public async Task PickUp(Unit unit, Box targetItem, CancellationToken cancellationToken)
 	{
-		if (unit.IsWithinReach(targetItem.Longitude, targetItem.Latitude))
+		if (!unit.IsWithinReach(targetItem.Longitude, targetItem.Latitude))
 		{
 			float[][] route = {
 				new[] { targetItem.Latitude, targetItem.Longitude }
@@ -63,12 +59,6 @@ internal class InteractionObjectsService : IInteractionObjectsService
 
 	public async Task GetIn(Unit unit, Unit targetUnit, CancellationToken cancellationToken)
 	{
-		if (unit.Id == targetUnit.Id)
-		{
-			await GetOut(unit, targetUnit, cancellationToken).ConfigureAwait(true);
-			return;
-		}
-
 		if (!unit.IsWithinReach(targetUnit.Longitude, targetUnit.Latitude))
 		{
 			float[][] route = { new[] { targetUnit.Latitude, targetUnit.Longitude } };
@@ -80,20 +70,21 @@ internal class InteractionObjectsService : IInteractionObjectsService
 			}
 		}
 
-		if (targetUnit is Car)
+		if (targetUnit is Car car)
 		{
-			unit.ChangeUnitType(UnitTypes.Car);
-			_unitsStorage.AddOrUpdate(unit.Id, unit);
-			_unitsStorage.Remove(targetUnit.Id);
+			_unitsStorage.Remove(car.Id);
+			car.GetBehindWheel(unit);
+			_unitsStorage.AddOrUpdate(car.Id, car);
 		}
 	}
 
-	public Task GetOut(Unit unit, Unit targetUnit, CancellationToken cancellationToken)
+	public Task GetOut(Unit targetUnit, CancellationToken cancellationToken)
 	{
-		unit.ChangeUnitType(UnitTypes.Player);
-		var id = Guid.NewGuid();
-		_unitsStorage.AddOrUpdate(id, _unitFactory.Create(UnitTypes.Car, id, GenerateName.Generate(7), unit.Latitude, unit.Longitude, 100));
-		_unitsStorage.AddOrUpdate(unit.Id, unit);
+		if (targetUnit is Car car && car.TryGetOffWheel(out var unit))
+		{
+			_unitsStorage.AddOrUpdate(car.Id, car);
+			_unitsStorage.AddOrUpdate(unit!.Id, unit);
+		}
 
 		return Task.CompletedTask;
 	}

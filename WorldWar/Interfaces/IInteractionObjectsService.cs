@@ -11,5 +11,5 @@ public interface IInteractionObjectsService
 
 	public Task GetIn(Unit unit, Unit targetUnit, CancellationToken cancellationToken);
 
-	public Task GetOut(Unit unit, Unit targetUnit, CancellationToken cancellationToken);
+	public Task GetOut(Unit unit, CancellationToken cancellationToken);
 }

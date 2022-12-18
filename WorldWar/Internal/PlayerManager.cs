@@ -145,13 +145,19 @@ internal class PlayerManager : IPlayerManager
 			return;
 		}
 
+		if (user!.Id == itemGuid)
+		{
+			await _unitManagementService.GetOutCar(user);
+			return;
+		}
+
 		if (!_unitsStorage.TryGetValue(itemGuid, out var targetUnit))
 		{
 			_logger.LogWarning("The target unit {guid} not found.", identity.GuidId);
 			return;
 		}
 
-		await _unitManagementService.GetInCar(user!, targetUnit!);
+		await _unitManagementService.GetInCar(user, targetUnit!);
 	}
 
 	[JSInvokable("StopUnit")]
