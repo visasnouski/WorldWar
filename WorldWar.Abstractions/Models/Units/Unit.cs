@@ -20,7 +20,7 @@ public abstract class Unit
 
 	public string Name { get; init; }
 
-	public Guid Id { get; init; }
+	public virtual Guid Id { get; }
 
 	public UnitTypes UnitType { get; set; }
 

@@ -58,14 +58,15 @@ internal class MovableService : IMovableService
 			{
 				unit.Move(lastTime, route[index][1], route[index][0]);
 				unit.SaveCurrentLocation();
+
 				index++;
 				if (route.Length <= index)
 				{
 					break;
 				}
 				stopWatch.Restart();
-				await unit.RotateUnit(route[index][1], route[index][0], route[index - 1][1], route[index - 1][0]);
 
+				await unit.RotateUnit(route[index][1], route[index][0], route[index - 1][1], route[index - 1][0]);
 				lastTime = TimeSpan.FromSeconds(Vector2.Distance(unit.Location.StartPos, new Vector2(route[index][1], route[index][0])) / unit.Speed);
 			}
 		}

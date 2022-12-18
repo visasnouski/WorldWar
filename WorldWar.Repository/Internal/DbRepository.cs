@@ -201,6 +201,12 @@ internal class DbRepository : IDbRepository
 		{
 			cancellationToken.ThrowIfCancellationRequested();
 
+			if (unit is Car car && car.TryGetOffWheel(out var driver))
+			{
+				// TODO Refactor 
+				await UpdateUnit(driver!).ConfigureAwait(true);
+			}
+
 			await UpdateUnit(unit).ConfigureAwait(true);
 		}
 	}

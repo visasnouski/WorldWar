@@ -13,6 +13,8 @@ public interface IUnitManagementService
 
 	Task GetInCar(Unit unit, Unit targetUnit);
 
+	Task GetOutCar(Unit unit);
+
 	Task PickUp(Unit unit, Box targetItem);
 
 	Task PickUp(Unit unit, Unit targetUnit);
