@@ -51,16 +51,16 @@ internal class RegisterModelServices : IRegisterModelServices
 		user.Latitude = input.Latitude;
 		user.Longitude = input.Longitude;
 
-		await _userStore.SetUserNameAsync(user, input.UserName, CancellationToken.None).ConfigureAwait(true);
-		await _emailStore.SetEmailAsync(user, input.Email, CancellationToken.None).ConfigureAwait(true);
-		var result = await _userManager.CreateAsync(user, input.Password).ConfigureAwait(true);
+		await _userStore.SetUserNameAsync(user, input.UserName, CancellationToken.None);
+		await _emailStore.SetEmailAsync(user, input.Email, CancellationToken.None);
+		var result = await _userManager.CreateAsync(user, input.Password);
 
 		if (result.Succeeded)
 		{
 			_logger.LogInformation("User created a new account with password.");
 
-			var userId = await _userManager.GetUserIdAsync(user).ConfigureAwait(true);
-			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user).ConfigureAwait(true);
+			var userId = await _userManager.GetUserIdAsync(user);
+			var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 			code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
 			var uriBuilder = new UriBuilder($"{baseUri}Identity/Account/ConfirmEmail");
@@ -74,14 +74,14 @@ internal class RegisterModelServices : IRegisterModelServices
 			_logger.LogInformation("Confirm your email.{ConfirmUri}", uriBuilder.ToString());
 
 			await _emailSender.SendEmailAsync(input.Email, "Confirm your email",
-				$"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(uriBuilder.ToString())}'>clicking here</a>.").ConfigureAwait(true);
+				$"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(uriBuilder.ToString())}'>clicking here</a>.");
 
 			if (_userManager.Options.SignIn.RequireConfirmedAccount)
 			{
 				return;
 			}
 
-			await _signInManager.SignInAsync(user, isPersistent: false).ConfigureAwait(true);
+			await _signInManager.SignInAsync(user, isPersistent: false);
 			return;
 		}
 

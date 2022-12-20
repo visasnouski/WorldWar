@@ -21,13 +21,13 @@ internal class AuthUser : IAuthUser
 
     public async Task<IWorldWarIdentityUser> GetIdentity()
     {
-        return _user ??= await GetUser().ConfigureAwait(true);
+        return _user ??= await GetUser();
     }
 
     private async Task<WorldWarIdentity> GetUser()
     {
-        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync().ConfigureAwait(true);
-        var user = await _userManager.GetUserAsync(authState.User).ConfigureAwait(true);
+        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = await _userManager.GetUserAsync(authState.User);
         return user ?? throw new AuthenticationException("Unknown identity");
     }
 }

@@ -15,13 +15,13 @@ public static class ServiceCollectionExtensions
 			throw new ArgumentNullException(nameof(serviceCollection));
 		}
 
-		// Add services to the container.
-		serviceCollection.AddDbContext<ApplicationDbContext>(options =>
-			options.UseSqlServer(connectionString));
 		serviceCollection.AddDatabaseDeveloperPageExceptionFilter();
 
 		identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
+
 		serviceCollection.AddSingleton<IDbRepository, DbRepository>();
+		serviceCollection.AddDbContextFactory<ApplicationDbContext>(options =>
+			options.UseSqlServer(connectionString), ServiceLifetime.Singleton);
 
 		return serviceCollection;
 	}

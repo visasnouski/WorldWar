@@ -36,7 +36,7 @@ internal class WorldWarMapService : IWorldWarMapService
 	{
 		_ = Task.Run(async () =>
 		{
-			var authUser = await _authUser.GetIdentity().ConfigureAwait(true);
+			var authUser = await _authUser.GetIdentity();
 			var mapGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
 
 			while (true)
@@ -53,30 +53,30 @@ internal class WorldWarMapService : IWorldWarMapService
 
 					if (!mapGuids.Contains((unit.Id, unit.UnitType)))
 					{
-						await _yandexJsClientAdapter.AddUnit(unit).ConfigureAwait(true);
+						await _yandexJsClientAdapter.AddUnit(unit);
 						mapGuids.Add((unit.Id, unit.UnitType));
 					}
 
 					visibleGuids.Add((unit.Id, unit.UnitType));
 					toUpdateList.Add(unit);
-				}).ConfigureAwait(true);
+				});
 
 				if (toUpdateList.Any())
 				{
-					await _yandexJsClientAdapter.UpdateUnits(toUpdateList.ToArray()).ConfigureAwait(true);
+					await _yandexJsClientAdapter.UpdateUnits(toUpdateList.ToArray());
 				}
 
 				var removableGuids = mapGuids.Except(visibleGuids).ToArray();
 				if (removableGuids.Any())
 				{
-					await _yandexJsClientAdapter.RemoveGeoObjects(removableGuids.Select(x => x.Item1).ToArray()).ConfigureAwait(true);
+					await _yandexJsClientAdapter.RemoveGeoObjects(removableGuids.Select(x => x.Item1).ToArray());
 
 					foreach (var removableGuid in removableGuids)
 					{
 						mapGuids.TryRemove(removableGuid);
 					}
 				}
-				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(true);
+				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
 			}
 
 		}, CancellationToken.None);
@@ -88,7 +88,7 @@ internal class WorldWarMapService : IWorldWarMapService
 	{
 		_ = Task.Run(async () =>
 		{
-			var authUser = await _authUser.GetIdentity().ConfigureAwait(true);
+			var authUser = await _authUser.GetIdentity();
 			var mapGuids = new HashSet<Guid>();
 
 			while (true)
@@ -101,7 +101,7 @@ internal class WorldWarMapService : IWorldWarMapService
 				{
 					if (!mapGuids.Contains(item.Id))
 					{
-						await _yandexJsClientAdapter.AddBox(item).ConfigureAwait(true);
+						await _yandexJsClientAdapter.AddBox(item);
 						mapGuids.Add(item.Id);
 					}
 
@@ -111,10 +111,10 @@ internal class WorldWarMapService : IWorldWarMapService
 				var guidsToRemove = mapGuids.Except(visibleGuids).ToArray();
 				if (guidsToRemove.Any())
 				{
-					await _yandexJsClientAdapter.RemoveGeoObjects(guidsToRemove).ConfigureAwait(true);
+					await _yandexJsClientAdapter.RemoveGeoObjects(guidsToRemove);
 					mapGuids.ExceptWith(guidsToRemove);
 				}
-				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(true);
+				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
 			}
 		}, CancellationToken.None);
 

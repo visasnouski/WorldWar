@@ -13,11 +13,12 @@ namespace WorldWar.Repository.Internal;
 
 internal class DbRepository : IDbRepository
 {
-	private readonly SemaphoreSlim _semaphore = new(1, 1);
 	private readonly IServiceScopeFactory _scopeFactory;
+	private readonly IDbContextFactory<ApplicationDbContext> _dbContextFactory;
 
-	public DbRepository(IServiceScopeFactory scopeFactory)
+	public DbRepository(IDbContextFactory<ApplicationDbContext> contextFactory, IServiceScopeFactory scopeFactory)
 	{
+		_dbContextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
 		_scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory));
 	}
 
@@ -25,9 +26,8 @@ internal class DbRepository : IDbRepository
 	{
 		get
 		{
-			using var scope = _scopeFactory.CreateScope();
-			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-			return Lock(() => applicationDbContext.Weapons.Select(x => x.ToWeapon()).ToList());
+			using var applicationDbContext = _dbContextFactory.CreateDbContext();
+			return applicationDbContext.Weapons.Select(x => x.ToWeapon()).ToList();
 		}
 	}
 
@@ -36,23 +36,21 @@ internal class DbRepository : IDbRepository
 		get
 		{
 			using var scope = _scopeFactory.CreateScope();
-			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+			using var applicationDbContext = _dbContextFactory.CreateDbContext();
 			var unitFactory = scope.ServiceProvider.GetRequiredService<IUnitFactory>();
-			return Lock(() =>
-			{
-				var unitDtos = applicationDbContext.Units
-					.Include(x => x.Weapon)
-					.Include(x => x.BodyProtection)
-					.Include(x => x.HeadProtection)
-					.Include(x => x.Loot).ToArray();
 
-				var items = applicationDbContext.Items.ToArray();
+			var unitDtos = applicationDbContext.Units
+				   .Include(x => x.Weapon)
+				   .Include(x => x.BodyProtection)
+				   .Include(x => x.HeadProtection)
+				   .Include(x => x.Loot).ToArray();
 
-				return unitDtos.Select(x => x.ToUnit(unitFactory, itemIds =>
-						itemIds.Select(itemId => items.First(item => itemId == item.Id))
-							.ToArray()))
-					.ToArray();
-			});
+			var items = applicationDbContext.Items.ToArray();
+
+			return unitDtos.Select(x => x.ToUnit(unitFactory, itemIds =>
+					itemIds.Select(itemId => items.First(item => itemId == item.Id))
+						.ToArray()))
+				.ToArray();
 		}
 	}
 
@@ -62,7 +60,7 @@ internal class DbRepository : IDbRepository
 		{
 			using var scope = _scopeFactory.CreateScope();
 			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-			return Lock(() => applicationDbContext.BodyProtections.Select(x => x.ToBodyProtection()).ToList());
+			return applicationDbContext.BodyProtections.Select(x => x.ToBodyProtection()).ToList();
 		}
 	}
 
@@ -70,18 +68,15 @@ internal class DbRepository : IDbRepository
 	{
 		get
 		{
-			using var scope = _scopeFactory.CreateScope();
-			var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-			return Lock(() => applicationDbContext.HeadProtections.Select(x => x.ToHeadProtection()).ToList());
+			using var applicationDbContext = _dbContextFactory.CreateDbContext();
+			return applicationDbContext.HeadProtections.Select(x => x.ToHeadProtection()).ToList();
 		}
 	}
 
 	public async Task<Weapon> GetWeapon(int id)
 	{
-		using var scope = _scopeFactory.CreateScope();
-		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-		var weaponDto = await LockAsync(() => applicationDbContext.Weapons.FirstOrDefaultAsync(x => x.Id == id))
-			.ConfigureAwait(true);
+		await using var applicationDbContext = await _dbContextFactory.CreateDbContextAsync();
+		var weaponDto = await applicationDbContext.Weapons.FirstOrDefaultAsync(x => x.Id == id);
 
 		if (weaponDto == null)
 		{
@@ -93,10 +88,8 @@ internal class DbRepository : IDbRepository
 
 	public async Task<BodyProtection> GetBodyProtection(int id)
 	{
-		using var scope = _scopeFactory.CreateScope();
-		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-		var bodyProtectionDto = await LockAsync(() => applicationDbContext.BodyProtections.FirstOrDefaultAsync(x => x.Id == id))
-			.ConfigureAwait(true);
+		await using var applicationDbContext = await _dbContextFactory.CreateDbContextAsync();
+		var bodyProtectionDto = await applicationDbContext.BodyProtections.FirstOrDefaultAsync(x => x.Id == id);
 
 		if (bodyProtectionDto == null)
 		{
@@ -108,10 +101,8 @@ internal class DbRepository : IDbRepository
 
 	public async Task<HeadProtection> GetHeadProtection(int id)
 	{
-		using var scope = _scopeFactory.CreateScope();
-		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-		var headProtectionDto = await LockAsync(() => applicationDbContext.HeadProtections.FirstOrDefaultAsync(x => x.Id == id))
-			.ConfigureAwait(true);
+		await using var applicationDbContext = await _dbContextFactory.CreateDbContextAsync();
+		var headProtectionDto = await applicationDbContext.HeadProtections.FirstOrDefaultAsync(x => x.Id == id);
 
 		if (headProtectionDto == null)
 		{
@@ -127,13 +118,12 @@ internal class DbRepository : IDbRepository
 		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 		var unitFactory = scope.ServiceProvider.GetRequiredService<IUnitFactory>();
 
-		var unitDto = await LockAsync(() => applicationDbContext.Units
+		var unitDto = await applicationDbContext.Units
 				.Include(x => x.Weapon)
 				.Include(x => x.BodyProtection)
 				.Include(x => x.HeadProtection)
 				.Include(x => x.Loot)
-				.FirstOrDefaultAsync(x => x.Id == id))
-			.ConfigureAwait(true);
+				.FirstOrDefaultAsync(x => x.Id == id);
 
 		if (unitDto == null)
 		{
@@ -147,47 +137,37 @@ internal class DbRepository : IDbRepository
 	{
 		var unitDto = unit.ToUnitDto();
 
-		using var scope = _scopeFactory.CreateScope();
-		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		await using var applicationDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-		Lock(() =>
-		{
-			applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
-			applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
-			return applicationDbContext.Weapons.Attach(unitDto.Weapon);
-		});
+		applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
+		applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
+		applicationDbContext.Weapons.Attach(unitDto.Weapon);
 
-		await LockAsync(async () =>
-		{
-			await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true);
-			return await applicationDbContext.SaveChangesAsync().ConfigureAwait(true);
-		}).ConfigureAwait(true);
+		await applicationDbContext.Units.AddAsync(unitDto);
+		await applicationDbContext.SaveChangesAsync();
+
 	}
 
 	public async Task UpdateUnit(Unit unit)
 	{
 		var unitDto = unit.ToUnitDto();
 
-		using var scope = _scopeFactory.CreateScope();
-		var applicationDbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+		await using var applicationDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-		Lock(() =>
-		{
-			applicationDbContext.Weapons.Attach(unitDto.Weapon);
-			applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
-			return applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
-		});
+		applicationDbContext.Weapons.Attach(unitDto.Weapon);
+		applicationDbContext.BodyProtections.Attach(unitDto.BodyProtection);
+		applicationDbContext.HeadProtections.Attach(unitDto.HeadProtection);
 
-		if (Lock(() => applicationDbContext.Units.AsNoTracking().Any(x => x.Id == unitDto.Id)))
+		if (applicationDbContext.Units.AsNoTracking().Any(x => x.Id == unitDto.Id))
 		{
-			Lock(() => applicationDbContext.Units.Update(unitDto));
+			applicationDbContext.Units.Update(unitDto);
 		}
 		else
 		{
-			await LockAsync(async () => await applicationDbContext.Units.AddAsync(unitDto).ConfigureAwait(true)).ConfigureAwait(true);
+			await applicationDbContext.Units.AddAsync(unitDto);
 		}
 
-		await LockAsync(async () => await applicationDbContext.SaveChangesAsync().ConfigureAwait(true)).ConfigureAwait(true);
+		await applicationDbContext.SaveChangesAsync();
 	}
 
 	public async Task SetUnits(IEnumerable<Unit> units, CancellationToken cancellationToken)
@@ -204,36 +184,10 @@ internal class DbRepository : IDbRepository
 			if (unit is Car car && car.TryGetOffWheel(out var driver))
 			{
 				// TODO Refactor 
-				await UpdateUnit(driver!).ConfigureAwait(true);
+				await UpdateUnit(driver!);
 			}
 
-			await UpdateUnit(unit).ConfigureAwait(true);
-		}
-	}
-
-	private async Task<T> LockAsync<T>(Func<Task<T>> worker)
-	{
-		await _semaphore.WaitAsync().ConfigureAwait(true);
-		try
-		{
-			return await worker().ConfigureAwait(true);
-		}
-		finally
-		{
-			_semaphore.Release();
-		}
-	}
-
-	private T Lock<T>(Func<T> worker)
-	{
-		_semaphore.Wait();
-		try
-		{
-			return worker();
-		}
-		finally
-		{
-			_semaphore.Release();
+			await UpdateUnit(unit);
 		}
 	}
 }
