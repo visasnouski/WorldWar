@@ -10,7 +10,7 @@ internal class UserEmailValidator<TUser> : IUserValidator<TUser>
 	{
 		var errors = new List<IdentityError>();
 
-		var owner = await manager.FindByEmailAsync(user.Email).ConfigureAwait(true);
+		var owner = await manager.FindByEmailAsync(user.Email);
 		if (owner != null &&
 			!string.Equals(await manager.GetUserIdAsync(owner), await manager.GetUserIdAsync(user)))
 		{

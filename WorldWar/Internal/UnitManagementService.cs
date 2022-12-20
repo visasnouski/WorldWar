@@ -23,7 +23,7 @@ internal class UnitManagementService : IUnitManagementService
 
 	public async Task MoveUnit(Unit unit, float[][] route)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _movableService.StartMove(unit, route, cs.Token)));
 	}
 
@@ -41,7 +41,7 @@ internal class UnitManagementService : IUnitManagementService
 
 			try
 			{
-				await task.Value.Item2.ConfigureAwait(true);
+				await task.Value.Item2;
 			}
 			catch (TaskCanceledException)
 			{
@@ -53,31 +53,31 @@ internal class UnitManagementService : IUnitManagementService
 
 	public async Task Attack(Unit unit, Unit enemy)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _combatService.AttackUnit(unit, enemy, cs.Token)));
 	}
 
 	public async Task GetInCar(Unit unit, Unit targetUnit)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.GetIn(unit, targetUnit, cs.Token)));
 	}
 
 	public async Task GetOutCar(Unit unit)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.GetOut(unit, cs.Token)));
 	}
 
 	public async Task PickUp(Unit unit, Box item)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.PickUp(unit, item, cs.Token)));
 	}
 
 	public async Task PickUp(Unit unit, Unit targetUnit)
 	{
-		await StopUnit(unit.Id).ConfigureAwait(true);
+		await StopUnit(unit.Id);
 		_tasksStorage.AddOrUpdate(unit.Id, GetTask(cs => _interactionObjectsService.PickUp(unit, targetUnit, cs.Token)));
 	}
 
