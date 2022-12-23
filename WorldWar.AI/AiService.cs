@@ -37,6 +37,7 @@ internal class AiService : BackgroundService
 										   && unit.Location.StartPos == unit.Location.CurrentPos
 										   && unit.Health > 0);
 
+			// TODO BUG https://github.com/visasnouski/WorldWar/issues/17
 			foreach (var unit in mobs)
 			{
 				cancellationToken.ThrowIfCancellationRequested();

@@ -1,37 +1,33 @@
-﻿using WorldWar.Abstractions.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Body;
 using WorldWar.Abstractions.Models.Items.Base.Protections.Head;
 using WorldWar.Abstractions.Models.Items.Base.Weapons;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Abstractions.Models.Units.Base;
-using WorldWar.YandexClient.Interfaces;
 
-namespace WorldWar.Internal
+namespace WorldWar.Core
 {
 	internal class UnitFactory : IUnitFactory
 	{
-		private readonly IYandexJsClientNotifier _notifier;
+		private readonly INotifier _notifier;
 		private readonly ILogger<UnitFactory> _logger;
 
-		public UnitFactory(IServiceScopeFactory scopeFactory, ILogger<UnitFactory> logger)
+		public UnitFactory(INotifier notifier, ILogger<UnitFactory> logger)
 		{
-			_notifier = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IYandexJsClientNotifier>() ??
-						throw new ArgumentNullException(nameof(scopeFactory));
+			_notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 			_logger = logger ?? throw new ArgumentNullException(nameof(logger));
 		}
 
 		public Unit Create(UnitTypes type, Guid id, string userName, float latitude, float longitude, int health, Weapon? weapon = null, HeadProtection? headProtection = null, BodyProtection? bodyProtection = null, Loot? loot = null)
 		{
 			var unit = GetUnit(type, id, userName, latitude, longitude, health, weapon, headProtection, bodyProtection, loot);
-			unit.AddDamageNotifier(_notifier.SendMessage);
-			unit.AddRotateNotifier(_notifier.RotateUnit);
-			unit.AddDeathNotifier(_notifier.KillUnit);
-			unit.AddSoundNotifier(_notifier.PlaySound);
-			unit.AddShootNotifier(_notifier.ShootUnit);
 
-			_logger.LogInformation("The new unit {id} was created: [ type:{unitType}, lat:{latitude},lon: {longitude}]", unit.Id,
-				unit.UnitType, unit.Latitude, unit.Longitude);
+			unit.AddNotifier(_notifier);
+
+			_logger.LogInformation("The new unit {id} was created: [ type:{unitType}, lat:{latitude}, lon: {longitude}]",
+				unit.Id, unit.UnitType, unit.Latitude, unit.Longitude);
 			return unit;
 		}
 

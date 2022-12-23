@@ -5,28 +5,28 @@ namespace WorldWar.YandexClient.Hubs;
 
 public class YandexMapHub : Hub<IYandexJsClientNotifier>
 {
-	public async Task SendShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
+	public async Task SendAttackUnit(Guid id, float enemyLatitude, float enemyLongitude)
 	{
-		await Clients.All.ShootUnit(id, enemyLatitude, enemyLongitude).ConfigureAwait(false);
+		await Clients.All.AttackUnit(id, enemyLatitude, enemyLongitude);
 	}
 
 	public async Task SendRotateUnit(Guid id, float latitude, float longitude)
 	{
-		await Clients.All.RotateUnit(id, latitude, longitude).ConfigureAwait(false);
+		await Clients.All.RotateUnit(id, latitude, longitude);
 	}
 
 	public async Task SendKillUnit(Guid id)
 	{
-		await Clients.All.KillUnit(id).ConfigureAwait(false);
+		await Clients.All.KillUnit(id);
 	}
 
 	public async Task SendMessage(Guid id, string message)
 	{
-		await Clients.All.SendMessage(id, message).ConfigureAwait(false);
+		await Clients.All.SendMessage(id, message);
 	}
 
 	public async Task SendPlaySound(string elementId, string src)
 	{
-		await Clients.All.PlaySound(elementId, src).ConfigureAwait(false);
+		await Clients.All.PlaySound(elementId, src);
 	}
 }

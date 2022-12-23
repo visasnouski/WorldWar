@@ -17,39 +17,39 @@ internal sealed class YandexJsClientNotifier : IYandexJsClientNotifier, IDisposa
 				.WithUrl(httpBaseUrlAccessor.GetUri())
 				.Build();
 
-			await hubConnection.StartAsync().ConfigureAwait(false);
+			await hubConnection.StartAsync();
 			return hubConnection;
 		});
 	}
 
 	public async Task KillUnit(Guid id)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendKillUnit), id).ConfigureAwait(false);
+		var hubConnection = await _hubConnection.Value;
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendKillUnit), id);
 	}
 
-	public async Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude)
+	public async Task AttackUnit(Guid id, float enemyLatitude, float enemyLongitude)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendShootUnit), id, enemyLatitude, enemyLongitude).ConfigureAwait(false);
+		var hubConnection = await _hubConnection.Value;
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendAttackUnit), id, enemyLatitude, enemyLongitude);
 	}
 
 	public async Task SendMessage(Guid id, string message)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendMessage), id, message).ConfigureAwait(false);
+		var hubConnection = await _hubConnection.Value;
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendMessage), id, message);
 	}
 
 	public async Task PlaySound(string id, string src)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendPlaySound), id, src).ConfigureAwait(false);
+		var hubConnection = await _hubConnection.Value;
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendPlaySound), id, src);
 	}
 
 	public async Task RotateUnit(Guid id, float latitude, float longitude)
 	{
-		var hubConnection = await _hubConnection.Value.ConfigureAwait(false);
-		await hubConnection.SendAsync(nameof(YandexMapHub.SendRotateUnit), id, latitude, longitude).ConfigureAwait(false);
+		var hubConnection = await _hubConnection.Value;
+		await hubConnection.SendAsync(nameof(YandexMapHub.SendRotateUnit), id, latitude, longitude);
 	}
 
 	public void Dispose()

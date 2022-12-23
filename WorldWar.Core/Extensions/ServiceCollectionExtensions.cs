@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models.Items.Base;
 using WorldWar.Abstractions.Models.Units;
 using WorldWar.Core.BackgroundServices;
@@ -15,16 +16,15 @@ public static class ServiceCollectionExtensions
 		{
 			throw new ArgumentNullException(nameof(serviceCollection));
 		}
-	
+
 		serviceCollection.AddHostedService<DbSyncService>();
-		serviceCollection.AddSingleton<IStorageFactory,StorageFactory>();
+		serviceCollection.AddSingleton<IStorageFactory, StorageFactory>();
 		serviceCollection.AddSingleton<Storage<Unit>>();
 		serviceCollection.AddSingleton<Storage<Box>>();
 		serviceCollection.Configure<CacheFactoryOptions>(options => options.Register<Unit>());
 		serviceCollection.Configure<CacheFactoryOptions>(options => options.Register<Box>());
 
 		serviceCollection.AddSingleton<ITasksStorage, TasksStorage>();
-
 		return serviceCollection;
 	}
 
@@ -35,6 +35,8 @@ public static class ServiceCollectionExtensions
 			throw new ArgumentNullException(nameof(serviceCollection));
 		}
 
+		serviceCollection.AddSingleton<IUnitFactory, UnitFactory>();
+		serviceCollection.AddSingleton<INotifier, Notifier>();
 
 		serviceCollection.AddScoped<ICombatService, CombatService>();
 		serviceCollection.AddScoped<IMovableService, MovableService>();

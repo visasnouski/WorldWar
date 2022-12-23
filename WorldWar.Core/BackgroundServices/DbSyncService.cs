@@ -34,9 +34,11 @@ public class DbSyncService : BackgroundService
 
 		while (!stoppingToken.IsCancellationRequested)
 		{
-			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None).ConfigureAwait(false);
+			// TODO make the delay configurable
+			await _taskDelay.Delay(TimeSpan.FromMinutes(1), CancellationToken.None);
+			_logger.LogInformation("Saving to the database has started.");
 			var mapUnits = _unitsStorage.Get();
-			await _dbRepository.SetUnits(mapUnits, stoppingToken).ConfigureAwait(false);
+			await _dbRepository.SetUnits(mapUnits, stoppingToken);
 		}
 	}
 }

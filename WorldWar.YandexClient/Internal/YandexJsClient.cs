@@ -24,22 +24,22 @@ internal class YandexJsClient : IYandexJsClient
 
 	public async Task<IJSObjectReference> GetYandexJsModule(string jsSrc)
 	{
-		var yandexMapJs = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/YandexMap.js").ConfigureAwait(false);
-		await yandexMapJs.InvokeVoidAsync("addScript", _yandexSettings.YandexApiSrc).ConfigureAwait(false);
+		var yandexMapJs = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "./js/YandexMap.js");
+		await yandexMapJs.InvokeVoidAsync("addScript", _yandexSettings.YandexApiSrc);
 
 		// TODO Find a way to await for the initialization of the Yandex map in javascript
-		await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None).ConfigureAwait(false);
+		await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);
 
-		var worldMapJs = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", jsSrc).ConfigureAwait(false);
+		var worldMapJs = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", jsSrc);
 
 		try
 		{
-			var authUser = await _authUser.GetIdentity().ConfigureAwait(false);
-			await worldMapJs.InvokeVoidAsync("setCoords", authUser.Longitude, authUser.Latitude).ConfigureAwait(false);
+			var authUser = await _authUser.GetIdentity();
+			await worldMapJs.InvokeVoidAsync("setCoords", authUser.Longitude, authUser.Latitude);
 		}
 		catch (AuthenticationException)
 		{
-			await worldMapJs.InvokeVoidAsync("setCoords", 27.561831, 53.902284).ConfigureAwait(false);
+			await worldMapJs.InvokeVoidAsync("setCoords", 27.561831, 53.902284);
 		}
 
 		return worldMapJs;
