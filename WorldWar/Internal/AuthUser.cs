@@ -8,26 +8,27 @@ namespace WorldWar.Internal;
 
 internal class AuthUser : IAuthUser
 {
-    private readonly AuthenticationStateProvider _authenticationStateProvider;
-    private readonly UserManager<WorldWarIdentity> _userManager;
+	private readonly AuthenticationStateProvider _authenticationStateProvider;
+	private readonly UserManager<WorldWarIdentity> _userManager;
 
-    private WorldWarIdentity? _user;
+	private WorldWarIdentity? _user;
 
-    public AuthUser(AuthenticationStateProvider authenticationStateProvider, UserManager<WorldWarIdentity> userManager)
-    {
-        _authenticationStateProvider = authenticationStateProvider;
-        _userManager = userManager;
-    }
+	public AuthUser(AuthenticationStateProvider authenticationStateProvider, UserManager<WorldWarIdentity> userManager)
+	{
+		_authenticationStateProvider = authenticationStateProvider ??
+									   throw new ArgumentNullException(nameof(authenticationStateProvider));
+		_userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+	}
 
-    public async Task<IWorldWarIdentityUser> GetIdentity()
-    {
-        return _user ??= await GetUser();
-    }
+	public async Task<IWorldWarIdentityUser> GetIdentity()
+	{
+		return _user ??= await GetUser();
+	}
 
-    private async Task<WorldWarIdentity> GetUser()
-    {
-        var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-        var user = await _userManager.GetUserAsync(authState.User);
-        return user ?? throw new AuthenticationException("Unknown identity");
-    }
+	private async Task<WorldWarIdentity> GetUser()
+	{
+		var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
+		var user = await _userManager.GetUserAsync(authState.User);
+		return user ?? throw new AuthenticationException("Unknown identity");
+	}
 }
