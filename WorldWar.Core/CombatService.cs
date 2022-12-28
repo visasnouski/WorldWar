@@ -40,14 +40,14 @@ public class CombatService : ICombatService
 			&& !user.IsWithinReach(enemy.Longitude, enemy.Latitude, user.Weapon.Distance))
 		{
 			_logger.LogInformation("The user {id} will move due to the long distance {distance} to the enemy {id}.", user.Id, user.Weapon.Distance, enemy.Id);
-			await _movableService.StartMove(user, enemy, cancellationToken, user.Weapon.Distance).ConfigureAwait(false);
+			await _movableService.StartMove(user, enemy, cancellationToken, user.Weapon.Distance);
 			if (cancellationToken.IsCancellationRequested)
 			{
 				return;
 			}
 		}
 
-		await _movableService.Rotate(user, enemy.Latitude, enemy.Longitude, cancellationToken).ConfigureAwait(false);
+		await _movableService.Rotate(user, enemy.Latitude, enemy.Longitude, cancellationToken);
 
 		while (!cancellationToken.IsCancellationRequested)
 		{

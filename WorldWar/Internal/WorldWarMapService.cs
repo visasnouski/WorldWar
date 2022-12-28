@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Numerics;
-using ConcurrentCollections;
 using WorldWar.Abstractions.Exceptions;
 using WorldWar.Abstractions.Interfaces;
 using WorldWar.Abstractions.Models;
@@ -37,20 +36,18 @@ internal class WorldWarMapService : IWorldWarMapService
 		_ = Task.Run(async () =>
 		{
 			var authUser = await _authUser.GetIdentity();
-			var mapGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
+			var mapGuids = new HashSet<(Guid, UnitTypes)>();
 
 			while (true)
 			{
-				var visibleGuids = new ConcurrentHashSet<(Guid, UnitTypes)>();
+				var visibleGuids = new HashSet<(Guid, UnitTypes)>();
 
 				var units = GetUnits(viewAllUnits, authUser.GuidId);
 
 				var toUpdateList = new ConcurrentBag<Unit>();
 
-				await Parallel.ForEachAsync(units, new ParallelOptions() { MaxDegreeOfParallelism = 10 }, async (unit, token) =>
+				foreach (var unit in units)
 				{
-					token.ThrowIfCancellationRequested();
-
 					if (!mapGuids.Contains((unit.Id, unit.UnitType)))
 					{
 						await _yandexJsClientAdapter.AddUnit(unit);
@@ -59,7 +56,7 @@ internal class WorldWarMapService : IWorldWarMapService
 
 					visibleGuids.Add((unit.Id, unit.UnitType));
 					toUpdateList.Add(unit);
-				});
+				}
 
 				if (toUpdateList.Any())
 				{
@@ -73,7 +70,7 @@ internal class WorldWarMapService : IWorldWarMapService
 
 					foreach (var removableGuid in removableGuids)
 					{
-						mapGuids.TryRemove(removableGuid);
+						mapGuids.Remove(removableGuid);
 					}
 				}
 				await _taskDelay.Delay(TimeSpan.FromSeconds(1), CancellationToken.None);

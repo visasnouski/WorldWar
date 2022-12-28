@@ -21,7 +21,7 @@ public static class ServiceCollectionExtensions
 
 		serviceCollection.AddSingleton<IDbRepository, DbRepository>();
 		serviceCollection.AddDbContextFactory<ApplicationDbContext>(options =>
-			options.UseSqlServer(connectionString), ServiceLifetime.Singleton);
+			options.UseSqlServer(connectionString));
 
 		return serviceCollection;
 	}

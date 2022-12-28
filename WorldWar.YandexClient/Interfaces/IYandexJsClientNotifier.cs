@@ -20,7 +20,7 @@ public interface IYandexJsClientNotifier
 	/// <param name="enemyLatitude"></param>
 	/// <param name="enemyLongitude"></param>
 	/// <returns></returns>
-	public Task ShootUnit(Guid id, float enemyLatitude, float enemyLongitude);
+	public Task AttackUnit(Guid id, float enemyLatitude, float enemyLongitude);
 
 	/// <summary>
 	/// Rotates the unit according to the coordinates

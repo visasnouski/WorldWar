@@ -10,13 +10,10 @@ using WorldWar.Abstractions.Models.Units.Base;
 
 namespace WorldWar.Abstractions.Models.Units;
 
+// TODO Refactor
 public abstract class Unit
 {
-	private Func<Guid, string, Task>? _damageNotificationFunc;
-	private Func<Guid, Task>? _deathNotificationFunc;
-	private Func<Guid, float, float, Task>? _rotateNotificationFunc;
-	private Func<string, string, Task>? _soundNotificationFunc;
-	private Func<Guid, float, float, Task>? _shootNotificationFunc;
+	private INotifier? _notifier;
 
 	public string Name { get; init; }
 
@@ -71,29 +68,9 @@ public abstract class Unit
 
 	public string MobTypesString => UnitType.ToString();
 
-	public void AddDamageNotifier(Func<Guid, string, Task> damageNotificationFunc)
+	public void AddNotifier(INotifier notifier)
 	{
-		_damageNotificationFunc = damageNotificationFunc;
-	}
-
-	public void AddRotateNotifier(Func<Guid, float, float, Task> rotateNotificationFunc)
-	{
-		_rotateNotificationFunc = rotateNotificationFunc;
-	}
-
-	public void AddDeathNotifier(Func<Guid, Task> deathNotificationFunc)
-	{
-		_deathNotificationFunc = deathNotificationFunc;
-	}
-
-	public void AddSoundNotifier(Func<string, string, Task> soundNotificationFunc)
-	{
-		_soundNotificationFunc = soundNotificationFunc;
-	}
-
-	public void AddShootNotifier(Func<Guid, float, float, Task> shootNotificationFunc)
-	{
-		_shootNotificationFunc = shootNotificationFunc;
+		_notifier = notifier;
 	}
 
 	public async Task RotateUnit(float endLongitude, float endLatitude, float? fromLongitude = null, float? fromLatitude = null)
@@ -102,9 +79,9 @@ public abstract class Unit
 		fromLatitude ??= Location.StartPos.Y;
 		Rotate = -90 + BearingCalculator.Calculate(fromLatitude.Value, fromLongitude.Value, endLatitude, endLongitude);
 
-		if (_rotateNotificationFunc != null)
+		if (_notifier != null)
 		{
-			await _rotateNotificationFunc.Invoke(Id, endLatitude, endLongitude);
+			await _notifier.Rotate(Id, endLatitude, endLongitude);
 		}
 	}
 
@@ -116,15 +93,15 @@ public abstract class Unit
 		if (Weapon.Ammo <= 0)
 		{
 			await PlaySound(Weapon.ReloadSoundLocation);
-			await taskDelay.Delay(Weapon.ReloadTime, cancellationToken).ConfigureAwait(false);
+			await taskDelay.Delay(Weapon.ReloadTime, cancellationToken);
 			Weapon.Ammo = Weapon.MagazineSize;
 		}
 
 		var damage = Weapon.CalculateDamage(distance);
 
-		if (_shootNotificationFunc != null)
+		if (_notifier != null)
 		{
-			await _shootNotificationFunc.Invoke(Id, enemy.Latitude, enemy.Longitude);
+			await _notifier.Attack(Id, enemy.Latitude, enemy.Longitude);
 		}
 
 		await PlaySound(Weapon.ShotSoundLocation);
@@ -139,9 +116,9 @@ public abstract class Unit
 
 	private async Task PlaySound(string src)
 	{
-		if (_soundNotificationFunc != null)
+		if (_notifier != null)
 		{
-			await _soundNotificationFunc.Invoke("sound", src);
+			await _notifier.MakeNoise("sound", src);
 		}
 	}
 
@@ -150,7 +127,7 @@ public abstract class Unit
 		// Added randomness so that the interval between shots is different
 		var delayShot = (int)weapon.DelayShot.TotalMilliseconds;
 		var rndDelay = RandomNumberGenerator.GetInt32(delayShot / 2, delayShot);
-		await delay.Delay(TimeSpan.FromMilliseconds(rndDelay), cancellationToken).ConfigureAwait(false);
+		await delay.Delay(TimeSpan.FromMilliseconds(rndDelay), cancellationToken);
 		weapon.Ammo -= 1;
 	}
 
@@ -159,17 +136,17 @@ public abstract class Unit
 		var protection = HeadProtection.Defense + BodyProtection.Defense;
 		var realDamage = damage - damage * protection / 100;
 
-		if (_damageNotificationFunc != null)
+		if (_notifier != null)
 		{
 			var message = damage > 0 ? damage.ToString(NumberFormatInfo.CurrentInfo) : "missed!";
-			await _damageNotificationFunc.Invoke(Id, message);
+			await _notifier.SendMessage(Id, message);
 		}
 
 		Health -= realDamage;
 
-		if (_deathNotificationFunc != null && Health <= 0)
+		if (_notifier != null && Health <= 0)
 		{
-			await _deathNotificationFunc.Invoke(Id);
+			await _notifier.Die(Id);
 		}
 	}
 }

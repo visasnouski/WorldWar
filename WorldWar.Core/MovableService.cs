@@ -52,7 +52,7 @@ internal class MovableService : IMovableService
 				}
 
 				unit.Move(lastTime + remainingTime, route[index][1], route[index][0]);
-				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken).ConfigureAwait(false);
+				await _taskDelay.Delay(TimeSpan.FromMilliseconds(100), cancellationToken);
 			}
 			else
 			{
@@ -80,7 +80,7 @@ internal class MovableService : IMovableService
 		while (!cancellationToken.IsCancellationRequested)
 		{
 			await unit.RotateUnit(targetUnit.Longitude, targetUnit.Latitude);
-			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken).ConfigureAwait(false);
+			await _taskDelay.Delay(TimeSpan.FromMilliseconds(300), cancellationToken);
 
 			unit.Move(DateTime.Now - startDateTime, targetUnit.Longitude, targetUnit.Latitude);
 
