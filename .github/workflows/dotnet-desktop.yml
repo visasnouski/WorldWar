@@ -28,8 +28,7 @@ jobs:
 
     env:
       Solution_Name: WorldWar.sln
-      Test_Project_Path: WorldWar.YandexClient.Tests\WorldWar.YandexClient.Tests.csproj
-      PUBLISH_DIR: bin/Release/net5.0/publish
+      PUBLISH_DIR: bin/Release/net6.0/publish/AppPackages
       
     steps:
     - name: Checkout
@@ -51,15 +50,13 @@ jobs:
     - name: Execute unit tests
       run: dotnet test
 
-    # Restore the application to populate the obj folder with RuntimeIdentifiers
-    - name: Restore the application
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+    # Publish
+    - name: Publish
+      run: dotnet publish DotNet6WithGithubActions/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: MSIX Package
-        path: ${{ env.PUBLISH_DIR }}\AppPackages
+        path: ${{ env.PUBLISH_DIR }}
