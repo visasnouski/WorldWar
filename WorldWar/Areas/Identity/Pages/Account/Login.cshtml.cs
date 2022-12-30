@@ -19,23 +19,23 @@ public class LoginModel : PageModel
 	}
 
 	[BindProperty]
-	public InputModel Input { get; set; }
+	public InputModel Input { get; set; } = null!;
 
-	public IList<AuthenticationScheme> ExternalLogins { get; set; }
+	public IList<AuthenticationScheme>? ExternalLogins { get; set; }
 
-	public string ReturnUrl { get; set; }
+	public string? ReturnUrl { get; set; }
 
 	[TempData]
-	public string ErrorMessage { get; set; }
+	public string? ErrorMessage { get; set; }
 
 	public class InputModel
 	{
 		[Required]
-		public string UserName { get; set; }
+		public string UserName { get; set; } = null!;
 
 		[Required]
 		[DataType(DataType.Password)]
-		public string Password { get; set; }
+		public string Password { get; set; } = null!;
 
 		[Display(Name = "Remember me?")]
 		public bool RememberMe { get; set; }
@@ -43,6 +43,7 @@ public class LoginModel : PageModel
 
 	public async Task OnGetAsync(string? returnUrl = null)
 	{
+		returnUrl ??= "/WorldWar";
 		if (!string.IsNullOrEmpty(ErrorMessage))
 		{
 			ModelState.AddModelError(string.Empty, ErrorMessage);
@@ -53,7 +54,7 @@ public class LoginModel : PageModel
 
 		ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-		ReturnUrl = "/WorldWar";
+		ReturnUrl = returnUrl;
 	}
 
 	public async Task<IActionResult> OnPostAsync(string? returnUrl = null)

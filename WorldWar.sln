@@ -21,9 +21,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.YandexClient.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Core.Tests", "WorldWar.Core.Tests\WorldWar.Core.Tests.csproj", "{7F0AA402-50F7-43D1-9E13-BD8D5647DCC3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqlScripts", "SqlScripts", "{A7A9B2E9-E32C-4627-95D1-DF75D1F24F24}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqlScripts", "SqlScripts", "{2554701D-1E80-453E-B5F0-7D7A8D6BB256}"
 	ProjectSection(SolutionItems) = preProject
-		WorldWar.Tests\SqlScripts\GenerateUnits.txt = WorldWar.Tests\SqlScripts\GenerateUnits.txt
+		SqlScripts\GenerateUnits.txt = SqlScripts\GenerateUnits.txt
 	EndProjectSection
 EndProject
 Global

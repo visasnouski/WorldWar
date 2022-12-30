@@ -16,8 +16,6 @@
 </table>
 
 @code {
-	private string _modalDisplay = "none;";
-
 	private IEnumerable<Item> GetItems()
 	{
 		IEnumerable<IEnumerable<Item>> Items()
@@ -38,7 +36,6 @@
 
 	public Task Open()
 	{
-		_modalDisplay = "block;";
 		StateHasChanged();
 		return Task.CompletedTask;
 	}

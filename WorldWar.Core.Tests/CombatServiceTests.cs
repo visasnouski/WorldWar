@@ -20,11 +20,9 @@ namespace WorldWar.Core.Tests
 			// Arrange
 
 			var mocker = new AutoMocker();
-			Guid.TryParse("AAAAAAAA-B402-49D3-8D17-D245069CA13D", out var userGuid);
-			Guid.TryParse("DDDDDDDD-B402-49D3-8D17-D245069CA13D", out var enemyGuid);
 
-			var user = new StubUnit(userGuid, userHealth);
-			var enemy = new StubUnit(enemyGuid, enemyHealth);
+			var user = new StubUnit(Guid.Parse("AAAAAAAA-B402-49D3-8D17-D245069CA13D"), userHealth);
+			var enemy = new StubUnit(Guid.Parse("DDDDDDDD-B402-49D3-8D17-D245069CA13D"), enemyHealth);
 
 			var target = mocker.CreateInstance<CombatService>();
 
@@ -43,11 +41,9 @@ namespace WorldWar.Core.Tests
 			// Arrange
 
 			var mocker = new AutoMocker();
-			Guid.TryParse("AAAAAAAA-B402-49D3-8D17-D245069CA13D", out var userGuid);
-			Guid.TryParse("DDDDDDDD-B402-49D3-8D17-D245069CA13D", out var enemyGuid);
 
-			Unit user = new Bot(userGuid, "SomeBot", UnitTypes.Mob, 10.00f, 20.00f, 100, WeaponModels.Fist);
-			Unit bot = new Bot(enemyGuid, "SomeBot", UnitTypes.Mob, 10.01f, 20.01f, 100, WeaponModels.Fist);
+			Unit user = new Bot(Guid.Parse("AAAAAAAA-B402-49D3-8D17-D245069CA13D"), "SomeBot", UnitTypes.Mob, 10.00f, 20.00f, 100, WeaponModels.Fist);
+			Unit bot = new Bot(Guid.Parse("DDDDDDDD-B402-49D3-8D17-D245069CA13D"), "SomeBot", UnitTypes.Mob, 10.01f, 20.01f, 100, WeaponModels.Fist);
 
 			var mockMovableService = new Mock<IMovableService>();
 			mockMovableService.Setup(x => x.StartMove(user, bot, CancellationToken.None, bot.Weapon.Distance)).Callback(() =>
@@ -76,10 +72,10 @@ namespace WorldWar.Core.Tests
 			// Arrange
 
 			var mocker = new AutoMocker();
-			Guid.TryParse("AAAAAAAA-B402-49D3-8D17-D245069CA13D", out var userGuid);
-			Guid.TryParse("DDDDDDDD-B402-49D3-8D17-D245069CA13D", out var enemyGuid);
 
-			Unit user = new Bot(userGuid, "SomeBot", UnitTypes.Mob, 10.00f, 20.00f, 100, WeaponModels.Fist);
+			var enemyGuid = Guid.Parse("DDDDDDDD-B402-49D3-8D17-D245069CA13D");
+
+			Unit user = new Bot(Guid.Parse("AAAAAAAA-B402-49D3-8D17-D245069CA13D"), "SomeBot", UnitTypes.Mob, 10.00f, 20.00f, 100, WeaponModels.Fist);
 			Unit bot = new Bot(enemyGuid, "SomeBot", UnitTypes.Mob, 10.00f, 20.00f, 1, WeaponModels.Fist);
 
 			var taskStorageMock = new Mock<ITasksStorage>();
