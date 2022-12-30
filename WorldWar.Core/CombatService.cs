@@ -26,20 +26,20 @@ public class CombatService : ICombatService
 	{
 		if (enemy.Health <= 0)
 		{
-			_logger.LogInformation("The enemy {id} has already been defeated.", enemy.Id);
+			_logger.LogInformation("The enemy {Id} has already been defeated.", enemy.Id);
 			return;
 		}
 
 		if (user.Health <= 0)
 		{
-			_logger.LogInformation("The user {id} has already been defeated.", enemy.Id);
+			_logger.LogInformation("The user {Id} has already been defeated.", enemy.Id);
 			return;
 		}
 
 		if (user.Weapon.WeaponType == WeaponTypes.Handguns
 			&& !user.IsWithinReach(enemy.Longitude, enemy.Latitude, user.Weapon.Distance))
 		{
-			_logger.LogInformation("The user {id} will move due to the long distance {distance} to the enemy {id}.", user.Id, user.Weapon.Distance, enemy.Id);
+			_logger.LogInformation("The user {Id} will move due to the long distance {Distance} to the enemy {Id}.", user.Id, user.Weapon.Distance, enemy.Id);
 			await _movableService.StartMove(user, enemy, cancellationToken, user.Weapon.Distance);
 			if (cancellationToken.IsCancellationRequested)
 			{
@@ -55,14 +55,14 @@ public class CombatService : ICombatService
 
 			if (enemy.Health <= 0)
 			{
-				_logger.LogInformation("The enemy {id} is defeated.", enemy.Id);
+				_logger.LogInformation("The enemy {Id} is defeated.", enemy.Id);
 				RemoveTasksForUnit(enemy);
 				break;
 			}
 
 			if (user.Health <= 0)
 			{
-				_logger.LogInformation("The user {id} is defeated.", enemy.Id);
+				_logger.LogInformation("The user {Id} is defeated.", enemy.Id);
 				RemoveTasksForUnit(user);
 				break;
 			}

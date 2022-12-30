@@ -7,7 +7,7 @@ public interface IWorldWarIdentityUser
 {
     public Guid GuidId { get; }
 
-    public string UserName { get; }
+    public string? UserName { get; }
 
     [Required]
     [DisplayName("Longitude")]

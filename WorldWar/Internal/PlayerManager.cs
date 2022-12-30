@@ -47,7 +47,7 @@ internal class PlayerManager : IPlayerManager
 		{
 			var unit = _unitFactory.Create(UnitTypes.Player,
 				identity.GuidId,
-				identity.UserName,
+				identity.UserName!,
 				(float)identity.Latitude,
 				(float)identity.Longitude,
 				100,

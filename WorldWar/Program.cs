@@ -18,7 +18,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 var identityBuilder =
 	builder.Services.AddDefaultIdentity<WorldWarIdentity>(options => options.SignIn.RequireConfirmedAccount = true);
-builder.Services.AddDbRepository(builder.Configuration.GetConnectionString("DefaultConnection"), identityBuilder);
+
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+if (defaultConnection is null)
+{
+	throw new ArgumentNullException(nameof(defaultConnection), "The connection string is missing.");
+}
+
+builder.Services.AddDbRepository(defaultConnection, identityBuilder);
 identityBuilder.AddUserValidator<UserEmailValidator<WorldWarIdentity>>();
 
 builder.Services.AddRazorPages();

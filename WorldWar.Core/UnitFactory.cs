@@ -26,7 +26,7 @@ namespace WorldWar.Core
 
 			unit.AddNotifier(_notifier);
 
-			_logger.LogInformation("The new unit {id} was created: [ type:{unitType}, lat:{latitude}, lon: {longitude}]",
+			_logger.LogInformation("The new unit {Id} was created: [ type:{UnitType}, lat:{Latitude}, lon: {Longitude}]",
 				unit.Id, unit.UnitType, unit.Latitude, unit.Longitude);
 			return unit;
 		}

@@ -27,31 +27,31 @@ internal class YandexHubConnection : IYandexHubConnection
 
 		_hubConnection.On<Guid, float, float>("AttackUnit", async (id, latitude, longitude) =>
 		{
-			_logger.LogInformation($"Shoot: {id}, Latitude:{latitude} ,Longitude:{longitude}");
+			_logger.LogInformation("Shoot: {Id}, Latitude:{Latitude} ,Longitude:{Longitude}", id, latitude, longitude);
 			await _yandexJsClientAdapter.ShootUnit(id, latitude, longitude);
 		});
 
 		_hubConnection.On<Guid, float, float>("RotateUnit", async (id, latitude, longitude) =>
 		{
-			_logger.LogInformation($"Rotate unit: {id}, Latitude:{latitude} ,Longitude:{longitude}");
+			_logger.LogInformation("Rotate unit: {Id}, Latitude:{Latitude} ,Longitude:{Longitude}", id, latitude, longitude);
 			await _yandexJsClientAdapter.RotateUnit(id, latitude, longitude);
 		});
 
 		_hubConnection.On<Guid>("KillUnit", async (id) =>
 		{
-			_logger.LogInformation($"Kill unit: {id}");
+			_logger.LogInformation("Kill unit: {Id}", id);
 			await _yandexJsClientAdapter.KillUnit(id);
 		});
 
 		_hubConnection.On<Guid, string>("SendMessage", async (id, message) =>
 		{
-			_logger.LogInformation($"Show message: {id}, Message: {message}");
+			_logger.LogInformation("Show message: {Id}, Message: {Message}", id, message);
 			await _yandexJsClientAdapter.ShowMessage(id, message);
 		});
 
 		_hubConnection.On<string, string>("PlaySound", async (elementId, src) =>
 		{
-			_logger.LogInformation($"Play sound: {elementId}, src: {src}");
+			_logger.LogInformation("Play sound: {ElementId}, src: {Src}", elementId, src);
 			await _yandexJsClientAdapter.PlaySound(elementId, src);
 		});
 
