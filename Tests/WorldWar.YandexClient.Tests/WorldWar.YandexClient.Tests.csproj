@@ -23,8 +23,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\WorldWar.Repository\WorldWar.Repository.csproj" />
-		<ProjectReference Include="..\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
+		<ProjectReference Include="..\..\Sources\WorldWar.Repository\WorldWar.Repository.csproj" />
+		<ProjectReference Include="..\..\Sources\WorldWar.YandexClient\WorldWar.YandexClient.csproj" />
 	</ItemGroup>
 
 </Project>
