@@ -52,7 +52,7 @@ jobs:
 
     # Publish
     - name: Publish
-      run: dotnet publish WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}
+      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
