@@ -51,24 +51,26 @@ jobs:
       run: dotnet test
       
     - name: Read value from Properties-file
-      id: read_property
-      shell: pwsh
+      id: version
+      shell: powershell
       run: |
-      $TempDetails = [XML](Get-Content Build/Dependencies.props)
-      echo "::set-output name=Version::$TempDetails.Project.PropertyGroup.CurrentVersion"
+          $Dependencies = [XML](Get-Content Build/Dependencies.props)
+          $Ver=$Dependencies.Project.PropertyGroup.CurrentVersion
+          echo ("Version=" + $Ver) >> $env:GITHUB_ENV
     - name: Check outputs
-      run: echo ${​​​​​​​​​{​​​​​​​​​ steps.read_property.outputs.Version }​​​​​​​​​}​​​​​​​​​
-
+      shell: powershell
+      run: |
+        echo "${{ env.Version }}"
 
     # Publish
-    - name: Publish for master
+    - name: Publish for alpha version
       if: github.ref == 'refs/heads/master'
-      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:CurrentVersionSuffix="${{ github.run_number }}"
+      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:CurrentVersion="${{ env.Version }}.${{ github.run_number }}"
       
       # Publish
     - name: Publish for non-master
       if: github.ref != 'refs/heads/master'
-      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:CurrentVersionSuffix="$-alfa"
+      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}  /p:CurrentVersion="${{ env.Version }}.${{ github.run_number }}" /p:CurrentVersionSuffix="-alfa"
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts
