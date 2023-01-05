@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup Label="Package versions">
-		<CurrentVersion>1.0.0</CurrentVersion>
+		<CurrentVersion>1.0.1</CurrentVersion>
 		<LangVersion>latest</LangVersion>
 		<AnalysisMode>All</AnalysisMode>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -14,6 +14,6 @@
 		<SignalRCoreVersion>1.1.0</SignalRCoreVersion>
 		<Nullable>enable</Nullable>
 		<DependencyVersion Condition=" '$(CurrentVersionSuffix)' == '' ">$(CurrentVersion)</DependencyVersion>
-		<DependencyVersion Condition=" '$(CurrentVersionSuffix)' != '' ">$(CurrentVersion)-$(CurrentVersionSuffix)</DependencyVersion>
+		<DependencyVersion Condition=" '$(CurrentVersionSuffix)' != '' ">$(CurrentVersion).$(CurrentVersionSuffix)</DependencyVersion>
 	</PropertyGroup>
 </Project>
