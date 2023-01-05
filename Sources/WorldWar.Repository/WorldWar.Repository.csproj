@@ -1,22 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<AnalysisMode>All</AnalysisMode>
-		<AnalysisLevel>7.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	</PropertyGroup>
+	<ImportGroup Label="Properties">
+		<Import Project="..\..\Build\Dependencies.props" />
+		<Import Project="..\..\Build\Packages.props" />
+	</ImportGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.1" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.1" />
+		<PackageReference Include="WorldWar.Abstractions" Version="$(DependencyVersion)" />
+
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="$(CoreFrameworkVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="$(CoreFrameworkVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="$(CoreFrameworkVersion)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="$(CoreFrameworkVersion)" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="$(CoreFrameworkVersion)" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="$(CoreFrameworkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>

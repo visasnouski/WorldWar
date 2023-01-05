@@ -1,22 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<AnalysisMode>All</AnalysisMode>
-		<AnalysisLevel>7.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	</PropertyGroup>
+	<ImportGroup Label="Properties">
+		<Import Project="..\..\Build\Dependencies.props" />
+		<Import Project="..\..\Build\Packages.props" />
+	</ImportGroup>
 
 	<ItemGroup>
-		<Folder Include="Models\Items\Base\Weapons\Hands\" />
-		<Folder Include="Models\Items\Base\Weapons\Pistols\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+		<PackageReference Include="Microsoft.JSInterop" Version="$(CoreFrameworkVersion)" />
 	</ItemGroup>
 
 </Project>

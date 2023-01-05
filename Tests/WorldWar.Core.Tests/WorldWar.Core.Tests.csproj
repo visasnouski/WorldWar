@@ -1,25 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<AnalysisMode>AllEnabledByDefault</AnalysisMode>
-		<AnalysisLevel>7.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<IsPackable>false</IsPackable>
 	</PropertyGroup>
 
+	<ImportGroup Label="Properties">
+		<Import Project="..\..\Build\Dependencies.props" />
+		<Import Project="..\..\Build\Packages.props" />
+	</ImportGroup>
+
 	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
-		<PackageReference Include="MSTest.TestAdapter" Version="3.0.2" />
-		<PackageReference Include="MSTest.TestFramework" Version="3.0.2" />
-		<PackageReference Include="coverlet.collector" Version="3.2.0">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Moq.AutoMock" Version="3.4.0" />
+		<PackageReference Include="WorldWar.Core" Version="$(DependencyVersion)" />
+
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(TestSdkVersion)" />
+		<PackageReference Include="MSTest.TestAdapter" Version="$(TestAdapterVersion)" />
+		<PackageReference Include="MSTest.TestFramework" Version="$(TestFrameworkVersion)" />
+		<PackageReference Include="Moq.AutoMock" Version="$(AutoMockVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
