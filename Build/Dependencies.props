@@ -1,0 +1,19 @@
+<Project>
+	<PropertyGroup Label="Package versions">
+		<CurrentVersion>1.0.0</CurrentVersion>
+		<LangVersion>latest</LangVersion>
+		<AnalysisMode>All</AnalysisMode>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<AnalysisLevel>7.0</AnalysisLevel>
+		<CoreFrameworkVersion>7.0.1</CoreFrameworkVersion>
+		<ExtensionsVersion>7.0.0</ExtensionsVersion>
+		<TestSdkVersion>17.4.1</TestSdkVersion>
+		<TestAdapterVersion>3.0.2</TestAdapterVersion>
+		<TestFrameworkVersion>3.0.2</TestFrameworkVersion>
+		<AutoMockVersion>3.4.0</AutoMockVersion>
+		<SignalRCoreVersion>1.1.0</SignalRCoreVersion>
+		<Nullable>enable</Nullable>
+		<DependencyVersion Condition=" '$(CurrentVersionSuffix)' == '' ">$(CurrentVersion)</DependencyVersion>
+		<DependencyVersion Condition=" '$(CurrentVersionSuffix)' != '' ">$(CurrentVersion)-$(CurrentVersionSuffix)</DependencyVersion>
+	</PropertyGroup>
+</Project>

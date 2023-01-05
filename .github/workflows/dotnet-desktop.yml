@@ -28,7 +28,7 @@ jobs:
 
     env:
       Solution_Name: WorldWar.sln
-      PUBLISH_DIR: bin/Release/net6.0/publish/AppPackages
+      PUBLISH_DIR: bin/Release/net7.0/publish/AppPackages
       
     steps:
     - name: Checkout
@@ -40,7 +40,7 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 7.0.x
 
     # Add  MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
     - name: Setup MSBuild.exe
@@ -49,10 +49,28 @@ jobs:
     # Execute all unit tests in the solution
     - name: Execute unit tests
       run: dotnet test
+      
+    - name: Read value from Properties-file
+      id: version
+      shell: powershell
+      run: |
+          $Dependencies = [XML](Get-Content Build/Dependencies.props)
+          $Ver=$Dependencies.Project.PropertyGroup.CurrentVersion
+          echo ("Version=" + $Ver) >> $env:GITHUB_ENV
+    - name: Check outputs
+      shell: powershell
+      run: |
+        echo "${{ env.Version }}"
 
     # Publish
     - name: Publish
-      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}
+      if: github.ref == 'refs/heads/master'
+      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }} /p:CurrentVersion="${{ env.Version }}.${{ github.run_number }}"
+      
+      # Publish
+    - name: Publish for alpha version
+      if: github.ref != 'refs/heads/master'
+      run: dotnet publish Sources/WorldWar/WorldWar.csproj -c Release -o ${{ env.PUBLISH_DIR }}  /p:CurrentVersion="${{ env.Version }}.${{ github.run_number }}" /p:CurrentVersionSuffix="-alfa"
 
     # Upload the MSIX package: https://github.com/marketplace/actions/upload-a-build-artifact
     - name: Upload build artifacts

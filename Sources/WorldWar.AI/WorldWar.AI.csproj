@@ -1,22 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<LangVersion>latest</LangVersion>
-		<AnalysisMode>All</AnalysisMode>
-		<AnalysisLevel>7.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<Nullable>enable</Nullable>
-	</PropertyGroup>
+	<ImportGroup Label="Properties">
+		<Import Project="..\..\Build\Dependencies.props" />
+		<Import Project="..\..\Build\Packages.props" />
+	</ImportGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="7.0.0" />
-	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(ExtensionsVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(ExtensionsVersion)" />
+
+		<PackageReference Include="WorldWar.Abstractions" Version="$(DependencyVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
-	  <ProjectReference Include="..\WorldWar.Core\WorldWar.Core.csproj" />
+		<ProjectReference Include="..\WorldWar.Abstractions\WorldWar.Abstractions.csproj" />
+		<ProjectReference Include="..\WorldWar.Core\WorldWar.Core.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,0 +1,15 @@
+<Project>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Authors>Viachaslau</Authors>
+		<Company>S™</Company>
+		<Copyright>Copyright ©2023 Viachaslau S™</Copyright>
+		<PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+		<GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+		<VersionPrefix>$(CurrentVersion)</VersionPrefix>
+		<VersionSuffix>$(CurrentVersionSuffix)</VersionSuffix>
+		<DebugType>Full</DebugType>
+	</PropertyGroup>
+</Project>

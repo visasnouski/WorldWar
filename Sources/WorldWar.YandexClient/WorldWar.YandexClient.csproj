@@ -1,19 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
-		<AnalysisMode>All</AnalysisMode>
-		<AnalysisLevel>7.0</AnalysisLevel>
-		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	</PropertyGroup>
+	<ImportGroup Label="Properties">
+		<Import Project="..\..\Build\Dependencies.props" />
+		<Import Project="..\..\Build\Packages.props" />
+	</ImportGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-		<PackageReference Include="Microsoft.JSInterop" Version="7.0.1" />
+		<PackageReference Include="WorldWar.Abstractions" Version="$(DependencyVersion)" />
+
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="$(CoreFrameworkVersion)" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="$(SignalRCoreVersion)" />
+		<PackageReference Include="Microsoft.JSInterop" Version="$(CoreFrameworkVersion)" />
 	</ItemGroup>
 
 	<ItemGroup>

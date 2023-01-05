@@ -11,6 +11,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SqlScripts", "SqlScripts", 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{FA2C422A-B5E1-49DA-9E55-A9F651689C47}"
+	ProjectSection(SolutionItems) = preProject
+		Build\Dependencies.props = Build\Dependencies.props
+		Build\Packages.props = Build\Packages.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WorldWar.Core.Tests", "Tests\WorldWar.Core.Tests\WorldWar.Core.Tests.csproj", "{F021F81E-C5AB-4C64-BB67-1158EAF2C253}"
 EndProject
